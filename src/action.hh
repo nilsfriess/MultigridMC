@@ -54,7 +54,7 @@ public:
             for (unsigned int ix = 0; ix < nx; ++ix)
             {
                 unsigned int i = nx * iy + ix;
-                double r = a_centre[i] = a_centre[i] * X->data[i];
+                double r = a_centre[i] * X->data[i];
                 r += a_north[i] * X->data[nx * ((iy + 1) % ny) + ix];
                 r += a_south[i] * X->data[nx * ((iy - 1) % ny) + ix];
                 r += a_east[i] * X->data[nx * iy + ((ix + 1) % nx)];
