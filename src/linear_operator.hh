@@ -1,5 +1,5 @@
-#ifndef LinearOperator_HH
-#define LinearOperator_HH LinearOperator_HH
+#ifndef LINEAR_OPERATOR_HH
+#define LINEAR_OPERATOR_HH LINEAR_OPERATOR_HH
 #include <memory>
 #include <random>
 #include <cmath>
@@ -184,4 +184,4 @@ const int BaseLinearOperator2d<5, LinearOperator2d5pt>::offset_x[5] = {0, 0, 0, 
 template <>
 const int BaseLinearOperator2d<5, LinearOperator2d5pt>::offset_y[5] = {0, -1, +1, 0, 0};
 
-#endif // LinearOperator_HH
+#endif // LINEAR_OPERATOR_HH
