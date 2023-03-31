@@ -64,8 +64,8 @@ public:
         }
     }
 
-    void smooth(const std::shared_ptr<SampleState> b, std::shared_ptr<SampleState> X, double omega)
-    /* Apply a single Gauss-Seidel sweep*/
+    void gibbssweep(const std::shared_ptr<SampleState> b, std::shared_ptr<SampleState> X, double omega)
+    /* Apply a single Gibbs sweep*/
     {
         unsigned int nx = lattice2d.nx;
         unsigned int ny = lattice2d.ny;

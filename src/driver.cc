@@ -4,6 +4,7 @@
 #include "lattice2d.hh"
 #include "samplestate.hh"
 #include "action.hh"
+#include "diffusion_operator_2d.hh"
 
 int main(int argc, char *argv[])
 {
@@ -17,7 +18,14 @@ int main(int argc, char *argv[])
     ny = atoi(argv[2]);
     std::cout << "lattice size : " << nx << " x " << ny << std::endl;
     Lattice2d lattice2d(nx, ny);
+    unsigned int seed = 1212417;
+    std::mt19937_64 rng(seed);
+#define USE_OPERATOR USE_OPERATOR
+#ifdef USE_OPERATOR
+    DiffusionOperator2d action = DiffusionOperator2d(lattice2d, rng);
+#else
     Action action(lattice2d);
+#endif // USE_OPERATOR
     std::shared_ptr<SampleState> X = std::make_shared<SampleState>(lattice2d.M);
     std::shared_ptr<SampleState> Y = std::make_shared<SampleState>(lattice2d.M);
 
@@ -50,7 +58,7 @@ int main(int argc, char *argv[])
     double omega = 0.95;
     for (unsigned int k = 0; k < niter; ++k)
     {
-        action.smooth(X, Y, omega);
+        action.gibbssweep(Y, X, omega);
     }
 
     t_finish = std::chrono::high_resolution_clock::now();
