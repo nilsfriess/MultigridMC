@@ -12,7 +12,7 @@
  *
  * Two dimensional diffusion operator
  */
-class DiffusionOperator2d : public Operator2d5pt
+class DiffusionOperator2d : public LinearOperator2d5pt
 {
 public:
     /** @brief Create a new instance
@@ -22,7 +22,7 @@ public:
      * @param[in] lattice_ underlying 2d lattice
      * @param[in] rng_ random number generator
      */
-    DiffusionOperator2d(const Lattice2d &lattice_, std::mt19937_64 &rng_) : Operator2d5pt(lattice_, rng_)
+    DiffusionOperator2d(const Lattice2d &lattice_, std::mt19937_64 &rng_) : LinearOperator2d5pt(lattice_, rng_)
     {
         unsigned int nx = lattice.nx;
         unsigned int ny = lattice.ny;

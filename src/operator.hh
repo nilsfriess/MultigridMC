@@ -1,5 +1,5 @@
-#ifndef OPERATOR_HH
-#define OPERATOR_HH OPERATOR_HH
+#ifndef LinearOperator_HH
+#define LinearOperator_HH LinearOperator_HH
 #include <memory>
 #include <random>
 #include <cmath>
@@ -7,24 +7,24 @@
 #include "lattice2d.hh"
 #include "samplestate.hh"
 
-/** @file operator.hh
- * @brief Header file for linear operator classes
+/** @file LinearOperator.hh
+ * @brief Header file for linear LinearOperator classes
  */
 
-/** @class AbstractOperator
+/** @class AbstractLinearOperator
  *
- * @brief abstract linear operator that can be used as a base class
+ * @brief abstract linear LinearOperator that can be used as a base class
  */
-class AbstractOperator
+class AbstractLinearOperator
 {
 public:
     /** @brief Create a new instance
      *
      * @param[in] rng random number generator
      */
-    AbstractOperator(std::mt19937_64 &rng_) : rng(rng_), normal_dist(0.0, 1.0) {}
+    AbstractLinearOperator(std::mt19937_64 &rng_) : rng(rng_), normal_dist(0.0, 1.0) {}
 
-    /** @brief Apply the linear operator
+    /** @brief Apply the linear LinearOperator
      *
      * Compute y = Ax
      *
@@ -50,15 +50,15 @@ protected:
     std::normal_distribution<double> normal_dist;
 };
 
-/** @class BaseOperator2d
+/** @class BaseLinearOperator2d
  *
- * @brief base class for defining operators with the CRTP in 2d
+ * @brief base class for defining LinearOperators with the CRTP in 2d
  */
-template <int ssize, class DerivedOperator>
-class BaseOperator2d : public AbstractOperator
+template <int ssize, class DerivedLinearOperator>
+class BaseLinearOperator2d : public AbstractLinearOperator
 {
 public:
-    typedef BaseOperator2d<ssize, DerivedOperator> Base;
+    typedef BaseLinearOperator2d<ssize, DerivedLinearOperator> Base;
     /** @brief Stencil size */
     static const int stencil_size = ssize;
 
@@ -67,18 +67,18 @@ public:
      * @param[in] lattice_ underlying 2d lattice
      * @param[in] rng_ random number generator
      */
-    BaseOperator2d(const Lattice2d &lattice_, std::mt19937_64 &rng_) : lattice(lattice_), AbstractOperator(rng_)
+    BaseLinearOperator2d(const Lattice2d &lattice_, std::mt19937_64 &rng_) : lattice(lattice_), AbstractLinearOperator(rng_)
     {
         data = new double[ssize * lattice.M];
     }
 
     /**@brief Destrory instance*/
-    ~BaseOperator2d()
+    ~BaseLinearOperator2d()
     {
         delete[] data;
     }
 
-    /** @brief Apply the linear operator
+    /** @brief Apply the linear LinearOperator
      *
      * Compute y = Ax
      *
@@ -156,8 +156,8 @@ protected:
     static const int offset_y[ssize];
 };
 
-/** @class Operator2d5pt
- * Operator with 5-point stencil. The stencil elements are arrange in the following order, with
+/** @class LinearOperator2d5pt
+ * LinearOperator with 5-point stencil. The stencil elements are arrange in the following order, with
  * offsets in x- and y-direction shown in brackets
  *
  * 0 : centre (  0,  0)
@@ -166,7 +166,7 @@ protected:
  * 3 : east   ( -1,  0)
  * 4 : west   ( +1,  0)
  */
-class Operator2d5pt : public BaseOperator2d<5, Operator2d5pt>
+class LinearOperator2d5pt : public BaseLinearOperator2d<5, LinearOperator2d5pt>
 {
 public:
     /** @brief Create a new instance 
@@ -174,14 +174,14 @@ public:
      * @param[in] lattice_ underlying lattice object
      * @param[in] rng_ random number generator (for Gibbs sweep)
     */
-    Operator2d5pt(const Lattice2d &lattice_, std::mt19937_64 &rng_) : Base(lattice_, rng_) {}
+    LinearOperator2d5pt(const Lattice2d &lattice_, std::mt19937_64 &rng_) : Base(lattice_, rng_) {}
 };
 
-/** @brief Offsets in x-direction for 5point operator in 2d */
+/** @brief Offsets in x-direction for 5point LinearOperator in 2d */
 template <>
-const int BaseOperator2d<5, Operator2d5pt>::offset_x[5] = {0, 0, 0, -1, +1};
-/** @brief Offsets in y-direction for 5point operator in 2d */
+const int BaseLinearOperator2d<5, LinearOperator2d5pt>::offset_x[5] = {0, 0, 0, -1, +1};
+/** @brief Offsets in y-direction for 5point LinearOperator in 2d */
 template <>
-const int BaseOperator2d<5, Operator2d5pt>::offset_y[5] = {0, -1, +1, 0, 0};
+const int BaseLinearOperator2d<5, LinearOperator2d5pt>::offset_y[5] = {0, -1, +1, 0, 0};
 
-#endif // OPERATOR_HH
+#endif // LinearOperator_HH
