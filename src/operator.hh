@@ -137,7 +137,10 @@ public:
         std::vector<Eigen::VectorXi> stencil;
         for (int j = 0; j < stencil_size; ++j)
         {
-            stencil.push_back(Eigen::VectorXi(offset_x[j], offset_y[j]));
+            Eigen::VectorXi v(2);
+            v[0] = offset_x[j];
+            v[1] = offset_y[j];
+            stencil.push_back(v);
         }
         return stencil;
     };
