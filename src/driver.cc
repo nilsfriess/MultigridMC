@@ -22,9 +22,9 @@ int main(int argc, char *argv[])
     std::mt19937_64 rng(seed);
 #define USE_OPERATOR USE_OPERATOR
 #ifdef USE_OPERATOR
-    DiffusionOperator2d action = DiffusionOperator2d(lattice2d, rng);
+    DiffusionOperator2d action(lattice2d, rng);
 #else
-    Action action(lattice2d);
+    Action action(lattice2d, rng);
 #endif // USE_OPERATOR
     std::shared_ptr<SampleState> X = std::make_shared<SampleState>(lattice2d.M);
     std::shared_ptr<SampleState> Y = std::make_shared<SampleState>(lattice2d.M);
@@ -55,10 +55,9 @@ int main(int argc, char *argv[])
     /* Measure applications of smooth */
     std::cout << "==== smoother application ====" << std::endl;
     t_start = std::chrono::high_resolution_clock::now();
-    double omega = 0.95;
     for (unsigned int k = 0; k < niter; ++k)
     {
-        action.gibbssweep(Y, X, omega);
+        action.gibbssweep(Y, X);
     }
 
     t_finish = std::chrono::high_resolution_clock::now();

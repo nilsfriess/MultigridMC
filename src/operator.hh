@@ -2,6 +2,7 @@
 #define OPERATOR_HH OPERATOR_HH
 #include <memory>
 #include <random>
+#include <cmath>
 #include <Eigen/Dense>
 #include "lattice2d.hh"
 #include "samplestate.hh"
@@ -36,9 +37,8 @@ public:
      *
      * @param[in] b right hand side
      * @param[inout] x vector to which the sweep is applied
-     * @param[in] omega overrelaxation paramater
      */
-    virtual void gibbssweep(const std::shared_ptr<SampleState> x, std::shared_ptr<SampleState> y, const double omega) = 0;
+    virtual void gibbssweep(const std::shared_ptr<SampleState> x, std::shared_ptr<SampleState> y) = 0;
 
     /** @extract the stencil */
     virtual std::vector<Eigen::VectorXi> get_stencil() const = 0;
@@ -67,7 +67,7 @@ public:
      * @param[in] lattice_ underlying 2d lattice
      * @param[in] rng_ random number generator
      */
-    BaseOperator2d(const Lattice2d &lattice_, std::mt19937_64 &rng_) : lattice(lattice), AbstractOperator(rng_)
+    BaseOperator2d(const Lattice2d &lattice_, std::mt19937_64 &rng_) : lattice(lattice_), AbstractOperator(rng_)
     {
         data = new double[ssize * lattice.M];
     }
@@ -109,9 +109,8 @@ public:
      *
      * @param[in] b right hand side
      * @param[inout] x vector to which the sweep is applied
-     * @param[in] omega overrelaxation paramater
      */
-    virtual void gibbssweep(const std::shared_ptr<SampleState> b, std::shared_ptr<SampleState> x, const double omega)
+    virtual void gibbssweep(const std::shared_ptr<SampleState> b, std::shared_ptr<SampleState> x)
     {
         unsigned int nx = lattice.nx;
         unsigned int ny = lattice.ny;
@@ -167,7 +166,12 @@ protected:
 class Operator2d5pt : public BaseOperator2d<5, Operator2d5pt>
 {
 public:
-    Operator2d5pt(const Lattice2d &lattice_, std::mt19937_64 &rng_) : Base(lattice, rng_) {}
+    /** @brief Create a new instance 
+     * 
+     * @param[in] lattice_ underlying lattice object
+     * @param[in] rng_ random number generator (for Gibbs sweep)
+    */
+    Operator2d5pt(const Lattice2d &lattice_, std::mt19937_64 &rng_) : Base(lattice_, rng_) {}
 };
 
 /** @brief Offsets in x-direction for 5point operator in 2d */

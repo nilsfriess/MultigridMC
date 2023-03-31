@@ -3,13 +3,14 @@
 
 #include <memory>
 #include <cmath>
+#include <random>
 #include "lattice2d.hh"
 #include "samplestate.hh"
 
 class Action
 {
 public:
-    Action(const Lattice2d lattice2d_) : lattice2d(lattice2d_)
+    Action(const Lattice2d lattice2d_,std::mt19937_64 &rng_) : lattice2d(lattice2d_), rng(rng_)
     {
         unsigned int M = lattice2d.M;
         a_centre = new double[M];
@@ -64,7 +65,7 @@ public:
         }
     }
 
-    void gibbssweep(const std::shared_ptr<SampleState> b, std::shared_ptr<SampleState> X, double omega)
+    void gibbssweep(const std::shared_ptr<SampleState> b, std::shared_ptr<SampleState> X)
     /* Apply a single Gibbs sweep*/
     {
         unsigned int nx = lattice2d.nx;
@@ -80,7 +81,7 @@ public:
                 residual -= a_south[i] * X->data[nx * ((iy - 1) % ny) + ix];
                 residual -= a_east[i] * X->data[nx * iy + ((ix + 1) % nx)];
                 residual -= a_west[i] * X->data[nx * iy + ((ix - 1) % nx)];
-                X->data[i] = (1. - omega) * X->data[i] + omega / a_centre[i] * residual;
+                X->data[i] = (b->data[i] - residual) / a_centre[i] + normal_dist(rng) / sqrt(a_centre[i]);
             }
         }
     }
@@ -96,6 +97,8 @@ public:
 
 protected:
     const Lattice2d lattice2d;
+    std::mt19937_64 &rng;
+    std::normal_distribution<double> normal_dist;
     double *a_centre;
     double *a_north;
     double *a_south;
