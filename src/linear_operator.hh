@@ -8,12 +8,28 @@
 #include "samplestate.hh"
 
 /** @file LinearOperator.hh
- * @brief Header file for linear LinearOperator classes
+ * @brief Header file for LinearOperator classes
  */
 
 /** @class AbstractLinearOperator
  *
  * @brief abstract linear LinearOperator that can be used as a base class
+ *
+ * A linear operator class provides the following functionality:
+ *
+ *  - application of the operator, i.e. the linear map L : x -> y
+ *
+ *       y_j = sum_{k=1}^{N} A_{jk} x_k
+ *
+ *  - Gibbs-sampling with the corresponding matrix A, i.e. for all j=1,...,N
+ *
+ *       x_j -> (b_j - sum_{k != j} A_{jk} x_k) / A_{jj} + \xi_j / \sqrt(A_{jj})
+ *
+ *    where \xi ~ N(0,1) is a normal variable
+ *
+ * The sparsity structure of the matrix is assumed to be fixed and is described
+ * by a stencil.
+ *
  */
 class AbstractLinearOperator
 {
@@ -53,6 +69,12 @@ protected:
 /** @class BaseLinearOperator2d
  *
  * @brief base class for defining LinearOperators with the CRTP in 2d
+ *
+ * Linear operator for vectors that describe the unknowns on a structured 2d lattice.
+ * The unknowns are assumed to be arranged in lexicographic order, i.e. node (i,j)
+ * maps to the index ell = nx*j + i. In this case the sparsity structure can be described
+ * by a list of offsets in x- and y-direction.
+ *
  */
 template <int ssize, class DerivedLinearOperator>
 class BaseLinearOperator2d : public AbstractLinearOperator
@@ -69,13 +91,13 @@ public:
      */
     BaseLinearOperator2d(const Lattice2d &lattice_, std::mt19937_64 &rng_) : lattice(lattice_), AbstractLinearOperator(rng_)
     {
-        data = new double[ssize * lattice.M];
+        matrix = new double[ssize * lattice.M];
     }
 
     /**@brief Destrory instance*/
     ~BaseLinearOperator2d()
     {
-        delete[] data;
+        delete[] matrix;
     }
 
     /** @brief Apply the linear LinearOperator
@@ -98,9 +120,9 @@ public:
                 for (unsigned k = 0; k < ssize; ++k)
                 {
                     unsigned int ell_prime = ((j + offset_y[k]) % ny) * nx + ((i + offset_x[k]) % nx);
-                    result += data[ell * ssize + k] * x->data[ell_prime];
+                    result += matrix[ell * ssize + k] * x->matrix[ell_prime];
                 }
-                y->data[ell] = result;
+                y->matrix[ell] = result;
             }
         }
     }
@@ -120,13 +142,13 @@ public:
             {
                 unsigned int ell = j * nx + i;
                 double residual = 0;
-                double a_diag = data[ell * ssize];
+                double a_diag = matrix[ell * ssize];
                 for (unsigned k = 1; k < ssize; ++k)
                 {
                     unsigned int ell_prime = ((j + offset_y[k]) % ny) * nx + ((i + offset_x[k]) % nx);
-                    residual += data[ell * ssize + k] * x->data[ell_prime];
+                    residual += matrix[ell * ssize + k] * x->matrix[ell_prime];
                 }
-                x->data[ell] = (b->data[ell] - residual) / a_diag + normal_dist(rng) / sqrt(a_diag);
+                x->matrix[ell] = (b->matrix[ell] - residual) / a_diag + normal_dist(rng) / sqrt(a_diag);
             }
         }
     }
@@ -149,7 +171,7 @@ protected:
     /** @brief underlying lattice */
     const Lattice2d &lattice;
     /** @brief matrix entries */
-    double *data;
+    double *matrix;
     /** @brief Offsets in x-direction */
     static const int offset_x[ssize];
     /** @brief Offsets in y-direction */
@@ -169,11 +191,11 @@ protected:
 class LinearOperator2d5pt : public BaseLinearOperator2d<5, LinearOperator2d5pt>
 {
 public:
-    /** @brief Create a new instance 
-     * 
+    /** @brief Create a new instance
+     *
      * @param[in] lattice_ underlying lattice object
      * @param[in] rng_ random number generator (for Gibbs sweep)
-    */
+     */
     LinearOperator2d5pt(const Lattice2d &lattice_, std::mt19937_64 &rng_) : Base(lattice_, rng_) {}
 };
 
