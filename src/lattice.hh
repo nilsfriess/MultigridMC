@@ -1,5 +1,5 @@
-#ifndef LATTICE2D_HH
-#define LATTICE2D_HH LATTICE2D_HH
+#ifndef LATTICE_HH
+#define LATTICE_HH LATTICE_HH
 /** @file lattice2d.hh
  *
  * @brief two dimensional lattice
@@ -27,4 +27,4 @@ public:
   const unsigned int M;
 };
 
-#endif // LATTICE2D_HH
+#endif // LATTICE_HH
