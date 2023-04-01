@@ -36,9 +36,10 @@ class AbstractLinearOperator
 public:
     /** @brief Create a new instance
      *
+     * @param[in] lattice_ underlying lattice
      * @param[in] rng random number generator
      */
-    AbstractLinearOperator(std::mt19937_64 &rng_) : rng(rng_), normal_dist(0.0, 1.0) {}
+    AbstractLinearOperator(const std::shared_ptr<Lattice> lattice_, std::mt19937_64 &rng_) : lattice(lattice_), rng(rng_), normal_dist(0.0, 1.0) {}
 
     /** @brief Apply the linear LinearOperator
      *
@@ -60,6 +61,8 @@ public:
     virtual std::vector<Eigen::VectorXi> get_stencil() const = 0;
 
 protected:
+    /** @brief underlying lattice */
+    const std::shared_ptr<Lattice> lattice;
     /** @brief random number generator */
     std::mt19937_64 &rng;
     /** @brief normal distribution for Gibbs-sweep */
@@ -89,9 +92,9 @@ public:
      * @param[in] lattice_ underlying 2d lattice
      * @param[in] rng_ random number generator
      */
-    BaseLinearOperator2d(const Lattice2d &lattice_, std::mt19937_64 &rng_) : lattice(lattice_), AbstractLinearOperator(rng_)
+    BaseLinearOperator2d(const std::shared_ptr<Lattice2d> lattice_, std::mt19937_64 &rng_) : AbstractLinearOperator(lattice_, rng_), nx(lattice_->nx), ny(lattice_->ny)
     {
-        matrix = new double[ssize * lattice.M];
+        matrix = new double[ssize * lattice->M];
     }
 
     /**@brief Destrory instance*/
@@ -109,8 +112,6 @@ public:
      */
     virtual void apply(const std::shared_ptr<SampleState> x, std::shared_ptr<SampleState> y) const
     {
-        unsigned int nx = lattice.nx;
-        unsigned int ny = lattice.ny;
         for (unsigned int j = 0; j < ny; ++j)
         {
             for (unsigned int i = 0; i < nx; ++i)
@@ -134,8 +135,6 @@ public:
      */
     virtual void gibbssweep(const std::shared_ptr<SampleState> b, std::shared_ptr<SampleState> x)
     {
-        unsigned int nx = lattice.nx;
-        unsigned int ny = lattice.ny;
         for (unsigned int j = 0; j < ny; ++j)
         {
             for (unsigned int i = 0; i < nx; ++i)
@@ -168,8 +167,10 @@ public:
     };
 
 protected:
-    /** @brief underlying lattice */
-    const Lattice2d &lattice;
+    /** @brief lattice extent in x-direction */
+    const unsigned int nx;
+    /** @brief lattice extent in y-direction */
+    const unsigned int ny;
     /** @brief matrix entries */
     double *matrix;
     /** @brief Offsets in x-direction */
@@ -196,7 +197,7 @@ public:
      * @param[in] lattice_ underlying lattice object
      * @param[in] rng_ random number generator (for Gibbs sweep)
      */
-    LinearOperator2d5pt(const Lattice2d &lattice_, std::mt19937_64 &rng_) : Base(lattice_, rng_) {}
+    LinearOperator2d5pt(const std::shared_ptr<Lattice2d> lattice_, std::mt19937_64 &rng_) : Base(lattice_, rng_) {}
 };
 
 #endif // LINEAR_OPERATOR_HH

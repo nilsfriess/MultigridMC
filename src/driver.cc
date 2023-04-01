@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
     std::mt19937_64 rng(seed);
 #define USE_OPERATOR USE_OPERATOR
 #ifdef USE_OPERATOR
-    DiffusionOperator2d action(lattice2d, rng);
+    DiffusionOperator2d action(std::make_shared<Lattice2d>(lattice2d), rng);
 #else
     Action action(lattice2d, rng);
 #endif // USE_OPERATOR

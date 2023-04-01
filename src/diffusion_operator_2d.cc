@@ -6,10 +6,8 @@
  */
 
 /** @brief Create a new instance */
-DiffusionOperator2d::DiffusionOperator2d(const Lattice2d &lattice_, std::mt19937_64 &rng_) : LinearOperator2d5pt(lattice_, rng_)
+DiffusionOperator2d::DiffusionOperator2d(const std::shared_ptr<Lattice2d> lattice_, std::mt19937_64 &rng_) : LinearOperator2d5pt(lattice_, rng_)
 {
-    unsigned int nx = lattice.nx;
-    unsigned int ny = lattice.ny;
     double hx = 1. / nx;
     double hy = 1. / ny;
     for (unsigned int j = 0; j < ny; ++j)

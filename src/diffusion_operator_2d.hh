@@ -22,7 +22,7 @@ public:
      * @param[in] lattice_ underlying 2d lattice
      * @param[in] rng_ random number generator
      */
-    DiffusionOperator2d(const Lattice2d &lattice_, std::mt19937_64 &rng_);
+    DiffusionOperator2d(const std::shared_ptr<Lattice2d> lattice_, std::mt19937_64 &rng_);
 
     /** @brief Diffusion coefficient
      *

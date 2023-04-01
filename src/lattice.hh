@@ -1,5 +1,6 @@
 #ifndef LATTICE_HH
 #define LATTICE_HH LATTICE_HH
+#include <memory>
 #include <Eigen/Dense>
 
 /** @file lattice2d.hh
@@ -14,6 +15,12 @@
 class Lattice
 {
 public:
+  /** @brief Create a new instance
+   *
+   * @param[in] M_ number of lattice sites
+   */
+  Lattice(const unsigned int M_) : M(M_) {}
+
   /** @brief Convert linear index to Euclidean index
    *
    * @param[in] ell linear index to be converted
@@ -32,6 +39,12 @@ public:
    * @param[in] shift Euclidean shift vector
    */
   inline virtual unsigned int shift_index(const unsigned int ell, const Eigen::VectorXi shift) const = 0;
+
+  /** @brief get coarsened version of lattice */
+  virtual std::shared_ptr<Lattice> get_coarse_lattice() const = 0;
+
+  /** @brief total number of lattice sites */
+  const unsigned int M;
 };
 
 /** @class Lattice2d
@@ -46,7 +59,7 @@ public:
    * @param[in] nx_ Extent in x-direction
    * @param[in] ny_ Extent in y-direction
    */
-  Lattice2d(const unsigned int nx_, const unsigned int ny_) : nx(nx_), ny(ny_), M(nx_ * ny_) {}
+  Lattice2d(const unsigned int nx_, const unsigned int ny_) : nx(nx_), ny(ny_), Lattice(nx * ny) {}
 
   /** @brief Convert linear index to Euclidean index
    *
@@ -86,12 +99,18 @@ public:
     return ((j + ny) % ny) * nx + ((i + nx) % nx);
   };
 
+  /** @brief get coarsened version of lattice */
+  virtual std::shared_ptr<Lattice> get_coarse_lattice() const
+  {
+    assert(nx % 2 == 0);
+    assert(ny % 2 == 0);
+    return std::make_shared<Lattice2d>(nx / 2, ny / 2);
+  };
+
   /** @brief extent in x-direction */
   const unsigned int nx;
   /** @brief extent in y-direction */
   const unsigned int ny;
-  /** @brief total number of lattice sites */
-  const unsigned int M;
 };
 
 #endif // LATTICE_HH
