@@ -13,6 +13,7 @@ const int BaseLinearOperator2d<5, LinearOperator2d5pt>::offset_x[5] = {0, 0, 0, 
 template <>
 const int BaseLinearOperator2d<5, LinearOperator2d5pt>::offset_y[5] = {0, -1, +1, 0, 0};
 
+/** @brief Create a new instance */
 LinearOperator2d5pt::LinearOperator2d5pt(const std::shared_ptr<Lattice2d> lattice_, std::mt19937_64 &rng_) : Base(lattice_, rng_)
 {
     for (unsigned int j = 0; j < ny; ++j)
