@@ -4,13 +4,13 @@
 #include <memory>
 #include <cmath>
 #include <random>
-#include "lattice2d.hh"
+#include "lattice.hh"
 #include "samplestate.hh"
 
 class Action
 {
 public:
-    Action(const Lattice2d lattice2d_,std::mt19937_64 &rng_) : lattice2d(lattice2d_), rng(rng_)
+    Action(const Lattice2d lattice2d_, std::mt19937_64 &rng_) : lattice2d(lattice2d_), rng(rng_)
     {
         unsigned int M = lattice2d.M;
         a_centre = new double[M];

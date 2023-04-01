@@ -4,7 +4,7 @@
 #include <random>
 #include <cmath>
 #include <Eigen/Dense>
-#include "lattice2d.hh"
+#include "lattice.hh"
 #include "samplestate.hh"
 
 /** @file LinearOperator.hh

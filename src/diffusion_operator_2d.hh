@@ -1,7 +1,7 @@
 #ifndef DIFFUSION_OPERATOR_2D_HH
 #define DIFFUSION_OPERATOR_2D_HH DIFFUSION_OPERATOR_2D_HH
 #include "linear_operator.hh"
-#include "lattice2d.hh"
+#include "lattice.hh"
 
 /** @file diffusion_operator_2d.hh
  *

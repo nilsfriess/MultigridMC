@@ -1,7 +1,7 @@
 #include <iostream>
 #include <chrono>
 #include <random>
-#include "lattice2d.hh"
+#include "lattice.hh"
 #include "samplestate.hh"
 #include "action.hh"
 #include "diffusion_operator_2d.hh"
