@@ -37,11 +37,11 @@ public:
                 double K_south = K_diff(i * hx, (j - 0.5) * hy);
                 double K_east = K_diff((i + 0.5) * hx, j * hy);
                 double K_west = K_diff((i - 0.5) * hx, j * hy);
-                data[stencil_size * ell + 0] = 1.0 + (K_east + K_west) / (hx * hx) + (K_north + K_south) / (hy * hy);
-                data[stencil_size * ell + 1] = -K_south / (hy * hy);
-                data[stencil_size * ell + 2] = -K_north / (hy * hy);
-                data[stencil_size * ell + 3] = -K_west / (hy * hy);
-                data[stencil_size * ell + 4] = -K_east / (hy * hy);
+                matrix[stencil_size * ell + 0] = 1.0 + (K_east + K_west) / (hx * hx) + (K_north + K_south) / (hy * hy);
+                matrix[stencil_size * ell + 1] = -K_south / (hy * hy);
+                matrix[stencil_size * ell + 2] = -K_north / (hy * hy);
+                matrix[stencil_size * ell + 3] = -K_west / (hy * hy);
+                matrix[stencil_size * ell + 4] = -K_east / (hy * hy);
             }
         }
     }

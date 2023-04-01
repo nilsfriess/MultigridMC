@@ -120,9 +120,9 @@ public:
                 for (unsigned k = 0; k < ssize; ++k)
                 {
                     unsigned int ell_prime = ((j + offset_y[k]) % ny) * nx + ((i + offset_x[k]) % nx);
-                    result += matrix[ell * ssize + k] * x->matrix[ell_prime];
+                    result += matrix[ell * ssize + k] * x->data[ell_prime];
                 }
-                y->matrix[ell] = result;
+                y->data[ell] = result;
             }
         }
     }
@@ -146,9 +146,9 @@ public:
                 for (unsigned k = 1; k < ssize; ++k)
                 {
                     unsigned int ell_prime = ((j + offset_y[k]) % ny) * nx + ((i + offset_x[k]) % nx);
-                    residual += matrix[ell * ssize + k] * x->matrix[ell_prime];
+                    residual += matrix[ell * ssize + k] * x->data[ell_prime];
                 }
-                x->matrix[ell] = (b->matrix[ell] - residual) / a_diag + normal_dist(rng) / sqrt(a_diag);
+                x->data[ell] = (b->data[ell] - residual) / a_diag + normal_dist(rng) / sqrt(a_diag);
             }
         }
     }
