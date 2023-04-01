@@ -178,7 +178,7 @@ public:
                 double result = 0;
                 for (unsigned k = 0; k < ssize; ++k)
                 {
-                    unsigned int ell = ((2 * j + offset_y[k]) % ny) * nx + ((2 * i + offset_x[k]) % nx);
+                    unsigned int ell = colidx[ell * ssize + k];
                     result += matrix[ell * ssize + k] * x->data[ell];
                 }
                 x_coarse->data[ell_coarse] = result;
@@ -203,7 +203,7 @@ public:
                 double x_coarse_local = x_coarse->data[ell_coarse];
                 for (unsigned k = 0; k < ssize; ++k)
                 {
-                    unsigned int ell = ((2 * j + offset_y[k]) % ny) * nx + ((2 * i + offset_x[k]) % nx);
+                    unsigned int ell = colidx[ell * ssize + k];
                     x->data[ell] += matrix[ell * ssize + k] * x_coarse_local;
                 }
             }
