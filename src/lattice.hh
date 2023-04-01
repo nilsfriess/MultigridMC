@@ -1,6 +1,7 @@
 #ifndef LATTICE_HH
 #define LATTICE_HH LATTICE_HH
 #include <memory>
+#include <iostream>
 #include <Eigen/Dense>
 
 /** @file lattice2d.hh
@@ -59,7 +60,7 @@ public:
    * @param[in] nx_ Extent in x-direction
    * @param[in] ny_ Extent in y-direction
    */
-  Lattice2d(const unsigned int nx_, const unsigned int ny_) : nx(nx_), ny(ny_), Lattice(nx * ny) {}
+  Lattice2d(const unsigned int nx_, const unsigned int ny_) : nx(nx_), ny(ny_), Lattice(nx_ * ny_) {}
 
   /** @brief Convert linear index to Euclidean index
    *

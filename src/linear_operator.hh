@@ -41,6 +41,12 @@ public:
      */
     AbstractLinearOperator(const std::shared_ptr<Lattice> lattice_, std::mt19937_64 &rng_) : lattice(lattice_), rng(rng_), normal_dist(0.0, 1.0) {}
 
+    /** @brief Extract underlying lattice */
+    std::shared_ptr<Lattice> get_lattice() const { return lattice; }
+
+    /** @brief Extract pointer to matrix elements */
+    virtual double *get_matrix() const { return matrix; }
+
     /** @brief Apply the linear LinearOperator
      *
      * Compute y = Ax
@@ -67,6 +73,8 @@ protected:
     std::mt19937_64 &rng;
     /** @brief normal distribution for Gibbs-sweep */
     std::normal_distribution<double> normal_dist;
+    /** @brief matrix entries */
+    double *matrix;
 };
 
 /** @class BaseLinearOperator2d
@@ -102,6 +110,9 @@ public:
     {
         delete[] matrix;
     }
+
+    /** @brief Extract underlying lattice */
+    std::shared_ptr<Lattice> get_lattice() const { return lattice; }
 
     /** @brief Apply the linear LinearOperator
      *
@@ -171,8 +182,6 @@ protected:
     const unsigned int nx;
     /** @brief lattice extent in y-direction */
     const unsigned int ny;
-    /** @brief matrix entries */
-    double *matrix;
     /** @brief Offsets in x-direction */
     static const int offset_x[ssize];
     /** @brief Offsets in y-direction */
