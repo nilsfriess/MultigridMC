@@ -128,10 +128,10 @@ public:
             for (unsigned int i = 0; i < nx; ++i)
             {
                 unsigned int ell = j * nx + i;
-                double result = 0;
-                for (unsigned k = 0; k < ssize; ++k)
+                double result = matrix[ell * ssize] * x->data[ell];
+                for (int k = 1; k < ssize; ++k)
                 {
-                    unsigned int ell_prime = ((j + offset_y[k]) % ny) * nx + ((i + offset_x[k]) % nx);
+                    unsigned int ell_prime = ((j + offset_y[k] + ny) % ny) * nx + ((i + offset_x[k] + nx) % nx);
                     result += matrix[ell * ssize + k] * x->data[ell_prime];
                 }
                 y->data[ell] = result;
@@ -155,7 +155,7 @@ public:
                 double a_diag = matrix[ell * ssize];
                 for (unsigned k = 1; k < ssize; ++k)
                 {
-                    unsigned int ell_prime = ((j + offset_y[k]) % ny) * nx + ((i + offset_x[k]) % nx);
+                    unsigned int ell_prime = ((j + offset_y[k] + ny) % ny) * nx + ((i + offset_x[k] + nx) % nx);
                     residual += matrix[ell * ssize + k] * x->data[ell_prime];
                 }
                 x->data[ell] = (b->data[ell] - residual) / a_diag + normal_dist(rng) / sqrt(a_diag);
