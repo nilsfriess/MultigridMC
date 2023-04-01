@@ -75,6 +75,8 @@ protected:
     std::normal_distribution<double> normal_dist;
     /** @brief matrix entries */
     double *matrix;
+    /** @brief column indices */
+    unsigned int *colidx;
 };
 
 /** @class BaseLinearOperator2d
@@ -103,12 +105,14 @@ public:
     BaseLinearOperator2d(const std::shared_ptr<Lattice2d> lattice_, std::mt19937_64 &rng_) : AbstractLinearOperator(lattice_, rng_), nx(lattice_->nx), ny(lattice_->ny)
     {
         matrix = new double[ssize * lattice->M];
+        colidx = new unsigned int[ssize * lattice->M];
     }
 
     /**@brief Destrory instance*/
     ~BaseLinearOperator2d()
     {
         delete[] matrix;
+        delete[] colidx;
     }
 
     /** @brief Extract underlying lattice */
@@ -131,7 +135,7 @@ public:
                 double result = matrix[ell * ssize] * x->data[ell];
                 for (int k = 1; k < ssize; ++k)
                 {
-                    unsigned int ell_prime = ((j + offset_y[k] + ny) % ny) * nx + ((i + offset_x[k] + nx) % nx);
+                    unsigned int ell_prime = colidx[ell * ssize + k];
                     result += matrix[ell * ssize + k] * x->data[ell_prime];
                 }
                 y->data[ell] = result;
@@ -155,7 +159,7 @@ public:
                 double a_diag = matrix[ell * ssize];
                 for (unsigned k = 1; k < ssize; ++k)
                 {
-                    unsigned int ell_prime = ((j + offset_y[k] + ny) % ny) * nx + ((i + offset_x[k] + nx) % nx);
+                    unsigned int ell_prime = colidx[ell * ssize + k];
                     residual += matrix[ell * ssize + k] * x->data[ell_prime];
                 }
                 x->data[ell] = (b->data[ell] - residual) / a_diag + normal_dist(rng) / sqrt(a_diag);
@@ -206,7 +210,7 @@ public:
      * @param[in] lattice_ underlying lattice object
      * @param[in] rng_ random number generator (for Gibbs sweep)
      */
-    LinearOperator2d5pt(const std::shared_ptr<Lattice2d> lattice_, std::mt19937_64 &rng_) : Base(lattice_, rng_) {}
+    LinearOperator2d5pt(const std::shared_ptr<Lattice2d> lattice_, std::mt19937_64 &rng_);
 };
 
 #endif // LINEAR_OPERATOR_HH
