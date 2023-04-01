@@ -199,11 +199,4 @@ public:
     LinearOperator2d5pt(const Lattice2d &lattice_, std::mt19937_64 &rng_) : Base(lattice_, rng_) {}
 };
 
-/** @brief Offsets in x-direction for 5point LinearOperator in 2d */
-template <>
-const int BaseLinearOperator2d<5, LinearOperator2d5pt>::offset_x[5] = {0, 0, 0, -1, +1};
-/** @brief Offsets in y-direction for 5point LinearOperator in 2d */
-template <>
-const int BaseLinearOperator2d<5, LinearOperator2d5pt>::offset_y[5] = {0, -1, +1, 0, 0};
-
 #endif // LINEAR_OPERATOR_HH
