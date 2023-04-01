@@ -44,6 +44,12 @@
 class AbstractIntergridOperator
 {
 public:
+    /** @brief Create a new instance
+     *
+     * @param[in] lattice_ underlying lattice
+     */
+    AbstractIntergridOperator(const std::shared_ptr<Lattice> lattice_) : lattice(lattice_) {}
+
     /** @brief Get the matrix entries of the prolongation operator */
     virtual const double *get_matrix() const = 0;
 
@@ -99,6 +105,9 @@ public:
 
     /** @extract the stencil */
     virtual std::vector<Eigen::VectorXi> get_stencil() const = 0;
+
+    /** @brief underlying lattice */
+    const std::shared_ptr<Lattice> lattice;
 };
 
 /** @class BaseIntergridOperator2d
@@ -121,7 +130,16 @@ public:
      *
      * @param[in] lattice_ underlying 2d lattice
      */
-    BaseIntergridOperator2d(const std::shared_ptr<Lattice2d> lattice_) : lattice(lattice_) {}
+    BaseIntergridOperator2d(const std::shared_ptr<Lattice2d> lattice_) : AbstractIntergridOperator(lattice_), nx(lattice_->nx), ny(lattice_->ny)
+    {
+        colidx = new unsigned int[lattice_->M * ssize];
+    }
+
+    /** @brief Destroy instance */
+    BaseIntergridOperator2d()
+    {
+        delete[] colidx;
+    }
 
     /** @brief Get the matrix entries of the prolongation operator */
     virtual const double *get_matrix() const
@@ -152,8 +170,6 @@ public:
      */
     virtual void restrict(const std::shared_ptr<SampleState> x, std::shared_ptr<SampleState> x_coarse) const
     {
-        unsigned int nx = lattice->nx;
-        unsigned int ny = lattice->ny;
         for (unsigned int j = 0; j < ny / 2; ++j)
         {
             for (unsigned int i = 0; i < nx / 2; ++i)
@@ -179,8 +195,6 @@ public:
      */
     virtual void prolongate_add(const std::shared_ptr<SampleState> x_coarse, std::shared_ptr<SampleState> x) const
     {
-        unsigned int nx = lattice->nx;
-        unsigned int ny = lattice->ny;
         for (unsigned int j = 0; j < ny / 2; ++j)
         {
             for (unsigned int i = 0; i < nx / 2; ++i)
@@ -197,14 +211,18 @@ public:
     };
 
 protected:
-    /** @brief underlying lattice */
-    const std::shared_ptr<Lattice2d> lattice;
+    /** @brief extent of lattice in x-direction */
+    const unsigned int nx;
+    /** @brief extent of lattice in y-direction */
+    const unsigned int ny;
     /** @brief matrix entries */
     static const double matrix[ssize];
     /** @brief Offsets in x-direction */
     static const int offset_x[ssize];
     /** @brief Offsets in y-direction */
     static const int offset_y[ssize];
+    /** @brief column indices */
+    unsigned int *colidx;
 };
 
 /** @class IntergridOperatorAvg
@@ -218,7 +236,7 @@ public:
      *
      * @param[in] lattice_ underlying lattice object
      */
-    IntergridOperator2dAvg(const std::shared_ptr<Lattice2d> &lattice_) : Base(lattice_) {}
+    IntergridOperator2dAvg(const std::shared_ptr<Lattice2d> lattice_);
 };
 
 #endif // INTERGRID_OPERATOR_HH

@@ -87,3 +87,19 @@ const int BaseIntergridOperator2d<4, IntergridOperator2dAvg>::offset_x[4] = {0, 
 /** @brief Offsets in y-direction for averaging IntergridOperator in 2d */
 template <>
 const int BaseIntergridOperator2d<4, IntergridOperator2dAvg>::offset_y[4] = {0, 0, 1, 1};
+
+/** @brief Create a new instance */
+IntergridOperator2dAvg::IntergridOperator2dAvg(const std::shared_ptr<Lattice2d> lattice_) : Base(lattice_)
+{
+    for (unsigned int j = 0; j < ny; ++j)
+    {
+        for (unsigned int i = 0; i < nx; ++i)
+        {
+            for (int k = 1; k < stencil_size; ++k)
+            {
+                unsigned int ell = ((j + offset_y[k] + ny) % ny) * nx + ((i + offset_x[k] + nx) % nx);
+                colidx[ell * stencil_size + k] = ell;
+            }
+        }
+    }
+};
