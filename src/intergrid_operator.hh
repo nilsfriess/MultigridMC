@@ -54,7 +54,7 @@ public:
                                                  stencil_size(stencil_size_)
     {
         matrix = new double[stencil_size];
-        colidx = new unsigned int[lattice->M * stencil_size];
+        colidx = new unsigned int[lattice->get_coarse_lattice()->M * stencil_size];
     }
 
     ~IntergridOperator()
@@ -114,22 +114,22 @@ public:
         }
     };
 
-    /** @brief convert prolongation operator to a sparse matrix */
+    /** @brief convert restriction operator to a sparse matrix */
     const Eigen::SparseMatrix<double> to_sparse() const
     {
         std::shared_ptr<Lattice> coarse_lattice = lattice->get_coarse_lattice();
         typedef Eigen::Triplet<double> T;
         std::vector<T> triplet_list;
-        unsigned int nrow = lattice->M;
-        unsigned int ncol = coarse_lattice->M;
+        unsigned int nrow = coarse_lattice->M;
+        unsigned int ncol = lattice->M;
         unsigned int nnz = stencil_size * nrow;
         triplet_list.reserve(nnz);
-        for (unsigned int ell = 0; ell < ncol; ++ell)
+        for (unsigned int ell = 0; ell < nrow; ++ell)
         {
             {
                 for (int k = 0; k < stencil_size; ++k)
                 {
-                    triplet_list.push_back(T(colidx[ell * stencil_size + k], ell, matrix[k]));
+                    triplet_list.push_back(T(ell, colidx[ell * stencil_size + k] * matrix[k]));
                 }
             }
         }
@@ -146,8 +146,9 @@ public:
      */
     LinearOperator coarsen_operator(const LinearOperator &A) const
     {
-        const LinearOperator::SparseMatrixType &A_prolong = to_sparse();
-        const LinearOperator::SparseMatrixType PT_A_P = A_prolong.transpose() * A.as_sparse() * A_prolong;
+        const LinearOperator::SparseMatrixType &A_restrict = to_sparse();
+        const LinearOperator::SparseMatrixType &A_prolong = A_restrict.transpose();
+        const LinearOperator::SparseMatrixType PT_A_P = A_restrict * A.as_sparse() * A_prolong;
         return LinearOperator(lattice->get_coarse_lattice(), PT_A_P);
     }
 

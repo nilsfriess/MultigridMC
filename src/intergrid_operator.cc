@@ -15,19 +15,16 @@ IntergridOperator2dAvg::IntergridOperator2dAvg(const std::shared_ptr<Lattice2d> 
     // column indices
     unsigned int nx = lattice_->nx;
     unsigned int ny = lattice_->ny;
-    for (unsigned int j = 0; j < ny; ++j)
+    for (unsigned int j = 0; j < ny / 2; ++j)
     {
-        for (unsigned int i = 0; i < nx; ++i)
+        for (unsigned int i = 0; i < nx / 2; ++i)
         {
-            unsigned int ell;
-            ell = j * nx + ((i + 0) % nx);
-            colidx[ell * stencil_size + 0] = ell;
-            ell = ((j + 1 + ny) % ny) * nx + ((i + 0) % nx);
-            colidx[ell * stencil_size + 1] = ell;
-            ell = j * nx + ((i + 1 + nx) % nx);
-            colidx[ell * stencil_size + 2] = ell;
-            ell = ((j + 1 + ny) % ny) * nx + ((i + 1 + nx) % nx);
-            colidx[ell * stencil_size + 3] = ell;
+            unsigned int ell = j * nx / 2 + i;
+
+            colidx[ell * stencil_size + 0] = 2 * j * nx + 2 * i;
+            colidx[ell * stencil_size + 1] = 2 * j * nx + ((2 * i + 1 + nx) % nx);
+            colidx[ell * stencil_size + 2] = ((2 * j + 1 + ny) % ny) * nx + 2 * i;
+            colidx[ell * stencil_size + 3] = ((2 * j + 1 + ny) % ny) * nx + ((2 * i + 1 + nx) % nx);
         }
     }
 };
