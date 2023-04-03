@@ -129,7 +129,7 @@ public:
             {
                 for (int k = 0; k < stencil_size; ++k)
                 {
-                    triplet_list.push_back(T(ell, colidx[ell * stencil_size + k] * matrix[k]));
+                    triplet_list.push_back(T(ell, colidx[ell * stencil_size + k], matrix[k]));
                 }
             }
         }
