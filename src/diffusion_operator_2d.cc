@@ -7,7 +7,6 @@
 
 /** @brief Create a new instance */
 DiffusionOperator2d::DiffusionOperator2d(const std::shared_ptr<Lattice2d> lattice_,
-                                         std::mt19937_64 &rng_,
                                          const double alpha_K_,
                                          const double beta_K_,
                                          const double alpha_b_,

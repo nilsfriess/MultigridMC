@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     unsigned int seed = 1212417;
     std::mt19937_64 rng(seed);
     std::shared_ptr<Lattice2d> coarse_lattice = std::static_pointer_cast<Lattice2d>(lattice2d->get_coarse_lattice());
-    DiffusionOperator2d linear_operator = DiffusionOperator2d(lattice2d, rng);
+    DiffusionOperator2d linear_operator = DiffusionOperator2d(lattice2d);
     GaussSeidelSmoother smoother(linear_operator, rng);
     IntergridOperator2dAvg intergrid_operator_avg(lattice2d);
     LinearOperator coarse_operator = intergrid_operator_avg.coarsen_operator(linear_operator);
