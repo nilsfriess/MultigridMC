@@ -199,8 +199,8 @@ protected:
  * 0 : centre (  0,  0)
  * 1 : south  (  0, -1)
  * 2 : north  (  0, +1)
- * 3 : east   ( -1,  0)
- * 4 : west   ( +1,  0)
+ * 3 : west   ( -1,  0)
+ * 4 : east   ( +1,  0)
  */
 class LinearOperator2d5pt : public BaseLinearOperator2d<5, LinearOperator2d5pt>
 {
