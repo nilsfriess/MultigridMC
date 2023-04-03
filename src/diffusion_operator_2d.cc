@@ -6,7 +6,7 @@
  */
 
 /** @brief Create a new instance */
-DiffusionOperator2d::DiffusionOperator2d(const std::shared_ptr<Lattice2d> lattice_, std::mt19937_64 &rng_) : LinearOperator2d5pt(lattice_, rng_)
+DiffusionOperator2d::DiffusionOperator2d(const std::shared_ptr<Lattice2d> lattice_, std::mt19937_64 &rng_, const double alpha_K_, const double beta_K_, const double alpha_b_, const double beta_b_) : LinearOperator2d5pt(lattice_, rng_), alpha_K(alpha_K_), beta_K(beta_K_), alpha_b(alpha_b_), beta_b(beta_b_)
 {
     double hx = 1. / nx;
     double hy = 1. / ny;
@@ -19,7 +19,8 @@ DiffusionOperator2d::DiffusionOperator2d(const std::shared_ptr<Lattice2d> lattic
             double K_south = K_diff(i * hx, (j - 0.5) * hy);
             double K_east = K_diff((i + 0.5) * hx, j * hy);
             double K_west = K_diff((i - 0.5) * hx, j * hy);
-            matrix[stencil_size * ell + 0] = 1.0 + (K_east + K_west) / (hx * hx) + (K_north + K_south) / (hy * hy);
+            double b_centre = b_zero(i * hx, j * hy);
+            matrix[stencil_size * ell + 0] = b_centre + (K_east + K_west) / (hx * hx) + (K_north + K_south) / (hy * hy);
             matrix[stencil_size * ell + 1] = -K_south / (hy * hy);
             matrix[stencil_size * ell + 2] = -K_north / (hy * hy);
             matrix[stencil_size * ell + 3] = -K_west / (hy * hy);
@@ -31,5 +32,11 @@ DiffusionOperator2d::DiffusionOperator2d(const std::shared_ptr<Lattice2d> lattic
 /** @brief Diffusion coefficient */
 double DiffusionOperator2d::K_diff(const double x, const double y) const
 {
-    return 0.8 + 0.25 * sin(2 * M_PI * x) * sin(2 * M_PI * y);
+    return alpha_K + beta_K * sin(2 * M_PI * x) * sin(2 * M_PI * y);
+}
+
+/** @brief Zero order term */
+double DiffusionOperator2d::b_zero(const double x, const double y) const
+{
+    return alpha_b + beta_b * cos(2 * M_PI * x) * cos(2 * M_PI * y);
 }
