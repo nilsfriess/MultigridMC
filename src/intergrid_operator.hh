@@ -147,7 +147,7 @@ public:
     LinearOperator coarsen_operator(const LinearOperator &A) const
     {
         const LinearOperator::SparseMatrixType &A_prolong = to_sparse();
-        const LinearOperator::SparseMatrixType PT_A_P = A_prolong.transpose() * A.to_sparse() * A_prolong;
+        const LinearOperator::SparseMatrixType PT_A_P = A_prolong.transpose() * A.as_sparse() * A_prolong;
         return LinearOperator(lattice->get_coarse_lattice(), PT_A_P);
     }
 

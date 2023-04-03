@@ -75,7 +75,7 @@ public:
     }
 
     /** @brief Convert to sparse storage format */
-    const SparseMatrixType &to_sparse() const { return A_sparse; };
+    const SparseMatrixType &as_sparse() const { return A_sparse; };
 
 protected:
     /** @brief underlying lattice */

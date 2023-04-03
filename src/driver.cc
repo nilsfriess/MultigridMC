@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     std::cout << " time per application = " << 1E6 * t_elapsed.count() / niter << " mu s" << std::endl;
 
     /* Measure applications of sparse eigen matrix*/
-    Eigen::SparseMatrix<double> A_sparse = linear_operator.to_sparse();
+    Eigen::SparseMatrix<double> A_sparse = linear_operator.as_sparse();
     std::cout << "==== Eigen::sparse application ====" << std::endl;
     t_start = std::chrono::high_resolution_clock::now();
     for (unsigned int k = 0; k < niter; ++k)
