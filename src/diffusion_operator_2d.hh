@@ -27,7 +27,7 @@
  * for some constants alpha_K, beta_K, alpha_b, beta_b.
  *
  */
-class DiffusionOperator2d : public LinearOperator2d5pt
+class DiffusionOperator2d : public LinearOperator
 {
 public:
     /** @brief Create a new instance
@@ -67,7 +67,6 @@ public:
     double b_zero(const double x, const double y) const;
 
 protected:
-    using Base::lattice;
     /** @brief First coefficient in diffusion function */
     const double alpha_K;
     /** @brief Second coefficient in diffusion function */

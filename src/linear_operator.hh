@@ -12,9 +12,9 @@
  * @brief Header file for LinearOperator classes
  */
 
-/** @class AbstractLinearOperator
+/** @class LinearOperator
  *
- * @brief abstract linear LinearOperator that can be used as a base class
+ * @brief LinearOperator class
  *
  * A linear operator class provides the following functionality:
  *
@@ -32,46 +32,106 @@
  * by a stencil.
  *
  */
-class AbstractLinearOperator
+class LinearOperator
 {
 public:
+    /** @brief Type of sparse matrix*/
+    typedef Eigen::SparseMatrix<double> SparseMatrixType;
+
     /** @brief Create a new instance
      *
      * @param[in] lattice_ underlying lattice
      * @param[in] rng random number generator
      */
-    AbstractLinearOperator(const std::shared_ptr<Lattice> lattice_, std::mt19937_64 &rng_) : lattice(lattice_), rng(rng_), normal_dist(0.0, 1.0) {}
+    LinearOperator(const std::shared_ptr<Lattice> lattice_,
+                   std::mt19937_64 &rng_) : lattice(lattice_),
+                                            rng(rng_),
+                                            normal_dist(0.0, 1.0),
+                                            A_sparse(lattice_->M, lattice_->M)
+    {
+        sqrt_inv_diag = new double[lattice->M];
+    }
+
+    /** @brief Create a new instance from a matrix
+     *
+     * @param[in] lattice_ underlying lattice
+     * @param[in] rng random number generator
+     */
+    LinearOperator(const std::shared_ptr<Lattice> lattice_,
+                   std::mt19937_64 &rng_,
+                   const SparseMatrixType &A_sparse_) : lattice(lattice_),
+                                                        rng(rng_),
+                                                        normal_dist(0.0, 1.0),
+                                                        A_sparse(A_sparse_)
+    {
+        set_inv_sqrt_diagonal();
+    }
+
+    /** @brief Compute 1/sqrt(A_diag) */
+    void set_inv_sqrt_diagonal()
+    {
+        auto diag = A_sparse.diagonal();
+        for (unsigned ell = 0; ell < lattice->M; ++ell)
+        {
+            sqrt_inv_diag[ell] = 1 / sqrt(diag[ell]);
+        }
+    }
+
+    /** @brief Destroy instance */
+    ~LinearOperator()
+    {
+        delete[] sqrt_inv_diag;
+    }
 
     /** @brief Extract underlying lattice */
-    std::shared_ptr<Lattice> get_lattice() const { return lattice; }
-
-    /** @brief Extract pointer to matrix elements */
-    virtual double *get_matrix() const { return matrix; }
+    std::shared_ptr<Lattice> get_lattice() const
+    {
+        return lattice;
+    }
 
     /** @brief Apply the linear LinearOperator
      *
      * Compute y = Ax
      *
-     * @param[in] x input vector
-     * @param[out] y output vector
+     * @param[in] x input state
+     * @param[out] y output state
      */
-    virtual void apply(const std::shared_ptr<SampleState> x, std::shared_ptr<SampleState> y) const = 0;
+    void apply(const std::shared_ptr<SampleState> x, std::shared_ptr<SampleState> y)
+    {
+        y->data = A_sparse * x->data;
+    }
 
     /** @brief Carry out a single Gibbs-sweep
      *
      * @param[in] b right hand side
      * @param[inout] x vector to which the sweep is applied
      */
-    virtual void gibbssweep(const std::shared_ptr<SampleState> x, std::shared_ptr<SampleState> y) = 0;
+    void gibbssweep(const std::shared_ptr<SampleState> b, std::shared_ptr<SampleState> x)
+    {
+        const auto row_ptr = A_sparse.outerIndexPtr();
+        const auto col_ptr = A_sparse.innerIndexPtr();
+        const auto val_ptr = A_sparse.valuePtr();
+        unsigned int nrow = A_sparse.rows();
+        for (int ell = 0; ell < nrow; ++ell)
+        {
+            double residual = 0.0;
+            for (int k = row_ptr[ell]; k < row_ptr[ell + 1]; ++k)
+            {
+                unsigned int ell_prime = col_ptr[k];
+                residual += val_ptr[k] * x->data[ell_prime];
+            }
+            const double a_sqrt_inv_diag = sqrt_inv_diag[ell];
+            // subtract diagonal contribution
+            residual -= x->data[ell] / (a_sqrt_inv_diag * a_sqrt_inv_diag);
+            x->data[ell] = ((b->data[ell] - residual) * a_sqrt_inv_diag + normal_dist(rng)) * a_sqrt_inv_diag;
+        }
+    }
 
     /** @brief Convert to sparse storage format */
-    const Eigen::SparseMatrix<double> to_sparse() const;
+    const SparseMatrixType &to_sparse() const { return A_sparse; };
 
-    /** @brief extract the stencil
-     *
-     * Return a vector of Eigen-vectors which encode the stencil offsets
-     */
-    virtual std::vector<Eigen::VectorXi> get_stencil() const = 0;
+    /** @brief Get RNG*/
+    std::mt19937_64 &get_rng() const { return rng; }
 
 protected:
     /** @brief underlying lattice */
@@ -80,144 +140,10 @@ protected:
     std::mt19937_64 &rng;
     /** @brief normal distribution for Gibbs-sweep */
     std::normal_distribution<double> normal_dist;
-    /** @brief matrix entries */
-    double *matrix;
-    /** @brief column indices */
-    unsigned int *colidx;
-};
-
-/** @class BaseLinearOperator2d
- *
- * @brief base class for defining LinearOperators with the CRTP in 2d
- *
- * Linear operator for vectors that describe the unknowns on a structured 2d lattice.
- * The unknowns are assumed to be arranged in lexicographic order, i.e. node (i,j)
- * maps to the index ell = nx*j + i. In this case the sparsity structure can be described
- * by a list of offsets in x- and y-direction.
- *
- */
-template <int ssize, class DerivedLinearOperator>
-class BaseLinearOperator2d : public AbstractLinearOperator
-{
-public:
-    typedef BaseLinearOperator2d<ssize, DerivedLinearOperator> Base;
-    /** @brief Stencil size */
-    static const int stencil_size = ssize;
-
-    /** @brief Create a new instance
-     *
-     * @param[in] lattice_ underlying 2d lattice
-     * @param[in] rng_ random number generator
-     */
-    BaseLinearOperator2d(const std::shared_ptr<Lattice2d> lattice_, std::mt19937_64 &rng_) : AbstractLinearOperator(lattice_, rng_), nx(lattice_->nx), ny(lattice_->ny)
-    {
-        matrix = new double[ssize * lattice->M];
-        colidx = new unsigned int[ssize * lattice->M];
-    }
-
-    /**@brief Destrory instance*/
-    ~BaseLinearOperator2d()
-    {
-        delete[] matrix;
-        delete[] colidx;
-    }
-
-    /** @brief Extract underlying lattice */
-    std::shared_ptr<Lattice> get_lattice() const { return lattice; }
-
-    /** @brief Apply the linear LinearOperator
-     *
-     * Compute y = Ax
-     *
-     * @param[in] x input vector
-     * @param[out] y output vector
-     */
-    virtual void apply(const std::shared_ptr<SampleState> x, std::shared_ptr<SampleState> y) const
-    {
-        for (unsigned int j = 0; j < ny; ++j)
-        {
-            for (unsigned int i = 0; i < nx; ++i)
-            {
-                unsigned int ell = j * nx + i;
-                double result = matrix[ell * ssize] * x->data[ell];
-                for (int k = 1; k < ssize; ++k)
-                {
-                    unsigned int ell_prime = colidx[ell * ssize + k];
-                    result += matrix[ell * ssize + k] * x->data[ell_prime];
-                }
-                y->data[ell] = result;
-            }
-        }
-    }
-
-    /** @brief Carry out a single Gibbs-sweep
-     *
-     * @param[in] b right hand side
-     * @param[inout] x vector to which the sweep is applied
-     */
-    virtual void gibbssweep(const std::shared_ptr<SampleState> b, std::shared_ptr<SampleState> x)
-    {
-        for (unsigned int j = 0; j < ny; ++j)
-        {
-            for (unsigned int i = 0; i < nx; ++i)
-            {
-                unsigned int ell = j * nx + i;
-                double residual = 0;
-                double a_diag = matrix[ell * ssize];
-                for (unsigned k = 1; k < ssize; ++k)
-                {
-                    unsigned int ell_prime = colidx[ell * ssize + k];
-                    residual += matrix[ell * ssize + k] * x->data[ell_prime];
-                }
-                x->data[ell] = (b->data[ell] - residual) / a_diag + normal_dist(rng) / sqrt(a_diag);
-            }
-        }
-    }
-
-    /** @brief extract the stencil as a vector of offsets */
-    virtual std::vector<Eigen::VectorXi> get_stencil() const
-    {
-        std::vector<Eigen::VectorXi> stencil;
-        for (int j = 0; j < stencil_size; ++j)
-        {
-            Eigen::VectorXi v(2);
-            v[0] = offset_x[j];
-            v[1] = offset_y[j];
-            stencil.push_back(v);
-        }
-        return stencil;
-    };
-
-protected:
-    /** @brief lattice extent in x-direction */
-    const unsigned int nx;
-    /** @brief lattice extent in y-direction */
-    const unsigned int ny;
-    /** @brief Offsets in x-direction */
-    static const int offset_x[ssize];
-    /** @brief Offsets in y-direction */
-    static const int offset_y[ssize];
-};
-
-/** @class LinearOperator2d5pt
- * LinearOperator with 5-point stencil. The stencil elements are arrange in the following order, with
- * offsets in x- and y-direction shown in brackets
- *
- * 0 : centre (  0,  0)
- * 1 : south  (  0, -1)
- * 2 : north  (  0, +1)
- * 3 : west   ( -1,  0)
- * 4 : east   ( +1,  0)
- */
-class LinearOperator2d5pt : public BaseLinearOperator2d<5, LinearOperator2d5pt>
-{
-public:
-    /** @brief Create a new instance
-     *
-     * @param[in] lattice_ underlying lattice object
-     * @param[in] rng_ random number generator (for Gibbs sweep)
-     */
-    LinearOperator2d5pt(const std::shared_ptr<Lattice2d> lattice_, std::mt19937_64 &rng_);
+    /** @brief Underlying sparse Eigen matrix */
+    SparseMatrixType A_sparse;
+    /** @brief square root of inverse diagonal matrix entries (required in Gibbs sweep) */
+    double *sqrt_inv_diag;
 };
 
 #endif // LINEAR_OPERATOR_HH

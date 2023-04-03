@@ -23,10 +23,9 @@ int main(int argc, char *argv[])
     unsigned int seed = 1212417;
     std::mt19937_64 rng(seed);
     std::shared_ptr<Lattice2d> coarse_lattice = std::static_pointer_cast<Lattice2d>(lattice2d->get_coarse_lattice());
-    std::shared_ptr<DiffusionOperator2d> linear_operator = std::make_shared<DiffusionOperator2d>(lattice2d, rng);
-    std::shared_ptr<DiffusionOperator2d> coarse_action = std::make_shared<DiffusionOperator2d>(coarse_lattice, rng);
+    DiffusionOperator2d linear_operator = DiffusionOperator2d(lattice2d, rng);
     IntergridOperator2dAvg intergrid_operator_avg(lattice2d);
-    intergrid_operator_avg.coarsen_operator(linear_operator, coarse_action);
+    LinearOperator coarse_operator = intergrid_operator_avg.coarsen_operator(linear_operator);
     std::cout << lattice2d->M << std::endl;
     std::shared_ptr<SampleState> X = std::make_shared<SampleState>(lattice2d->M);
     std::shared_ptr<SampleState> Y = std::make_shared<SampleState>(lattice2d->M);
@@ -44,7 +43,7 @@ int main(int argc, char *argv[])
     unsigned int niter = 1000;
     for (unsigned int k = 0; k < niter; ++k)
     {
-        linear_operator->apply(X, Y);
+        linear_operator.apply(X, Y);
     }
 
     auto t_finish = std::chrono::high_resolution_clock::now();
@@ -54,7 +53,7 @@ int main(int argc, char *argv[])
     std::cout << " time per application = " << 1E6 * t_elapsed.count() / niter << " mu s" << std::endl;
 
     /* Measure applications of sparse eigen matrix*/
-    Eigen::SparseMatrix<double> A_sparse = linear_operator->to_sparse();
+    Eigen::SparseMatrix<double> A_sparse = linear_operator.to_sparse();
     std::cout << "==== Eigen::sparse application ====" << std::endl;
     t_start = std::chrono::high_resolution_clock::now();
     for (unsigned int k = 0; k < niter; ++k)
@@ -73,7 +72,8 @@ int main(int argc, char *argv[])
     t_start = std::chrono::high_resolution_clock::now();
     for (unsigned int k = 0; k < niter; ++k)
     {
-        linear_operator->gibbssweep(Y, X);
+        // linear_operator->gibbssweep(Y, X);
+        linear_operator.gibbssweep(Y, X);
     }
 
     t_finish = std::chrono::high_resolution_clock::now();

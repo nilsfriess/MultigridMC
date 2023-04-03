@@ -15,9 +15,9 @@
  * @brief Header file for intergrid operator classes
  */
 
-/** @class AbstractIntergridOperator
+/** @class IntergridOperator
  *
- * @brief abstract IntergridOperator that can be used as a base class
+ * @brief IntergridOperator that can be used as a base class
  *
  * A linear operator class provides functionality for performing the
  * following operations:
@@ -41,17 +41,27 @@
  * be constant. Note in particular that this implies that each coarse level unknown depends on
  * the fine level unknown in exactly the same way.
  */
-class AbstractIntergridOperator
+class IntergridOperator
 {
 public:
     /** @brief Create a new instance
      *
      * @param[in] lattice_ underlying lattice
+     * @param[in] stencil_size_ size of intergrid stencil
      */
-    AbstractIntergridOperator(const std::shared_ptr<Lattice> lattice_) : lattice(lattice_) {}
+    IntergridOperator(const std::shared_ptr<Lattice> lattice_,
+                      const int stencil_size_) : lattice(lattice_),
+                                                 stencil_size(stencil_size_)
+    {
+        matrix = new double[stencil_size];
+        colidx = new unsigned int[lattice->M * stencil_size];
+    }
 
-    /** @brief Get the matrix entries of the prolongation operator */
-    virtual const double *get_matrix() const = 0;
+    ~IntergridOperator()
+    {
+        delete[] matrix;
+        delete[] colidx;
+    }
 
     /** @brief Restrict a vector to the next-coarser level
      *
@@ -60,7 +70,20 @@ public:
      * @param[in] x input vector on current lattice
      * @param[out] x^{c} output vector on next-coarser lattice
      */
-    virtual void restrict(const std::shared_ptr<SampleState> x, std::shared_ptr<SampleState> x_coarse) const = 0;
+    virtual void restrict(const std::shared_ptr<SampleState> x, std::shared_ptr<SampleState> x_coarse)
+    {
+        std::shared_ptr<Lattice> coarse_lattice = lattice->get_coarse_lattice();
+        for (unsigned int ell_coarse = 0; ell_coarse < coarse_lattice->M; ++ell_coarse)
+        {
+            double result = 0;
+            for (unsigned k = 0; k < stencil_size; ++k)
+            {
+                unsigned int ell = colidx[ell_coarse * stencil_size + k];
+                result += matrix[k] * x->data[ell];
+            }
+            x_coarse->data[ell_coarse] = result;
+        }
+    }
 
     /** @brief Prolongate-add a vector from the next-coarser level
      *
@@ -77,151 +100,64 @@ public:
      * @param[in] x_coarse input vector on next-coarser lattice
      * @param[out] x output vector on current lattice
      */
-    virtual void prolongate_add(const std::shared_ptr<SampleState> x_coarse, std::shared_ptr<SampleState> x) const = 0;
+    virtual void prolongate_add(const std::shared_ptr<SampleState> x_coarse, std::shared_ptr<SampleState> x)
+    {
+        std::shared_ptr<Lattice> coarse_lattice = lattice->get_coarse_lattice();
+        for (unsigned int ell_coarse = 0; ell_coarse < coarse_lattice->M; ++ell_coarse)
+        {
+            double x_coarse_ell = x_coarse->data[ell_coarse];
+            for (unsigned k = 0; k < stencil_size; ++k)
+            {
+                unsigned int ell = colidx[ell_coarse * stencil_size + k];
+                x->data[ell] += matrix[k] * x_coarse_ell;
+            }
+        }
+    };
+
+    /** @brief convert prolongation operator to a sparse matrix */
+    const Eigen::SparseMatrix<double> to_sparse() const
+    {
+        std::shared_ptr<Lattice> coarse_lattice = lattice->get_coarse_lattice();
+        typedef Eigen::Triplet<double> T;
+        std::vector<T> triplet_list;
+        unsigned int nrow = lattice->M;
+        unsigned int ncol = coarse_lattice->M;
+        unsigned int nnz = stencil_size * nrow;
+        triplet_list.reserve(nnz);
+        for (unsigned int ell = 0; ell < ncol; ++ell)
+        {
+            {
+                for (int k = 0; k < stencil_size; ++k)
+                {
+                    triplet_list.push_back(T(colidx[ell * stencil_size + k], ell, matrix[k]));
+                }
+            }
+        }
+        LinearOperator::SparseMatrixType A_sparse(nrow, ncol);
+        A_sparse.setFromTriplets(triplet_list.begin(), triplet_list.end());
+        return A_sparse;
+    }
 
     /** @brief Coarsen a linear operator to the next-coarser level
      *
      * Compute A^{c} = I_{2h}^{h} A I_{h}^{2h}
      *
-     * To compute A^{(c)} note that we need the matrix entries
-     *
-     *   A^{c}_{i,i+\Delta_k}
-     *
-     * for all coarse grid points i and all offsets \Delta_k in S(A^{c}), the set of possible
-     * offsets of the coarse level operator A^{c}. This can be written as
-     *
-     *   A^{c}_{i,i+\Delta_k} = \sum{\sigma^{k}_m,\sigma'^{k}_m} in S(A;\Delta_k)
-     *                            P_{\sigma^{k}_m} * P_{\sigma'^{k}_m}
-     *                            * A_{2*i+\sigma^{k}_m,2*(i+\Delta_k)+\sigma'^{k}_m}
-     *
-     * where for each offset \Delta_k the set S(A;\Delta_k) contains all pairs of
-     * offsets (\sigma^{k}_m,\sigma'^{k}_m) such that 2*\Delta_k + \sigma'^{k}_m -  \sigma^{k}_m in S(A),
-     * the set of possible offsets of the operator A.
-     *
      * @param[in] A Linear operator on current lattice
-     * @param[out] A_coarse Resulting linear operator on current lattice
      */
-    virtual void coarsen_operator(const std::shared_ptr<AbstractLinearOperator> A, std::shared_ptr<AbstractLinearOperator> A_coarse) const;
-
-    /** @extract the stencil */
-    virtual std::vector<Eigen::VectorXi> get_stencil() const = 0;
+    LinearOperator coarsen_operator(const LinearOperator &A) const
+    {
+        const LinearOperator::SparseMatrixType &A_prolong = to_sparse();
+        const LinearOperator::SparseMatrixType PT_A_P = A_prolong.transpose() * A.to_sparse() * A_prolong;
+        return LinearOperator(lattice->get_coarse_lattice(), A.get_rng(), PT_A_P);
+    }
 
     /** @brief underlying lattice */
     const std::shared_ptr<Lattice> lattice;
-};
-
-/** @class BaseIntergridOperator2d
- *
- * @brief Base class for defining IntergridOperators with the CRTP in 2d
- *
- * Intergrid operator that allows describing restriction, prolongation and matrix-coarsening
- * for regular 2d lattices.
- *
- */
-template <int ssize, class DerivedIntergridOperator>
-class BaseIntergridOperator2d : public AbstractIntergridOperator
-{
-public:
-    typedef BaseIntergridOperator2d<ssize, DerivedIntergridOperator> Base;
-    /** @brief Stencil size */
-    static const int stencil_size = ssize;
-
-    /** @brief Create a new instance
-     *
-     * @param[in] lattice_ underlying 2d lattice
-     */
-    BaseIntergridOperator2d(const std::shared_ptr<Lattice2d> lattice_) : AbstractIntergridOperator(lattice_), nx(lattice_->nx), ny(lattice_->ny)
-    {
-        colidx = new unsigned int[lattice_->M * ssize];
-    }
-
-    /** @brief Destroy instance */
-    BaseIntergridOperator2d()
-    {
-        delete[] colidx;
-    }
-
-    /** @brief Get the matrix entries of the prolongation operator */
-    virtual const double *get_matrix() const
-    {
-        return matrix;
-    };
-
-    /** @brief Get the offsets of the prolongation operator */
-    virtual std::vector<Eigen::VectorXi> get_stencil() const
-    {
-        std::vector<Eigen::VectorXi> offsets;
-        for (int j = 0; j < stencil_size; ++j)
-        {
-            Eigen::VectorXi v(2);
-            v[0] = offset_x[j];
-            v[1] = offset_y[j];
-            offsets.push_back(v);
-        }
-        return offsets;
-    };
-
-    /** @brief Restrict a vector to the next-coarser level
-     *
-     * Compute x^{c} = I_{h}^{2h} x
-     *
-     * @param[in] x input vector on current lattice
-     * @param[out] x^{c} output vector on next-coarser lattice
-     */
-    virtual void restrict(const std::shared_ptr<SampleState> x, std::shared_ptr<SampleState> x_coarse) const
-    {
-        for (unsigned int j = 0; j < ny / 2; ++j)
-        {
-            for (unsigned int i = 0; i < nx / 2; ++i)
-            {
-                unsigned int ell_coarse = j * (nx / 2) + i;
-                double result = 0;
-                for (unsigned k = 0; k < ssize; ++k)
-                {
-                    unsigned int ell = colidx[ell * ssize + k];
-                    result += matrix[k] * x->data[ell];
-                }
-                x_coarse->data[ell_coarse] = result;
-            }
-        }
-    };
-
-    /** @brief Prolongate-add a vector from the next-coarser level
-     *
-     * Compute x += I_{2h}^{h} x^{c}
-     *
-     * @param[in] x_coarse input vector on next-coarser lattice
-     * @param[out] x output vector on current lattice
-     */
-    virtual void prolongate_add(const std::shared_ptr<SampleState> x_coarse, std::shared_ptr<SampleState> x) const
-    {
-        for (unsigned int j = 0; j < ny / 2; ++j)
-        {
-            for (unsigned int i = 0; i < nx / 2; ++i)
-            {
-                unsigned int ell_coarse = j * (nx / 2) + i;
-                double x_coarse_local = x_coarse->data[ell_coarse];
-                for (unsigned k = 0; k < ssize; ++k)
-                {
-                    unsigned int ell = colidx[ell * ssize + k];
-                    x->data[ell] += matrix[k] * x_coarse_local;
-                }
-            }
-        }
-    };
-
-protected:
-    /** @brief extent of lattice in x-direction */
-    const unsigned int nx;
-    /** @brief extent of lattice in y-direction */
-    const unsigned int ny;
-    /** @brief matrix entries */
-    static const double matrix[ssize];
-    /** @brief Offsets in x-direction */
-    static const int offset_x[ssize];
-    /** @brief Offsets in y-direction */
-    static const int offset_y[ssize];
-    /** @brief column indices */
+    /** @brief size of stencil */
+    const int stencil_size;
+    /** @brief underlying matrix */
+    double *matrix;
+    /** @brief indirection map */
     unsigned int *colidx;
 };
 
@@ -229,9 +165,12 @@ protected:
  * IntergridOperator which implements constant averaging
  *
  */
-class IntergridOperator2dAvg : public BaseIntergridOperator2d<4, IntergridOperator2dAvg>
+class IntergridOperator2dAvg : public IntergridOperator
 {
 public:
+    /** @brief base type */
+    typedef IntergridOperator Base;
+
     /** @brief Create a new instance
      *
      * @param[in] lattice_ underlying lattice object
