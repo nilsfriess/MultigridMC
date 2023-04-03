@@ -6,7 +6,13 @@
  */
 
 /** @brief Create a new instance */
-DiffusionOperator2d::DiffusionOperator2d(const std::shared_ptr<Lattice2d> lattice_, std::mt19937_64 &rng_, const double alpha_K_, const double beta_K_, const double alpha_b_, const double beta_b_) : LinearOperator2d5pt(lattice_, rng_), alpha_K(alpha_K_), beta_K(beta_K_), alpha_b(alpha_b_), beta_b(beta_b_)
+DiffusionOperator2d::DiffusionOperator2d(const std::shared_ptr<Lattice2d> lattice_,
+                                         std::mt19937_64 &rng_,
+                                         const double alpha_K_,
+                                         const double beta_K_,
+                                         const double alpha_b_,
+                                         const double beta_b_) : LinearOperator2d5pt(lattice_, rng_),
+                                                                 alpha_K(alpha_K_), beta_K(beta_K_), alpha_b(alpha_b_), beta_b(beta_b_)
 {
     double hx = 1. / nx;
     double hy = 1. / ny;

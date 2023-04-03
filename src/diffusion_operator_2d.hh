@@ -41,7 +41,12 @@ public:
      * @param[in] alpha_b first coefficient in zero order term
      * @param[in] beta_b second coefficient in zero order term
      */
-    DiffusionOperator2d(const std::shared_ptr<Lattice2d> lattice_, std::mt19937_64 &rng_, const double alpha_K_ = 0.8, const double beta_K_ = 0.2, const double alpha_b_ = 0.9, const double beta_b_ = 0.1);
+    DiffusionOperator2d(const std::shared_ptr<Lattice2d> lattice_,
+                        std::mt19937_64 &rng_,
+                        const double alpha_K_ = 0.8,
+                        const double beta_K_ = 0.2,
+                        const double alpha_b_ = 0.9,
+                        const double beta_b_ = 0.1);
 
     /** @brief Diffusion coefficient
      *
