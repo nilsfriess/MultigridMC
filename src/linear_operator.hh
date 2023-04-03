@@ -4,6 +4,7 @@
 #include <random>
 #include <cmath>
 #include <Eigen/Dense>
+#include <Eigen/Sparse>
 #include "lattice.hh"
 #include "samplestate.hh"
 
@@ -63,7 +64,13 @@ public:
      */
     virtual void gibbssweep(const std::shared_ptr<SampleState> x, std::shared_ptr<SampleState> y) = 0;
 
-    /** @extract the stencil */
+    /** @brief Convert to sparse storage format */
+    const Eigen::SparseMatrix<double> to_sparse() const;
+
+    /** @brief extract the stencil
+     *
+     * Return a vector of Eigen-vectors which encode the stencil offsets
+     */
     virtual std::vector<Eigen::VectorXi> get_stencil() const = 0;
 
 protected:

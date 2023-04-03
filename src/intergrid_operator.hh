@@ -179,7 +179,7 @@ public:
                 for (unsigned k = 0; k < ssize; ++k)
                 {
                     unsigned int ell = colidx[ell * ssize + k];
-                    result += matrix[ell * ssize + k] * x->data[ell];
+                    result += matrix[k] * x->data[ell];
                 }
                 x_coarse->data[ell_coarse] = result;
             }
@@ -204,7 +204,7 @@ public:
                 for (unsigned k = 0; k < ssize; ++k)
                 {
                     unsigned int ell = colidx[ell * ssize + k];
-                    x->data[ell] += matrix[ell * ssize + k] * x_coarse_local;
+                    x->data[ell] += matrix[k] * x_coarse_local;
                 }
             }
         }
