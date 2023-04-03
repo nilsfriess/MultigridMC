@@ -148,7 +148,7 @@ public:
     {
         const LinearOperator::SparseMatrixType &A_prolong = to_sparse();
         const LinearOperator::SparseMatrixType PT_A_P = A_prolong.transpose() * A.to_sparse() * A_prolong;
-        return LinearOperator(lattice->get_coarse_lattice(), A.get_rng(), PT_A_P);
+        return LinearOperator(lattice->get_coarse_lattice(), PT_A_P);
     }
 
     /** @brief underlying lattice */
@@ -168,7 +168,7 @@ public:
 class IntergridOperator2dAvg : public IntergridOperator
 {
 public:
-    /** @brief base type */
+    /** @brief Base type */
     typedef IntergridOperator Base;
 
     /** @brief Create a new instance

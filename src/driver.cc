@@ -5,6 +5,7 @@
 #include "lattice.hh"
 #include "samplestate.hh"
 #include "action.hh"
+#include "smoother.hh"
 #include "diffusion_operator_2d.hh"
 #include "intergrid_operator.hh"
 
@@ -24,6 +25,7 @@ int main(int argc, char *argv[])
     std::mt19937_64 rng(seed);
     std::shared_ptr<Lattice2d> coarse_lattice = std::static_pointer_cast<Lattice2d>(lattice2d->get_coarse_lattice());
     DiffusionOperator2d linear_operator = DiffusionOperator2d(lattice2d, rng);
+    GaussSeidelSmoother smoother(linear_operator, rng);
     IntergridOperator2dAvg intergrid_operator_avg(lattice2d);
     LinearOperator coarse_operator = intergrid_operator_avg.coarsen_operator(linear_operator);
     std::cout << lattice2d->M << std::endl;
@@ -73,7 +75,7 @@ int main(int argc, char *argv[])
     for (unsigned int k = 0; k < niter; ++k)
     {
         // linear_operator->gibbssweep(Y, X);
-        linear_operator.gibbssweep(Y, X);
+        smoother.apply(Y, X);
     }
 
     t_finish = std::chrono::high_resolution_clock::now();

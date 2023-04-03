@@ -11,7 +11,7 @@ DiffusionOperator2d::DiffusionOperator2d(const std::shared_ptr<Lattice2d> lattic
                                          const double alpha_K_,
                                          const double beta_K_,
                                          const double alpha_b_,
-                                         const double beta_b_) : LinearOperator(lattice_, rng_),
+                                         const double beta_b_) : LinearOperator(lattice_),
                                                                  alpha_K(alpha_K_),
                                                                  beta_K(beta_K_),
                                                                  alpha_b(alpha_b_),
@@ -53,7 +53,6 @@ DiffusionOperator2d::DiffusionOperator2d(const std::shared_ptr<Lattice2d> lattic
         }
     }
     A_sparse.setFromTriplets(triplet_list.begin(), triplet_list.end());
-    set_inv_sqrt_diagonal();
 }
 
 /** @brief Diffusion coefficient */
