@@ -179,4 +179,21 @@ public:
     IntergridOperator2dAvg(const std::shared_ptr<Lattice2d> lattice_);
 };
 
+/** @class IntergridOperatorAvg
+ * IntergridOperator which implements linear averaging
+ *
+ */
+class IntergridOperator2dLinear : public IntergridOperator
+{
+public:
+    /** @brief Base type */
+    typedef IntergridOperator Base;
+
+    /** @brief Create a new instance
+     *
+     * @param[in] lattice_ underlying lattice object
+     */
+    IntergridOperator2dLinear(const std::shared_ptr<Lattice2d> lattice_);
+};
+
 #endif // INTERGRID_OPERATOR_HH
