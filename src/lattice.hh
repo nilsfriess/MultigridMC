@@ -50,7 +50,23 @@ public:
 
 /** @class Lattice2d
  *
- * @brief Two dimensional structured lattice of size nx x ny
+ * @brief Two dimensional structured lattice of size nx x ny with periodic boundary
+ *
+ * Periodic boundary conditions are implicitly assumed
+ *
+ *  Points are arranged ordered lexicographically, for example for nx = 4, ny =3:
+ *
+ *  ^ y
+ *  !
+ *                                         N
+ *  8 ---- 9 --- 10 --- 11              W  +  E
+ *  !      !      !      !                 S
+ *  !      !      !      !
+ *  4 ---- 5 ---- 6 ---- 7
+ *  !      !      !      !
+ *  !      !      !      !
+ *  0 ---- 1 ---- 2 ---- 3  ---> x
+ *
  */
 class Lattice2d : public Lattice
 {
