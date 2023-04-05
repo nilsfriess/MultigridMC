@@ -38,7 +38,7 @@ IntergridOperator2dAvg::IntergridOperator2dAvg(const std::shared_ptr<Lattice2d> 
 IntergridOperator2dLinear::IntergridOperator2dLinear(const std::shared_ptr<Lattice2d> lattice_) : Base(lattice_, 9)
 {
     // 1d stencil and shift vector
-    const double stencil1d[3] = {0.5, 0.25, 0.5};
+    const double stencil1d[3] = {0.25, 0.5, 0.25};
     const int shift1d[3] = {-1, 0, +1};
     // matrix entries
     int k = 0;
