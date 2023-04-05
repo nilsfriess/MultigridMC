@@ -1,3 +1,6 @@
+#ifndef TEST_INTERGRID_HH
+#define TEST_INTERGRID_HH TEST_INTERGRID_HH
+
 #include <gtest/gtest.h>
 #include <random>
 #include <Eigen/Dense>
@@ -78,7 +81,7 @@ TEST_F(IntergridTest, TestProlongRestrict2dAvg)
     EXPECT_NEAR((X_prol_restr->data - 4. * X_coarse->data).norm(), 0.0, tolerance);
 }
 
-/** @brief check that prolongating then restricting will return the same field up to a factor */
+/** @brief check that prolongating a field will return the same result as manually interpolating */
 TEST_F(IntergridTest, TestProlongRestrict2dLinear)
 {
     // initial coarse level state
@@ -145,8 +148,12 @@ TEST_F(IntergridTest, TestProlongRestrict2dLinear)
     EXPECT_NEAR((4 * X_prol->data - X_linear->data).norm(), 0.0, tolerance);
 }
 
-/** @brief check that coarsening the operator works */
-TEST_F(IntergridTest, TestCoarsen)
+/** @brief check that coarsening the operator works
+ *
+ * Coarsening the shifted Laplace operator should result in rescaling the
+ * second- order and zero- order terms by constant factors
+ */
+TEST_F(IntergridTest, TestCoarsenOperator)
 {
     DiffusionOperator2d linear_operator(lattice, 1.0, 0.0, 1.0, 0.0);
     DiffusionOperator2d coarse_operator(coarse_lattice, 8.0, 0.0, 4.0, 0.0);
@@ -154,3 +161,5 @@ TEST_F(IntergridTest, TestCoarsen)
     const double tolerance = 1.E-12;
     EXPECT_NEAR((coarse_operator.as_sparse() - coarsened_operator.as_sparse()).norm(), 0.0, tolerance);
 }
+
+#endif // TEST_INTERGRID_HH

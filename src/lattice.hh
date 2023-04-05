@@ -97,10 +97,6 @@ public:
    */
   inline virtual unsigned int idx_euclidean2linear(const Eigen::VectorXi idx) const
   {
-    assert(idx[0] >= 0);
-    assert(idx[0] < nx);
-    assert(idx[1] >= 0);
-    assert(idx[1] < ny);
     return ((idx[1] + ny) % ny) * nx + ((idx[0] + nx) % nx);
   };
 
