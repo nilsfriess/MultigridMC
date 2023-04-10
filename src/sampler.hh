@@ -1,18 +1,18 @@
-#ifndef SMOOTHER_HH
-#define SMOOTHER_HH SMOOTHER_HH
+#ifndef SAMPLER_HH
+#define SAMPLER_HH SAMPLER_HH
 #include <random>
 #include "linear_operator.hh"
 #include "samplestate.hh"
 
-/** @file smoother.hh
+/** @file sampler.hh
  *
- * @brief multigrid smoothers
+ * @brief Monte Carlo samplers
  */
 
-/** @class Smoother
+/** @class Sampler
  *
- * @brief Smoother base class */
-class Smoother
+ * @brief Sampler base class */
+class Sampler
 {
 public:
     /** @brief Create a new instance
@@ -20,11 +20,11 @@ public:
      * @param[in] linear_operator_ underlying linear operator
      * @param[in] rng_ random number generator
      */
-    Smoother(const LinearOperator &linear_operator_,
-             std::mt19937_64 &rng_);
+    Sampler(const LinearOperator &linear_operator_,
+            std::mt19937_64 &rng_);
 
     /** @brief destroy instance */
-    ~Smoother()
+    ~Sampler()
     {
         delete[] sqrt_inv_diag;
     }
@@ -42,22 +42,22 @@ protected:
     std::normal_distribution<double> normal_dist;
 };
 
-/** @class GaussSeidelSmoother
+/** @class GibbsSampler
  *
- * @brief Gauss Seidel smoother
+ * @brief Gibbs Sampler
  */
-class GaussSeidelSmoother : public Smoother
+class GibbsSampler : public Sampler
 {
 public:
     /** @brief Base type*/
-    typedef Smoother Base;
+    typedef Sampler Base;
     /** @brief Create a new instance
      *
      * @param[in] linear_operator_ underlying linear operator
      * @param[in] rng_ random number generator
      */
-    GaussSeidelSmoother(const LinearOperator &linear_operator_,
-                        std::mt19937_64 &rng_) : Base(linear_operator_, rng_){};
+    GibbsSampler(const LinearOperator &linear_operator_,
+                 std::mt19937_64 &rng_) : Base(linear_operator_, rng_){};
 
     /** @brief Carry out a single Gibbs-sweep
      *
@@ -68,4 +68,4 @@ public:
                std::shared_ptr<SampleState> x);
 };
 
-#endif // SMOOTHER_HH
+#endif // SAMPLER_HH

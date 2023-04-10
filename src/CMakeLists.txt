@@ -2,7 +2,7 @@ enable_testing()
 
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/linear_operator.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/smoother.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/sampler.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/diffusion_operator_2d.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/intergrid_operator.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/cholesky_solver.cc

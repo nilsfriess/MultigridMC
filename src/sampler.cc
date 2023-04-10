@@ -1,15 +1,15 @@
-/** @file smoother.cc
+/** @file sampler.cc
  *
- * @brief Implementation of smoother.hh
+ * @brief Implementation of sampler.hh
  */
 
-#include "smoother.hh"
+#include "sampler.hh"
 
 /** @brief Create a new instance */
-Smoother::Smoother(const LinearOperator &linear_operator_,
-                   std::mt19937_64 &rng_) : linear_operator(linear_operator_),
-                                            rng(rng_),
-                                            normal_dist(0.0, 1.0)
+Sampler::Sampler(const LinearOperator &linear_operator_,
+                 std::mt19937_64 &rng_) : linear_operator(linear_operator_),
+                                          rng(rng_),
+                                          normal_dist(0.0, 1.0)
 {
     const LinearOperator::SparseMatrixType &A_sparse = linear_operator.as_sparse();
     unsigned int nrow = A_sparse.rows();
@@ -21,9 +21,9 @@ Smoother::Smoother(const LinearOperator &linear_operator_,
     }
 }
 
-/** @brief apply smoother */
-void GaussSeidelSmoother::apply(const std::shared_ptr<SampleState> b,
-                                std::shared_ptr<SampleState> x)
+/** @brief apply Sampler */
+void GibbsSampler::apply(const std::shared_ptr<SampleState> b,
+                         std::shared_ptr<SampleState> x)
 {
     const LinearOperator::SparseMatrixType &A_sparse = linear_operator.as_sparse();
     const auto row_ptr = A_sparse.outerIndexPtr();
