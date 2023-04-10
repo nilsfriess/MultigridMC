@@ -20,24 +20,26 @@ int main(int argc, char *argv[])
     nx = atoi(argv[1]);
     ny = atoi(argv[2]);
     std::cout << "lattice size : " << nx << " x " << ny << std::endl;
-    std::shared_ptr<Lattice2d> lattice2d = std::make_shared<Lattice2d>(nx, ny);
+    std::shared_ptr<Lattice2d> lattice = std::make_shared<Lattice2d>(nx, ny);
     unsigned int seed = 1212417;
     std::mt19937_64 rng(seed);
-    std::shared_ptr<Lattice2d> coarse_lattice = std::static_pointer_cast<Lattice2d>(lattice2d->get_coarse_lattice());
-    DiffusionOperator2d linear_operator = DiffusionOperator2d(lattice2d);
+    std::shared_ptr<Lattice2d> coarse_lattice = std::static_pointer_cast<Lattice2d>(lattice->get_coarse_lattice());
+    DiffusionOperator2d linear_operator = DiffusionOperator2d(lattice);
     GaussSeidelSmoother smoother(linear_operator, rng);
-    IntergridOperator2dAvg intergrid_operator_avg(lattice2d);
+    IntergridOperator2dAvg intergrid_operator_avg(lattice);
     LinearOperator coarse_operator = intergrid_operator_avg.coarsen_operator(linear_operator);
-    std::cout << lattice2d->M << std::endl;
-    std::shared_ptr<SampleState> X = std::make_shared<SampleState>(lattice2d->M);
-    std::shared_ptr<SampleState> Y = std::make_shared<SampleState>(lattice2d->M);
+    std::cout << lattice->M << std::endl;
+    std::shared_ptr<SampleState> X = std::make_shared<SampleState>(lattice->M);
+    std::shared_ptr<SampleState> Y = std::make_shared<SampleState>(lattice->M);
     std::random_device rd;
     std::mt19937 mt(rd());
     std::uniform_real_distribution<double> dist(0.0, 1.0);
-    for (unsigned int i = 0; i < lattice2d->M; ++i)
+    for (unsigned int i = 0; i < lattice->M; ++i)
     {
         X->data[i] = dist(mt);
     }
+    std::shared_ptr<SampleState> X_coarse = std::make_shared<SampleState>(coarse_lattice->M);
+    intergrid_operator_avg.restrict(X, X_coarse);
 
     /* Measure applications of operator */
     std::cout << "==== operator application ====" << std::endl;
