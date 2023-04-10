@@ -44,10 +44,10 @@ DiffusionOperator2d::DiffusionOperator2d(const std::shared_ptr<Lattice2d> lattic
             ell_prime = nx * ((j + 1) % ny) + i;
             triplet_list.push_back(T(ell, ell_prime, -K_north / (hy * hy)));
             // west
-            ell_prime = nx * j + ((i + 1) % nx);
+            ell_prime = nx * j + ((i - 1) % nx);
             triplet_list.push_back(T(ell, ell_prime, -K_west / (hy * hy)));
             // east
-            ell_prime = nx * j + ((i - 1 + nx) % nx);
+            ell_prime = nx * j + ((i + 1 + nx) % nx);
             triplet_list.push_back(T(ell, ell_prime, -K_east / (hy * hy)));
         }
     }
