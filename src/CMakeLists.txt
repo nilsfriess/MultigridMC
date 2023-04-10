@@ -5,6 +5,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/smoother.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/diffusion_operator_2d.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/intergrid_operator.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/cholesky_solver.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/vtk_writer.cc
 )
 
