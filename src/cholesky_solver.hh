@@ -37,4 +37,20 @@ protected:
     Eigen::SimplicialLLT<SparseMatrixType> solver;
 };
 
+/* ******************** factory classes ****************************** */
+
+/** @brief Cholesky solver factory class */
+class CholeskySolverFactory : public LinearSolverFactory
+{
+public:
+    /** @brief Return solver for a specific  linear operator
+     *
+     * @param[in] linear_operator_ Underlying linear operator
+     */
+    virtual std::shared_ptr<LinearSolver> get(std::shared_ptr<LinearOperator> linear_operator)
+    {
+        return std::make_shared<CholeskySolver>(linear_operator);
+    }
+};
+
 #endif // CHOLESKY_SOLVER_HH

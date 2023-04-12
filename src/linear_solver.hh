@@ -82,4 +82,14 @@ protected:
     const IterativeSolverParameters params;
 };
 
+/* ******************** factory classes ****************************** */
+
+/** @brief Linear solver factory base class */
+class LinearSolverFactory
+{
+public:
+    /** @brief extract a linear solver for a given action */
+    virtual std::shared_ptr<LinearSolver> get(std::shared_ptr<LinearOperator> linear_operator) = 0;
+};
+
 #endif // SOLVER_HH

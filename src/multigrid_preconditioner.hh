@@ -5,6 +5,7 @@
 #include <Eigen/SparseCholesky>
 #include "linear_operator.hh"
 #include "intergrid_operator.hh"
+#include "linear_solver.hh"
 #include "preconditioner.hh"
 #include "smoother.hh"
 
@@ -26,11 +27,13 @@ public:
      * @param[in] number of levels
      * @param[in] smoother_factory_ factory for smoothers on each level
      * @param[in] intergrid_operator_factory_ factory for intergrid operators on each level
+     * @param[in] coarse_solver_factory_ factory for coarse solver
      */
     MultigridPreconditioner(std::shared_ptr<LinearOperator> linear_operator_,
                             const unsigned int nlevel_,
                             std::shared_ptr<SmootherFactory> smoother_factory_,
-                            std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory_);
+                            std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory_,
+                            std::shared_ptr<LinearSolverFactory> coarse_solver_factory_);
 
     /** @brief Solve the linear system Ax = b
      *
@@ -52,6 +55,10 @@ protected:
     std::shared_ptr<SmootherFactory> smoother_factory;
     /** @brief intergrid operator factory on each level */
     std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory;
+    /** @brief factory for coarse solver */
+    std::shared_ptr<LinearSolverFactory> coarse_solver_factory;
+    /** @brief coarse level solver */
+    std::shared_ptr<LinearSolver> coarse_solver;
     /** @brief linear operators on all levels */
     std::vector<std::shared_ptr<LinearOperator>> linear_operators;
     /** @brief smoothers on all levels */

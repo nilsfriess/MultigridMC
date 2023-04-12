@@ -8,10 +8,12 @@
 MultigridPreconditioner::MultigridPreconditioner(std::shared_ptr<LinearOperator> linear_operator_,
                                                  const unsigned int nlevel_,
                                                  std::shared_ptr<SmootherFactory> smoother_factory_,
-                                                 std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory_) : Preconditioner(linear_operator_),
-                                                                                                                          nlevel(nlevel_),
-                                                                                                                          smoother_factory(smoother_factory_),
-                                                                                                                          intergrid_operator_factory(intergrid_operator_factory_)
+                                                 std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory_,
+                                                 std::shared_ptr<LinearSolverFactory> coarse_solver_factory_) : Preconditioner(linear_operator_),
+                                                                                                                nlevel(nlevel_),
+                                                                                                                smoother_factory(smoother_factory_),
+                                                                                                                intergrid_operator_factory(intergrid_operator_factory_),
+                                                                                                                coarse_solver_factory(coarse_solver_factory_)
 {
     // Extract underlying fine lattice
     std::shared_ptr<Lattice> lattice = linear_operator->get_lattice();
@@ -34,6 +36,7 @@ MultigridPreconditioner::MultigridPreconditioner(std::shared_ptr<LinearOperator>
             lattice = lattice->get_coarse_lattice();
         }
     }
+    coarse_solver = coarse_solver_factory->get(lin_op);
 }
 
 /** Recursive solve on a givel level */
@@ -46,10 +49,7 @@ void MultigridPreconditioner::solve(const unsigned int level)
     if (level == nlevel - 1)
     {
         // Coarse level solve
-        for (unsigned int k = 0; k < n_coarsesmooth; ++k)
-        {
-            smoothers[level]->apply(b_ell[level], x_ell[level]);
-        }
+        coarse_solver->apply(b_ell[level], x_ell[level]);
     }
     else
     {

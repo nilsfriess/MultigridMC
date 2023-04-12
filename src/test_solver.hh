@@ -85,10 +85,12 @@ TEST_F(SolverTest, TestMultigrid)
     const double omega = 0.8;
     std::shared_ptr<SSORSmootherFactory> smoother_factory = std::make_shared<SSORSmootherFactory>(omega);
     std::shared_ptr<IntergridOperator2dLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperator2dLinearFactory>();
+    std::shared_ptr<CholeskySolverFactory> coarse_solver_factory = std::make_shared<CholeskySolverFactory>();
     std::shared_ptr<MultigridPreconditioner> prec = std::make_shared<MultigridPreconditioner>(linear_operator,
                                                                                               nlevel,
                                                                                               smoother_factory,
-                                                                                              intergrid_operator_factory);
+                                                                                              intergrid_operator_factory,
+                                                                                              coarse_solver_factory);
     IterativeSolverParameters params;
     params.rtol = 1.0E-11;
     params.atol = 1.0E-9;
