@@ -6,11 +6,11 @@
 
 /** Create a new instance */
 MultigridPreconditioner::MultigridPreconditioner(std::shared_ptr<LinearOperator> linear_operator_,
-                                                 const unsigned int nlevel_,
+                                                 const MultigridParameters params_,
                                                  std::shared_ptr<SmootherFactory> smoother_factory_,
                                                  std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory_,
                                                  std::shared_ptr<LinearSolverFactory> coarse_solver_factory_) : Preconditioner(linear_operator_),
-                                                                                                                nlevel(nlevel_),
+                                                                                                                params(params_),
                                                                                                                 smoother_factory(smoother_factory_),
                                                                                                                 intergrid_operator_factory(intergrid_operator_factory_),
                                                                                                                 coarse_solver_factory(coarse_solver_factory_)
@@ -19,7 +19,7 @@ MultigridPreconditioner::MultigridPreconditioner(std::shared_ptr<LinearOperator>
     std::shared_ptr<Lattice> lattice = linear_operator->get_lattice();
     // Linear operator on a given level
     std::shared_ptr<LinearOperator> lin_op = linear_operator;
-    for (int level = 0; level < nlevel; ++level)
+    for (int level = 0; level < params.nlevel; ++level)
     {
         x_ell.push_back(std::make_shared<SampleState>(lattice->M));
         b_ell.push_back(std::make_shared<SampleState>(lattice->M));
@@ -27,7 +27,7 @@ MultigridPreconditioner::MultigridPreconditioner(std::shared_ptr<LinearOperator>
         linear_operators.push_back(lin_op);
         std::shared_ptr<Smoother> smoother = smoother_factory->get(lin_op);
         smoothers.push_back(smoother);
-        if (level < nlevel - 1)
+        if (level < params.nlevel - 1)
         {
             std::shared_ptr<IntergridOperator> intergrid_operator = intergrid_operator_factory->get(lattice);
             intergrid_operators.push_back(intergrid_operator);
@@ -42,11 +42,8 @@ MultigridPreconditioner::MultigridPreconditioner(std::shared_ptr<LinearOperator>
 /** Recursive solve on a givel level */
 void MultigridPreconditioner::solve(const unsigned int level)
 {
-    unsigned int n_presmooth = 2;
-    unsigned int n_postsmooth = 2;
-    unsigned int n_coarsesmooth = 10;
     x_ell[level]->data.setZero();
-    if (level == nlevel - 1)
+    if (level == params.nlevel - 1)
     {
         // Coarse level solve
         coarse_solver->apply(b_ell[level], x_ell[level]);
@@ -54,7 +51,7 @@ void MultigridPreconditioner::solve(const unsigned int level)
     else
     {
         // Presmooth
-        for (unsigned int k = 0; k < n_presmooth; ++k)
+        for (unsigned int k = 0; k < params.npresmooth; ++k)
         {
             smoothers[level]->apply(b_ell[level], x_ell[level]);
         }
@@ -67,7 +64,7 @@ void MultigridPreconditioner::solve(const unsigned int level)
         // Prolongate and add
         intergrid_operators[level]->prolongate_add(x_ell[level + 1], x_ell[level]);
         // Postsmooth
-        for (unsigned int k = 0; k < n_postsmooth; ++k)
+        for (unsigned int k = 0; k < params.npostsmooth; ++k)
         {
             smoothers[level]->apply(b_ell[level], x_ell[level]);
         }

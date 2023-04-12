@@ -14,6 +14,17 @@
  * @brief multigrid preconditioner
  */
 
+/** @struct multigrid parameters */
+struct MultigridParameters
+{
+    /** @brief Number of levels */
+    unsigned int nlevel;
+    /** @brief Number of presmoothing steps */
+    unsigned int npresmooth;
+    /** @brief number of postsmoothing steps */
+    unsigned int npostsmooth;
+};
+
 /** @class MultigridPreconditioner
  *
  * @brief Preconditioner based on the multigrid algorithm
@@ -24,13 +35,13 @@ public:
     /** @brief Create a new instance
      *
      * @param[in] linear_operator_ underlying linear operator
-     * @param[in] number of levels
+     * @param[in] params_ multigrid parameters
      * @param[in] smoother_factory_ factory for smoothers on each level
      * @param[in] intergrid_operator_factory_ factory for intergrid operators on each level
      * @param[in] coarse_solver_factory_ factory for coarse solver
      */
     MultigridPreconditioner(std::shared_ptr<LinearOperator> linear_operator_,
-                            const unsigned int nlevel_,
+                            const MultigridParameters params_,
                             std::shared_ptr<SmootherFactory> smoother_factory_,
                             std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory_,
                             std::shared_ptr<LinearSolverFactory> coarse_solver_factory_);
@@ -49,8 +60,8 @@ protected:
      */
     void solve(const unsigned int level);
 
-    /** @brief number of levels */
-    const unsigned int nlevel;
+    /** @brief parameters */
+    const MultigridParameters params;
     /** @brief smoother factory on each level */
     std::shared_ptr<SmootherFactory> smoother_factory;
     /** @brief intergrid operator factory on each level */

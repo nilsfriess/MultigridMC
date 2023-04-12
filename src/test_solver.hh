@@ -81,22 +81,25 @@ TEST_F(SolverTest, TestCholesky)
  */
 TEST_F(SolverTest, TestMultigrid)
 {
-    const unsigned int nlevel = 6;
     const double omega = 0.8;
+    MultigridParameters multigrid_params;
+    multigrid_params.nlevel = 6;
+    multigrid_params.npresmooth = 2;
+    multigrid_params.npostsmooth = 2;
     std::shared_ptr<SSORSmootherFactory> smoother_factory = std::make_shared<SSORSmootherFactory>(omega);
     std::shared_ptr<IntergridOperator2dLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperator2dLinearFactory>();
     std::shared_ptr<CholeskySolverFactory> coarse_solver_factory = std::make_shared<CholeskySolverFactory>();
     std::shared_ptr<MultigridPreconditioner> prec = std::make_shared<MultigridPreconditioner>(linear_operator,
-                                                                                              nlevel,
+                                                                                              multigrid_params,
                                                                                               smoother_factory,
                                                                                               intergrid_operator_factory,
                                                                                               coarse_solver_factory);
-    IterativeSolverParameters params;
-    params.rtol = 1.0E-11;
-    params.atol = 1.0E-9;
-    params.maxiter = 100;
-    params.verbose = 0;
-    LoopSolver solver(linear_operator, prec, params);
+    IterativeSolverParameters solver_params;
+    solver_params.rtol = 1.0E-11;
+    solver_params.atol = 1.0E-9;
+    solver_params.maxiter = 100;
+    solver_params.verbose = 0;
+    LoopSolver solver(linear_operator, prec, solver_params);
     solver.apply(b, x);
     double tolerance = 1.E-9;
     double error = (x->data - x_exact->data).norm();
