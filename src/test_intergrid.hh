@@ -74,7 +74,7 @@ TEST_F(IntergridTest, TestProlongRestrict2dAvg)
     // prolongated state
     std::shared_ptr<SampleState> X_prol = get_state(false, false);
     // prolongate and restricted state
-    std::shared_ptr<SampleState> X_prol_restr = get_state(false, false);
+    std::shared_ptr<SampleState> X_prol_restr = get_state(true, false);
     intergrid_operator_2davg->prolongate_add(X_coarse, X_prol);
     intergrid_operator_2davg->restrict(X_prol, X_prol_restr);
     double tolerance = 1.E-12;
