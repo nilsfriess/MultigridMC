@@ -84,7 +84,6 @@ MeasuredDiffusionOperator2d::MeasuredDiffusionOperator2d(const std::shared_ptr<L
     unsigned int nx = lattice_->nx;
     unsigned int ny = lattice_->ny;
     Eigen::MatrixXd Sigma_inv = Sigma.inverse();
-    std::cout << "Sigma^{-1} = " << Sigma_inv << std::endl;
     typedef Eigen::Triplet<double> T;
     std::vector<T> triplet_list;
     unsigned int nrow = lattice->M;
