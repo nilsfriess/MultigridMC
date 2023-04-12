@@ -84,8 +84,8 @@ TEST_F(SolverTest, TestMultigrid)
     const double omega = 0.8;
     MultigridParameters multigrid_params;
     multigrid_params.nlevel = 6;
-    multigrid_params.npresmooth = 2;
-    multigrid_params.npostsmooth = 2;
+    multigrid_params.npresmooth = 1;
+    multigrid_params.npostsmooth = 1;
     std::shared_ptr<SSORSmootherFactory> smoother_factory = std::make_shared<SSORSmootherFactory>(omega);
     std::shared_ptr<IntergridOperator2dLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperator2dLinearFactory>();
     std::shared_ptr<CholeskySolverFactory> coarse_solver_factory = std::make_shared<CholeskySolverFactory>();
