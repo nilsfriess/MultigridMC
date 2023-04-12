@@ -1,6 +1,7 @@
 #ifndef LOOP_SOLVER_HH
 #define LOOP_SOLVER_HH LOOP_SOLVER_HH
 
+#include <Eigen/Dense>
 #include "linear_operator.hh"
 #include "linear_solver.hh"
 #include "preconditioner.hh"
@@ -34,8 +35,8 @@ public:
                const IterativeSolverParameters params_) : IterativeSolver(linear_operator_, params_),
                                                           preconditioner(preconditioner_)
     {
-        r = std::make_shared<SampleState>(linear_operator_->get_lattice()->M);
-        Pr = std::make_shared<SampleState>(linear_operator_->get_lattice()->M);
+        r = Eigen::VectorXd(linear_operator_->get_lattice()->M);
+        Pr = Eigen::VectorXd(linear_operator_->get_lattice()->M);
     }
 
     /** @brief Solve the linear system Ax = b
@@ -43,15 +44,15 @@ public:
      * @param[in] b right hand side b
      * @param[out] x solution x
      */
-    virtual void apply(const std::shared_ptr<SampleState> b, std::shared_ptr<SampleState> x);
+    virtual void apply(const Eigen::VectorXd &b, Eigen::VectorXd &x);
 
 protected:
     /** @brief preconditioner */
     std::shared_ptr<Preconditioner> preconditioner;
     /** @brief residual */
-    std::shared_ptr<SampleState> r;
+    Eigen::VectorXd r;
     /** @brief P applied to residual */
-    std::shared_ptr<SampleState> Pr;
+    Eigen::VectorXd Pr;
 };
 
 #endif // LOOP_SOLVER_HH

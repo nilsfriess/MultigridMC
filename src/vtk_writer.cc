@@ -5,7 +5,7 @@
 #include "vtk_writer.hh"
 
 /** @brief Add state to collection of sample states to be written */
-void VTKWriter::add_state(const std::shared_ptr<SampleState> phi, const std::string label)
+void VTKWriter::add_state(const Eigen::VectorXd &phi, const std::string label)
 {
     sample_states[label] = phi;
 }
@@ -39,14 +39,14 @@ void VTKWriter2d::write() const
     {
         std::string label = it->first;
         std::cout << "Writing " << label << std::endl;
-        std::shared_ptr<SampleState> phi = it->second;
+        Eigen::VectorXd phi = it->second;
         out << "SCALARS " << label << " double 1" << std::endl;
         out << "LOOKUP_TABLE default" << std::endl;
         if (entity == Cells)
         {
             for (unsigned int ell = 0; ell < nx * ny; ++ell)
             {
-                out << phi->data[ell] << std::endl;
+                out << phi[ell] << std::endl;
             }
         }
         else
@@ -56,7 +56,7 @@ void VTKWriter2d::write() const
                 for (int i = 0; i <= nx; ++i)
                 {
                     unsigned int ell = (j % ny) * nx + (i % nx);
-                    out << phi->data[ell] << std::endl;
+                    out << phi[ell] << std::endl;
                 }
             }
         }

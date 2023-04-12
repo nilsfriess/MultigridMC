@@ -6,15 +6,15 @@
  */
 
 /*  Solve the linear system Ax = b */
-void LoopSolver::apply(const std::shared_ptr<SampleState> b, std::shared_ptr<SampleState> x)
+void LoopSolver::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x)
 {
-    double r0_nrm = b->data.norm();
+    double r0_nrm = b.norm();
     if (params.verbose >= 2)
     {
         printf("Initial residual ||r_0|| =  %12.4f\n", r0_nrm);
     }
     unsigned int ndof = linear_operator->get_lattice()->M;
-    x->data.setZero();
+    x.setZero();
     bool converged = false;
     double r_nrm;
     double rold_nrm = r0_nrm;
@@ -24,8 +24,8 @@ void LoopSolver::apply(const std::shared_ptr<SampleState> b, std::shared_ptr<Sam
     for (int k = 0; k < params.maxiter; ++k)
     {
         linear_operator->apply(x, r);
-        r->data -= b->data;
-        r_nrm = r->data.norm();
+        r -= b;
+        r_nrm = r.norm();
         if (params.verbose >= 2)
         {
             printf("%5d   %8.3e   %12.3e   %6.3f\n", k, r_nrm, r_nrm / r0_nrm, r_nrm / rold_nrm);
@@ -38,7 +38,7 @@ void LoopSolver::apply(const std::shared_ptr<SampleState> b, std::shared_ptr<Sam
         }
         rold_nrm = r_nrm;
         preconditioner->apply(r, Pr);
-        x->data -= Pr->data;
+        x -= Pr;
     }
     if (params.verbose >= 1)
     {

@@ -6,7 +6,6 @@
 #include <map>
 #include <Eigen/Dense>
 #include "lattice.hh"
-#include "samplestate.hh"
 
 /** @file vtk_writer.hh
  *
@@ -41,7 +40,7 @@ public:
      * @param[in] phi state to write to disk
      * @param[in] label label to identify state in file
      */
-    void add_state(const std::shared_ptr<SampleState> phi, const std::string label);
+    void add_state(const Eigen::VectorXd &phi, const std::string label);
 
     /** @brief write all sample states to disk */
     virtual void write() const = 0;
@@ -53,7 +52,7 @@ protected:
     const Entity entity;
     /** @brief dictionary of sample state to be written to disk
      * each state is identified by its label. */
-    std::map<std::string, std::shared_ptr<SampleState>> sample_states;
+    std::map<std::string, Eigen::VectorXd> sample_states;
 };
 
 /** @class VTKWriter2d

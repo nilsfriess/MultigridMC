@@ -1,8 +1,8 @@
 #ifndef SMOOTHER_HH
 #define SMOOTHER_HH SMOOTHER_HH
 #include <random>
+#include <Eigen/Dense>
 #include "linear_operator.hh"
-#include "samplestate.hh"
 
 /** @file Smoother.hh
  *
@@ -26,8 +26,7 @@ public:
      * @param[in] b right hand side
      * @param[inout] x vector to which the sweep is applied
      */
-    virtual void apply(const std::shared_ptr<SampleState> b,
-                       std::shared_ptr<SampleState> x) = 0;
+    virtual void apply(const Eigen::VectorXd &b, Eigen::VectorXd &x) = 0;
 
 protected:
     /** @brief Underlying Linear operator */
@@ -56,8 +55,7 @@ public:
      * @param[in] b right hand side
      * @param[inout] x vector to which the sweep is applied
      */
-    virtual void apply(const std::shared_ptr<SampleState> b,
-                       std::shared_ptr<SampleState> x);
+    virtual void apply(const Eigen::VectorXd &b, Eigen::VectorXd &x);
 
 protected:
     /** @brief Overrelaxation factor */
@@ -86,8 +84,7 @@ public:
      * @param[in] b right hand side
      * @param[inout] x vector to which the sweep is applied
      */
-    virtual void apply(const std::shared_ptr<SampleState> b,
-                       std::shared_ptr<SampleState> x);
+    virtual void apply(const Eigen::VectorXd &b, Eigen::VectorXd &x);
 
 protected:
     /** @brief Overrelaxation factor */

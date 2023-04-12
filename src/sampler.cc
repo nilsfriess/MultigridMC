@@ -22,8 +22,7 @@ Sampler::Sampler(const LinearOperator &linear_operator_,
 }
 
 /** @brief apply Sampler */
-void GibbsSampler::apply(const std::shared_ptr<SampleState> b,
-                         std::shared_ptr<SampleState> x)
+void GibbsSampler::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x)
 {
     const LinearOperator::SparseMatrixType &A_sparse = linear_operator.as_sparse();
     const auto row_ptr = A_sparse.outerIndexPtr();
@@ -36,11 +35,11 @@ void GibbsSampler::apply(const std::shared_ptr<SampleState> b,
         for (int k = row_ptr[ell]; k < row_ptr[ell + 1]; ++k)
         {
             unsigned int ell_prime = col_ptr[k];
-            residual += val_ptr[k] * x->data[ell_prime];
+            residual += val_ptr[k] * x[ell_prime];
         }
         const double a_sqrt_inv_diag = sqrt_inv_diag[ell];
         // subtract diagonal contribution
-        residual -= x->data[ell] / (a_sqrt_inv_diag * a_sqrt_inv_diag);
-        x->data[ell] = ((b->data[ell] - residual) * a_sqrt_inv_diag + normal_dist(rng)) * a_sqrt_inv_diag;
+        residual -= x[ell] / (a_sqrt_inv_diag * a_sqrt_inv_diag);
+        x[ell] = ((b[ell] - residual) * a_sqrt_inv_diag + normal_dist(rng)) * a_sqrt_inv_diag;
     }
 }

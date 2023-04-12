@@ -28,19 +28,23 @@ protected:
      * @param[in] coarse Generate state on coarse level?
      * @param[in] random Initialise with random numbers?
      */
-    std::shared_ptr<SampleState> get_state(const bool coarse = false, const bool random = false)
+    Eigen::VectorXd get_state(const bool coarse = false, const bool random = false)
     {
         unsigned int ndof = coarse ? coarse_lattice->M : lattice->M;
         unsigned int seed = 1212417;
         std::mt19937 rng(seed);
         std::normal_distribution<double> dist(0.0, 1.0);
-        std::shared_ptr<SampleState> X = std::make_shared<SampleState>(ndof);
+        Eigen::VectorXd X(ndof);
         if (random)
         {
             for (unsigned int ell = 0; ell < ndof; ++ell)
             {
-                X->data[ell] = dist(rng);
+                X[ell] = dist(rng);
             }
+        }
+        else
+        {
+            X.setZero();
         }
         return X;
     }
@@ -70,28 +74,28 @@ protected:
 TEST_F(IntergridTest, TestProlongRestrict2dAvg)
 {
     // initial coarse level state
-    std::shared_ptr<SampleState> X_coarse = get_state(true, true);
+    Eigen::VectorXd X_coarse = get_state(true, true);
     // prolongated state
-    std::shared_ptr<SampleState> X_prol = get_state(false, false);
+    Eigen::VectorXd X_prol = get_state(false, false);
     // prolongate and restricted state
-    std::shared_ptr<SampleState> X_prol_restr = get_state(true, false);
+    Eigen::VectorXd X_prol_restr = get_state(true, false);
     intergrid_operator_2davg->prolongate_add(X_coarse, X_prol);
     intergrid_operator_2davg->restrict(X_prol, X_prol_restr);
     double tolerance = 1.E-12;
-    EXPECT_NEAR((X_prol_restr->data - 4. * X_coarse->data).norm(), 0.0, tolerance);
+    EXPECT_NEAR((X_prol_restr - 4. * X_coarse).norm(), 0.0, tolerance);
 }
 
 /** @brief check that prolongating a field will return the same result as manually interpolating */
 TEST_F(IntergridTest, TestProlongRestrict2dLinear)
 {
     // initial coarse level state
-    std::shared_ptr<SampleState> X_coarse = get_state(true, true);
+    Eigen::VectorXd X_coarse = get_state(true, true);
     // prolongated state
-    std::shared_ptr<SampleState> X_prol = get_state(false, false);
+    Eigen::VectorXd X_prol = get_state(false, false);
     // prolongate and restricted state
     intergrid_operator_2dlinear->prolongate_add(X_coarse, X_prol);
     // Manually interpolate linearly
-    std::shared_ptr<SampleState> X_linear = get_state(false, false);
+    Eigen::VectorXd X_linear = get_state(false, false);
     Eigen::Vector2i shift_north = {0, +1};
     Eigen::Vector2i shift_south = {0, -1};
     Eigen::Vector2i shift_east = {+1, 0};
@@ -111,7 +115,7 @@ TEST_F(IntergridTest, TestProlongRestrict2dLinear)
             {
                 // Copy coarse level point
                 unsigned int ell_coarse = fine2coarse_idx(ell);
-                X_linear->data[ell] = X_coarse->data[ell_coarse];
+                X_linear[ell] = X_coarse[ell_coarse];
             }
             if ((i % 2 == 1) && (j % 2 == 1))
             {
@@ -120,32 +124,32 @@ TEST_F(IntergridTest, TestProlongRestrict2dLinear)
                 unsigned int ell_se = fine2coarse_idx(lattice->shift_index(ell, shift_south_east));
                 unsigned int ell_nw = fine2coarse_idx(lattice->shift_index(ell, shift_north_west));
                 unsigned int ell_sw = fine2coarse_idx(lattice->shift_index(ell, shift_south_west));
-                X_linear->data[ell] = 0.25 * (X_coarse->data[ell_ne] +
-                                              X_coarse->data[ell_se] +
-                                              X_coarse->data[ell_nw] +
-                                              X_coarse->data[ell_sw]);
+                X_linear[ell] = 0.25 * (X_coarse[ell_ne] +
+                                        X_coarse[ell_se] +
+                                        X_coarse[ell_nw] +
+                                        X_coarse[ell_sw]);
             }
             if ((i % 2 == 1) && (j % 2 == 0))
             {
                 // horizontal facet
                 unsigned int ell_e = fine2coarse_idx(lattice->shift_index(ell, shift_east));
                 unsigned int ell_w = fine2coarse_idx(lattice->shift_index(ell, shift_west));
-                X_linear->data[ell] = 0.5 * (X_coarse->data[ell_e] +
-                                             X_coarse->data[ell_w]);
+                X_linear[ell] = 0.5 * (X_coarse[ell_e] +
+                                       X_coarse[ell_w]);
             }
             if ((i % 2 == 0) && (j % 2 == 1))
             {
                 // vertical facet
                 unsigned int ell_n = fine2coarse_idx(lattice->shift_index(ell, shift_north));
                 unsigned int ell_s = fine2coarse_idx(lattice->shift_index(ell, shift_south));
-                X_linear->data[ell] = 0.5 * (X_coarse->data[ell_n] +
-                                             X_coarse->data[ell_s]);
+                X_linear[ell] = 0.5 * (X_coarse[ell_n] +
+                                       X_coarse[ell_s]);
             }
         }
     }
 
     double tolerance = 1.E-12;
-    EXPECT_NEAR((4 * X_prol->data - X_linear->data).norm(), 0.0, tolerance);
+    EXPECT_NEAR((4 * X_prol - X_linear).norm(), 0.0, tolerance);
 }
 
 /** @brief check that coarsening the operator works

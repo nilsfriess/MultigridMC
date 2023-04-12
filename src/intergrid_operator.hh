@@ -9,7 +9,6 @@
 #include <Eigen/Dense>
 #include "lattice.hh"
 #include "linear_operator.hh"
-#include "samplestate.hh"
 
 /** @file intergrid_operator.hh
  * @brief Header file for intergrid operator classes
@@ -70,7 +69,7 @@ public:
      * @param[in] x input vector on current lattice
      * @param[out] x^{c} output vector on next-coarser lattice
      */
-    virtual void restrict(const std::shared_ptr<SampleState> x, std::shared_ptr<SampleState> x_coarse)
+    virtual void restrict(const Eigen::VectorXd &x, Eigen::VectorXd &x_coarse)
     {
         std::shared_ptr<Lattice> coarse_lattice = lattice->get_coarse_lattice();
         for (unsigned int ell_coarse = 0; ell_coarse < coarse_lattice->M; ++ell_coarse)
@@ -79,9 +78,9 @@ public:
             for (unsigned k = 0; k < stencil_size; ++k)
             {
                 unsigned int ell = colidx[ell_coarse * stencil_size + k];
-                result += matrix[k] * x->data[ell];
+                result += matrix[k] * x[ell];
             }
-            x_coarse->data[ell_coarse] = result;
+            x_coarse[ell_coarse] = result;
         }
     }
 
@@ -100,16 +99,16 @@ public:
      * @param[in] x_coarse input vector on next-coarser lattice
      * @param[out] x output vector on current lattice
      */
-    virtual void prolongate_add(const std::shared_ptr<SampleState> x_coarse, std::shared_ptr<SampleState> x)
+    virtual void prolongate_add(const Eigen::VectorXd &x_coarse, Eigen::VectorXd &x)
     {
         std::shared_ptr<Lattice> coarse_lattice = lattice->get_coarse_lattice();
         for (unsigned int ell_coarse = 0; ell_coarse < coarse_lattice->M; ++ell_coarse)
         {
-            double x_coarse_ell = x_coarse->data[ell_coarse];
+            double x_coarse_ell = x_coarse[ell_coarse];
             for (unsigned k = 0; k < stencil_size; ++k)
             {
                 unsigned int ell = colidx[ell_coarse * stencil_size + k];
-                x->data[ell] += matrix[k] * x_coarse_ell;
+                x[ell] += matrix[k] * x_coarse_ell;
             }
         }
     };

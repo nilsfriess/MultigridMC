@@ -21,9 +21,9 @@ MultigridPreconditioner::MultigridPreconditioner(std::shared_ptr<LinearOperator>
     std::shared_ptr<LinearOperator> lin_op = linear_operator;
     for (int level = 0; level < params.nlevel; ++level)
     {
-        x_ell.push_back(std::make_shared<SampleState>(lattice->M));
-        b_ell.push_back(std::make_shared<SampleState>(lattice->M));
-        r_ell.push_back(std::make_shared<SampleState>(lattice->M));
+        x_ell.push_back(Eigen::VectorXd(lattice->M));
+        b_ell.push_back(Eigen::VectorXd(lattice->M));
+        r_ell.push_back(Eigen::VectorXd(lattice->M));
         linear_operators.push_back(lin_op);
         std::shared_ptr<Smoother> smoother = smoother_factory->get(lin_op);
         smoothers.push_back(smoother);
@@ -42,7 +42,7 @@ MultigridPreconditioner::MultigridPreconditioner(std::shared_ptr<LinearOperator>
 /** Recursive solve on a givel level */
 void MultigridPreconditioner::solve(const unsigned int level)
 {
-    x_ell[level]->data.setZero();
+    x_ell[level].setZero();
     if (level == params.nlevel - 1)
     {
         // Coarse level solve
@@ -57,7 +57,7 @@ void MultigridPreconditioner::solve(const unsigned int level)
         }
         // Compute residual
         linear_operators[level]->apply(x_ell[level], r_ell[level]);
-        r_ell[level]->data = b_ell[level]->data - r_ell[level]->data;
+        r_ell[level] = b_ell[level] - r_ell[level];
         intergrid_operators[level]->restrict(r_ell[level], b_ell[level + 1]);
         // Recursive call
         solve(level + 1);
@@ -72,13 +72,10 @@ void MultigridPreconditioner::solve(const unsigned int level)
 }
 
 /** Solve the linear system Ax = b with one iteration of the multigrid V-cycle */
-void MultigridPreconditioner::apply(const std::shared_ptr<SampleState> b, std::shared_ptr<SampleState> x)
+void MultigridPreconditioner::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x)
 {
-    b_ell[0]->data = b->data;
-    for (unsigned int ell = 0; ell < x->data.size(); ++ell)
-    {
-        x_ell[0]->data[ell] = 0;
-    }
+    b_ell[0] = b;
+    x_ell[0].setZero();
     solve(0);
-    x->data = x_ell[0]->data;
+    x = x_ell[0];
 }

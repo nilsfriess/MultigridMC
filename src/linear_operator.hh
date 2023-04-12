@@ -6,7 +6,6 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include "lattice.hh"
-#include "samplestate.hh"
 
 /** @file LinearOperator.hh
  * @brief Header file for LinearOperator classes
@@ -32,6 +31,7 @@
  * by a stencil.
  *
  */
+
 class LinearOperator
 {
 public:
@@ -69,9 +69,9 @@ public:
      * @param[in] x input state
      * @param[out] y output state
      */
-    void apply(const std::shared_ptr<SampleState> x, std::shared_ptr<SampleState> y)
+    void apply(const Eigen::VectorXd &x, Eigen::VectorXd &y)
     {
-        y->data = A_sparse * x->data;
+        y = A_sparse * x;
     }
 
     /** @brief Convert to sparse storage format */

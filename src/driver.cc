@@ -2,9 +2,8 @@
 #include <chrono>
 #include <random>
 #include <Eigen/Sparse>
+#include <Eigen/Dense>
 #include "lattice.hh"
-#include "samplestate.hh"
-#include "action.hh"
 #include "sampler.hh"
 #include "diffusion_operator_2d.hh"
 #include "intergrid_operator.hh"
@@ -29,16 +28,16 @@ int main(int argc, char *argv[])
     IntergridOperator2dAvg intergrid_operator_avg(lattice);
     LinearOperator coarse_operator = intergrid_operator_avg.coarsen_operator(linear_operator);
     std::cout << lattice->M << std::endl;
-    std::shared_ptr<SampleState> X = std::make_shared<SampleState>(lattice->M);
-    std::shared_ptr<SampleState> Y = std::make_shared<SampleState>(lattice->M);
+    Eigen::VectorXd X(lattice->M);
+    Eigen::VectorXd Y(lattice->M);
     std::random_device rd;
     std::mt19937 mt(rd());
     std::uniform_real_distribution<double> dist(0.0, 1.0);
     for (unsigned int i = 0; i < lattice->M; ++i)
     {
-        X->data[i] = dist(mt);
+        X[i] = dist(mt);
     }
-    std::shared_ptr<SampleState> X_coarse = std::make_shared<SampleState>(coarse_lattice->M);
+    Eigen::VectorXd X_coarse(coarse_lattice->M);
     intergrid_operator_avg.restrict(X, X_coarse);
 
     /* Measure applications of operator */
@@ -62,7 +61,7 @@ int main(int argc, char *argv[])
     t_start = std::chrono::high_resolution_clock::now();
     for (unsigned int k = 0; k < niter; ++k)
     {
-        Y->data = A_sparse * X->data;
+        Y = A_sparse * X;
     }
 
     t_finish = std::chrono::high_resolution_clock::now();

@@ -13,8 +13,8 @@ CholeskySolver::CholeskySolver(std::shared_ptr<LinearOperator> linear_operator_)
 }
 
 /** Solve the linear system Ax = b */
-void CholeskySolver::apply(const std::shared_ptr<SampleState> b, std::shared_ptr<SampleState> x)
+void CholeskySolver::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x)
 {
     // Solve the factorised system
-    x->data = solver.solve(b->data);
+    x = solver.solve(b);
 }

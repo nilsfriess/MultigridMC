@@ -5,7 +5,6 @@
 #include <random>
 #include <Eigen/Dense>
 #include "lattice.hh"
-#include "samplestate.hh"
 #include "cholesky_solver.hh"
 #include "preconditioner.hh"
 #include "multigrid_preconditioner.hh"
@@ -37,14 +36,14 @@ protected:
         unsigned int seed = 1212417;
         std::mt19937 rng(seed);
         std::normal_distribution<double> dist(0.0, 1.0);
-        x_exact = std::make_shared<SampleState>(ndof);
-        x = std::make_shared<SampleState>(ndof);
+        x_exact = Eigen::VectorXd(ndof);
+        x = Eigen::VectorXd(ndof);
         for (unsigned int ell = 0; ell < ndof; ++ell)
         {
-            x_exact->data[ell] = dist(rng);
+            x_exact[ell] = dist(rng);
         }
 
-        b = std::make_shared<SampleState>(ndof);
+        b = Eigen::VectorXd(ndof);
         linear_operator->apply(x_exact, b);
     }
 
@@ -52,11 +51,11 @@ protected:
     /** @brief linear operator */
     std::shared_ptr<DiffusionOperator2d> linear_operator;
     /** @brief exact solution */
-    std::shared_ptr<SampleState> x_exact;
+    Eigen::VectorXd x_exact;
     /** @brief numerical solution */
-    std::shared_ptr<SampleState> x;
+    Eigen::VectorXd x;
     /** @brief right hand side */
-    std::shared_ptr<SampleState> b;
+    Eigen::VectorXd b;
 };
 
 /* Test Cholesky solver
@@ -69,7 +68,7 @@ TEST_F(SolverTest, TestCholesky)
 
     CholeskySolver solver(linear_operator);
     solver.apply(b, x);
-    double error = (x->data - x_exact->data).norm();
+    double error = (x - x_exact).norm();
     double tolerance = 1.E-12;
     EXPECT_NEAR(error, 0.0, tolerance);
 }
@@ -102,7 +101,7 @@ TEST_F(SolverTest, TestMultigrid)
     LoopSolver solver(linear_operator, prec, solver_params);
     solver.apply(b, x);
     double tolerance = 1.E-9;
-    double error = (x->data - x_exact->data).norm();
+    double error = (x - x_exact).norm();
     EXPECT_NEAR(error, 0.0, tolerance);
 }
 

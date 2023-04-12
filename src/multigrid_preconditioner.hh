@@ -2,7 +2,7 @@
 #define MULTIGRID_PRECONDITIONER_HH MULTIGRID_PRECONDITIONER_HH
 #include <memory>
 #include <vector>
-#include <Eigen/SparseCholesky>
+#include <Eigen/Dense>
 #include "linear_operator.hh"
 #include "intergrid_operator.hh"
 #include "linear_solver.hh"
@@ -51,7 +51,7 @@ public:
      * @param[in] b right hand side b
      * @param[out] x solution x
      */
-    virtual void apply(const std::shared_ptr<SampleState> b, std::shared_ptr<SampleState> x);
+    virtual void apply(const Eigen::VectorXd &b, Eigen::VectorXd &x);
 
 protected:
     /** @brief Recursive solve on a givel level
@@ -77,11 +77,11 @@ protected:
     /** @brief intergrid operators on all levels (except the coarsest) */
     std::vector<std::shared_ptr<IntergridOperator>> intergrid_operators;
     /** @brief Solution on each level */
-    std::vector<std::shared_ptr<SampleState>> x_ell;
+    std::vector<Eigen::VectorXd> x_ell;
     /** @brief RHS on each level */
-    std::vector<std::shared_ptr<SampleState>> b_ell;
+    std::vector<Eigen::VectorXd> b_ell;
     /** @brief Residual on each level */
-    std::vector<std::shared_ptr<SampleState>> r_ell;
+    std::vector<Eigen::VectorXd> r_ell;
 };
 
 #endif // MULTIGRID_PRECONDITIONER_HH

@@ -1,8 +1,8 @@
 #ifndef SAMPLER_HH
 #define SAMPLER_HH SAMPLER_HH
 #include <random>
+#include <Eigen/Dense>
 #include "linear_operator.hh"
-#include "samplestate.hh"
 
 /** @file sampler.hh
  *
@@ -64,8 +64,7 @@ public:
      * @param[in] b right hand side
      * @param[inout] x vector to which the sweep is applied
      */
-    void apply(const std::shared_ptr<SampleState> b,
-               std::shared_ptr<SampleState> x);
+    void apply(const Eigen::VectorXd &b, Eigen::VectorXd &x);
 };
 
 #endif // SAMPLER_HH

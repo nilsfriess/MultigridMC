@@ -6,8 +6,7 @@
 #include "smoother.hh"
 
 /** apply SOR smoother */
-void SORSmoother::apply(const std::shared_ptr<SampleState> b,
-                        std::shared_ptr<SampleState> x)
+void SORSmoother::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x)
 {
     const LinearOperator::SparseMatrixType &A_sparse = linear_operator->as_sparse();
     const auto row_ptr = A_sparse.outerIndexPtr();
@@ -21,15 +20,14 @@ void SORSmoother::apply(const std::shared_ptr<SampleState> b,
         for (int k = row_ptr[ell]; k < row_ptr[ell + 1]; ++k)
         {
             unsigned int ell_prime = col_ptr[k];
-            residual += val_ptr[k] * x->data[ell_prime];
+            residual += val_ptr[k] * x[ell_prime];
         }
-        x->data[ell] += omega * (b->data[ell] - residual) / diag_ptr[ell];
+        x[ell] += omega * (b[ell] - residual) / diag_ptr[ell];
     }
 }
 
 /** apply SSOR smoother */
-void SSORSmoother::apply(const std::shared_ptr<SampleState> b,
-                         std::shared_ptr<SampleState> x)
+void SSORSmoother::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x)
 {
     const LinearOperator::SparseMatrixType &A_sparse = linear_operator->as_sparse();
     const auto row_ptr = A_sparse.outerIndexPtr();
@@ -47,9 +45,9 @@ void SSORSmoother::apply(const std::shared_ptr<SampleState> b,
             for (int k = row_ptr[ell]; k < row_ptr[ell + 1]; ++k)
             {
                 unsigned int ell_prime = col_ptr[k];
-                residual += val_ptr[k] * x->data[ell_prime];
+                residual += val_ptr[k] * x[ell_prime];
             }
-            x->data[ell] += omega * (b->data[ell] - residual) / diag_ptr[ell];
+            x[ell] += omega * (b[ell] - residual) / diag_ptr[ell];
         }
     }
 }

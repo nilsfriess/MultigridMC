@@ -28,7 +28,7 @@ public:
      * @param[in] b right hand side b
      * @param[out] x solution x
      */
-    virtual void apply(const std::shared_ptr<SampleState> b, std::shared_ptr<SampleState> x);
+    virtual void apply(const Eigen::VectorXd &b, Eigen::VectorXd &x);
 
 protected:
     /** @brief Expose of sparse matrix to be used */
