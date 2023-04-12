@@ -2,6 +2,7 @@
 #include "test_lattice.hh"
 #include "test_intergrid.hh"
 #include "test_cholesky.hh"
+#include "test_multigrid.hh"
 
 int main(int argc, char *argv[])
 {
