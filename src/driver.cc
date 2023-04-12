@@ -3,10 +3,16 @@
 #include <random>
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
+#include <Eigen/QR>
+
 #include "lattice.hh"
-#include "sampler.hh"
+#include "smoother.hh"
+#include "linear_operator.hh"
 #include "diffusion_operator_2d.hh"
 #include "intergrid_operator.hh"
+#include "loop_solver.hh"
+#include "multigrid_preconditioner.hh"
+#include "cholesky_solver.hh"
 
 int main(int argc, char *argv[])
 {
@@ -18,70 +24,70 @@ int main(int argc, char *argv[])
     }
     nx = atoi(argv[1]);
     ny = atoi(argv[2]);
+    unsigned int seed = 1212417;
+    std::mt19937 rng(seed);
+    std::normal_distribution<double> dist_normal(0.0, 1.0);
+    std::uniform_real_distribution<double> dist_uniform(0.0, 1.0);
     std::cout << "lattice size : " << nx << " x " << ny << std::endl;
     std::shared_ptr<Lattice2d> lattice = std::make_shared<Lattice2d>(nx, ny);
-    unsigned int seed = 1212417;
-    std::mt19937_64 rng(seed);
-    std::shared_ptr<Lattice2d> coarse_lattice = std::static_pointer_cast<Lattice2d>(lattice->get_coarse_lattice());
-    DiffusionOperator2d linear_operator = DiffusionOperator2d(lattice);
-    GibbsSampler Sampler(linear_operator, rng);
-    IntergridOperator2dAvg intergrid_operator_avg(lattice);
-    LinearOperator coarse_operator = intergrid_operator_avg.coarsen_operator(linear_operator);
-    std::cout << lattice->M << std::endl;
-    Eigen::VectorXd X(lattice->M);
-    Eigen::VectorXd Y(lattice->M);
-    std::random_device rd;
-    std::mt19937 mt(rd());
-    std::uniform_real_distribution<double> dist(0.0, 1.0);
-    for (unsigned int i = 0; i < lattice->M; ++i)
+    unsigned int ndof = lattice->M;
+    double alpha_K = 1.5;
+    double beta_K = 0.3;
+    double alpha_b = 1.2;
+    double beta_b = 0.1;
+    unsigned int n_meas = 10;
+    std::cout << "Number of measurements : " << n_meas << std::endl;
+    std::vector<Eigen::Vector2d> measurement_locations(n_meas);
+    Eigen::MatrixXd Sigma(n_meas, n_meas);
+    Sigma.setZero();
+    for (int k = 0; k < n_meas; ++k)
     {
-        X[i] = dist(mt);
+        measurement_locations[k] = Eigen::Vector2d({dist_uniform(rng), dist_uniform(rng)});
+        Sigma(k, k) = 0.00001 * (1.0 + 2.0 * dist_uniform(rng));
     }
-    Eigen::VectorXd X_coarse(coarse_lattice->M);
-    intergrid_operator_avg.restrict(X, X_coarse);
-
-    /* Measure applications of operator */
-    std::cout << "==== operator application ====" << std::endl;
-    auto t_start = std::chrono::high_resolution_clock::now();
-    unsigned int niter = 1000;
-    for (unsigned int k = 0; k < niter; ++k)
+    // Rotate randomly
+    Eigen::MatrixXd A(Eigen::MatrixXd::Random(n_meas, n_meas)), Q;
+    A.setRandom();
+    Eigen::HouseholderQR<Eigen::MatrixXd> qr(A);
+    Q = qr.householderQ();
+    Sigma = Q * Sigma * Q.transpose();
+    std::shared_ptr<MeasuredDiffusionOperator2d>
+        linear_operator = std::make_shared<MeasuredDiffusionOperator2d>(lattice,
+                                                                        measurement_locations,
+                                                                        Sigma,
+                                                                        alpha_K,
+                                                                        beta_K,
+                                                                        alpha_b,
+                                                                        beta_b);
+    Eigen::VectorXd x_exact(ndof);
+    Eigen::VectorXd x(ndof);
+    for (unsigned int ell = 0; ell < ndof; ++ell)
     {
-        linear_operator.apply(X, Y);
-    }
-
-    auto t_finish = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> t_elapsed = t_finish - t_start;
-    std::cout << " elapsed = " << t_elapsed.count() << " s ";
-    std::cout << " [ " << niter << " iterations ] " << std::endl;
-    std::cout << " time per application = " << 1E6 * t_elapsed.count() / niter << " mu s" << std::endl;
-
-    /* Measure applications of sparse eigen matrix*/
-    Eigen::SparseMatrix<double> A_sparse = linear_operator.as_sparse();
-    std::cout << "==== Eigen::sparse application ====" << std::endl;
-    t_start = std::chrono::high_resolution_clock::now();
-    for (unsigned int k = 0; k < niter; ++k)
-    {
-        Y = A_sparse * X;
+        x_exact[ell] = dist_normal(rng);
     }
 
-    t_finish = std::chrono::high_resolution_clock::now();
-    t_elapsed = t_finish - t_start;
-    std::cout << " elapsed = " << t_elapsed.count() << " s ";
-    std::cout << " [ " << niter << " iterations ] " << std::endl;
-    std::cout << " time per application = " << 1E6 * t_elapsed.count() / niter << " mu s" << std::endl;
-
-    /* Measure applications of smooth */
-    std::cout << "==== Sampler application ====" << std::endl;
-    t_start = std::chrono::high_resolution_clock::now();
-    for (unsigned int k = 0; k < niter; ++k)
-    {
-        // linear_operator->gibbssweep(Y, X);
-        Sampler.apply(Y, X);
-    }
-
-    t_finish = std::chrono::high_resolution_clock::now();
-    t_elapsed = t_finish - t_start;
-    std::cout << " elapsed = " << t_elapsed.count() << " s ";
-    std::cout << " [ " << niter << " iterations ] " << std::endl;
-    std::cout << " time per application = " << 1E6 * t_elapsed.count() / niter << " mu s" << std::endl;
+    Eigen::VectorXd b(ndof);
+    linear_operator->apply(x_exact, b);
+    const double omega = 0.8;
+    MultigridParameters multigrid_params;
+    multigrid_params.nlevel = 6;
+    multigrid_params.npresmooth = 1;
+    multigrid_params.npostsmooth = 1;
+    std::shared_ptr<SSORSmootherFactory> smoother_factory = std::make_shared<SSORSmootherFactory>(omega);
+    std::shared_ptr<IntergridOperator2dLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperator2dLinearFactory>();
+    std::shared_ptr<CholeskySolverFactory> coarse_solver_factory = std::make_shared<CholeskySolverFactory>();
+    std::shared_ptr<MultigridPreconditioner> prec = std::make_shared<MultigridPreconditioner>(linear_operator,
+                                                                                              multigrid_params,
+                                                                                              smoother_factory,
+                                                                                              intergrid_operator_factory,
+                                                                                              coarse_solver_factory);
+    IterativeSolverParameters solver_params;
+    solver_params.rtol = 1.0E-12;
+    solver_params.atol = 1.0;
+    solver_params.maxiter = 100;
+    solver_params.verbose = 2;
+    LoopSolver solver(linear_operator, prec, solver_params);
+    solver.apply(b, x);
+    double error = (x - x_exact).norm();
+    std::cout << "error ||u-u_{exact}|| = " << error << std::endl;
 }
