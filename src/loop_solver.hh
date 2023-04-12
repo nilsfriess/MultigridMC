@@ -19,30 +19,20 @@
  *
  * for a given linear operator A and preconditioner P
  */
-class LoopSolver : public LinearSolver
+class LoopSolver : public IterativeSolver
 {
 public:
     /** @brief Create a new instance
      *
      * @param[in] linear_operator_ underlying linear operator
      * @param[in] preconditioner_ preconditioner
-     * @param[in] rtol_ relative tolerance in solve
-     * @param[in] atol_ absolute tolerance in solve
-     * @param[in] maxiter_ maximal number of iterations
-     * @param[in] verbose_ verbosity level
+     * @param[in] params_ linear solver parameters
 
      */
     LoopSolver(const std::shared_ptr<LinearOperator> linear_operator_,
                std::shared_ptr<Preconditioner> preconditioner_,
-               const double rtol_ = 1.E-12,
-               const double atol_ = 1.0,
-               const unsigned int maxiter_ = 100,
-               const int verbose_ = 2) : LinearSolver(linear_operator_,
-                                                      rtol_,
-                                                      atol_,
-                                                      maxiter_,
-                                                      verbose_),
-                                         preconditioner(preconditioner_)
+               const IterativeSolverParameters params_) : IterativeSolver(linear_operator_, params_),
+                                                          preconditioner(preconditioner_)
     {
         r = std::make_shared<SampleState>(linear_operator_->get_lattice()->M);
         Pr = std::make_shared<SampleState>(linear_operator_->get_lattice()->M);

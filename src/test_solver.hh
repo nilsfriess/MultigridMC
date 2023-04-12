@@ -89,7 +89,12 @@ TEST_F(SolverTest, TestMultigrid)
                                                                                               nlevel,
                                                                                               smoother_factory,
                                                                                               intergrid_operator_factory);
-    LoopSolver solver(linear_operator, prec, 1.0E-11, 1.0E-9, 100, 0);
+    IterativeSolverParameters params;
+    params.rtol = 1.0E-11;
+    params.atol = 1.0E-9;
+    params.maxiter = 100;
+    params.verbose = 0;
+    LoopSolver solver(linear_operator, prec, params);
     solver.apply(b, x);
     double tolerance = 1.E-9;
     double error = (x->data - x_exact->data).norm();

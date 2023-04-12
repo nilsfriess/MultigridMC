@@ -18,20 +18,9 @@ public:
     /** @brief Create a new instance
      *
      * @param[in] operator_ underlying linear operator
-     * @param[in] rtol_ relative tolerance in solve
-     * @param[in] atol_ absolute tolerance in solve
-     * @param[in] maxiter_ maximal number of iterations
-     * @param[in] verbose_ verbosity level
+     * @param[in] params_ solver parameters
      */
-    LinearSolver(std::shared_ptr<LinearOperator> linear_operator_,
-                 const double rtol_ = 1.E-12,
-                 const double atol_ = 1.0,
-                 const unsigned int maxiter_ = 100,
-                 const int verbose_ = 2) : linear_operator(linear_operator_),
-                                           rtol(rtol_),
-                                           atol(atol_),
-                                           maxiter(maxiter_),
-                                           verbose(verbose_)
+    LinearSolver(std::shared_ptr<LinearOperator> linear_operator_) : linear_operator(linear_operator_)
     {
     }
 
@@ -45,14 +34,52 @@ public:
 protected:
     /** @brief Underlying linear operator */
     std::shared_ptr<LinearOperator> linear_operator;
+};
+
+/** @class IterativeSolverParameters
+ *
+ * @brief iterative linear solver parameters
+ */
+struct IterativeSolverParameters
+{
     /** @brief relative tolerance for solving */
-    const double rtol;
+    double rtol;
     /** @brief absolute tolerance for solving */
-    const double atol;
+    double atol;
     /** @brief maximum number of iterations */
-    const unsigned int maxiter;
+    unsigned int maxiter;
     /** @brief verbosity level */
-    const int verbose;
+    int verbose;
+};
+
+/** @class IterativeSolver
+ *
+ * @brief base class for iterative solvers
+ */
+class IterativeSolver : public LinearSolver
+{
+public:
+    /** @brief Create a new instance
+     *
+     * @param[in] operator_ underlying linear operator
+     * @param[in] params_ solver parameters
+     */
+    IterativeSolver(std::shared_ptr<LinearOperator> linear_operator_,
+                    const IterativeSolverParameters params_) : LinearSolver(linear_operator_),
+                                                               params(params_)
+    {
+    }
+
+    /** @brief Solve the linear system Ax = b
+     *
+     * @param[in] b right hand side b
+     * @param[out] x solution x
+     */
+    virtual void apply(const std::shared_ptr<SampleState> b, std::shared_ptr<SampleState> x) = 0;
+
+protected:
+    /** @brief Solver Parameters */
+    const IterativeSolverParameters params;
 };
 
 #endif // SOLVER_HH
