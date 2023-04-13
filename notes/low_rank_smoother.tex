@@ -49,7 +49,7 @@ Note that $x^{k+1/2}$ can be computed with the standard iterative method defined
         \For {$k=0,1,\dots,K_{\max}-1$}
         \State Compute $x^{k+1/2} = M_0^{-1} (b+N_0 x^k)$ as usual
         \State Compute the $m$-dimensional vector $y = B^T x^{k+1/2}$
-        \State Set $x^{k+1} = x^{k+1/2} + \overline{B} y$
+        \State Set $x^{k+1} = x^{k+1/2} - \overline{B} y$
         \EndFor
     \end{algorithmic}
 \end{algorithm}
