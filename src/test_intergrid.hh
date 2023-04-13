@@ -161,9 +161,9 @@ TEST_F(IntergridTest, TestCoarsenOperator)
 {
     DiffusionOperator2d linear_operator(lattice, 1.0, 0.0, 1.0, 0.0);
     DiffusionOperator2d coarse_operator(coarse_lattice, 8.0, 0.0, 4.0, 0.0);
-    LinearOperator coarsened_operator = intergrid_operator_2davg->coarsen_operator(linear_operator);
+    LinearOperator coarsened_operator = linear_operator.coarsen(intergrid_operator_2davg);
     const double tolerance = 1.E-12;
-    EXPECT_NEAR((coarse_operator.as_sparse() - coarsened_operator.as_sparse()).norm(), 0.0, tolerance);
+    EXPECT_NEAR((coarse_operator.get_sparse() - coarsened_operator.get_sparse()).norm(), 0.0, tolerance);
 }
 
 #endif // TEST_INTERGRID_HH

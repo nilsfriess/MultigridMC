@@ -31,7 +31,7 @@ MultigridPreconditioner::MultigridPreconditioner(std::shared_ptr<LinearOperator>
         {
             std::shared_ptr<IntergridOperator> intergrid_operator = intergrid_operator_factory->get(lattice);
             intergrid_operators.push_back(intergrid_operator);
-            lin_op = std::make_shared<LinearOperator>(intergrid_operator->coarsen_operator(*lin_op));
+            lin_op = std::make_shared<LinearOperator>(lin_op->coarsen(intergrid_operator));
             //  Move to next-coarser lattice
             lattice = lattice->get_coarse_lattice();
         }

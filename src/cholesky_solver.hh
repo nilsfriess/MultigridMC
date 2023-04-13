@@ -33,8 +33,13 @@ public:
 protected:
     /** @brief Expose of sparse matrix to be used */
     typedef LinearOperator::SparseMatrixType SparseMatrixType;
+    typedef LinearOperator::DenseMatrixType DenseMatrixType;
     /** @brief Underlying Eigen solver */
     Eigen::SimplicialLLT<SparseMatrixType> solver;
+    /** @brief Dense low-rank matrix B */
+    DenseMatrixType B;
+    /** @brief dense low rank matrix A^{-1} B bar(Sigma)^{-1} */
+    DenseMatrixType B_bar;
 };
 
 /* ******************** factory classes ****************************** */

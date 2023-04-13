@@ -42,6 +42,7 @@ public:
      * @param[in] beta_K second coefficient in diffusion function
      * @param[in] alpha_b first coefficient in zero order term
      * @param[in] beta_b second coefficient in zero order term
+     * @param[in] m_lowrank_ the dimension of the low rank correction
      */
     DiffusionOperator2d(const std::shared_ptr<Lattice2d> lattice_,
                         const double alpha_K_ = 0.8,
@@ -79,7 +80,7 @@ protected:
 };
 
 /** @brief diffusion operator with measurements */
-class MeasuredDiffusionOperator2d : public DiffusionOperator2d
+class MeasuredDiffusionOperator2d : public LinearOperator
 {
 public:
     /** @brief Create a new instance
@@ -102,12 +103,6 @@ public:
                                 const double beta_K_ = 0.2,
                                 const double alpha_b_ = 0.9,
                                 const double beta_b_ = 0.1);
-
-protected:
-    /** @brief measurement locations */
-    const std::vector<Eigen::Vector2d> measurement_locations;
-    /** @brief variances of measurements */
-    const Eigen::MatrixXd Sigma;
 };
 
 #endif // DIFFUSION_OPERATOR_2D_HH

@@ -7,8 +7,8 @@
 #include <utility>
 #include <algorithm>
 #include <Eigen/Dense>
+#include <Eigen/Sparse>
 #include "lattice.hh"
-#include "linear_operator.hh"
 
 /** @file intergrid_operator.hh
  * @brief Header file for intergrid operator classes
@@ -43,6 +43,8 @@
 class IntergridOperator
 {
 public:
+    /** @brief Type of sparse matrix*/
+    typedef Eigen::SparseMatrix<double> SparseMatrixType;
     /** @brief Create a new instance
      *
      * @param[in] lattice_ underlying lattice
@@ -72,6 +74,7 @@ public:
     virtual void restrict(const Eigen::VectorXd &x, Eigen::VectorXd &x_coarse)
     {
         std::shared_ptr<Lattice> coarse_lattice = lattice->get_coarse_lattice();
+
         for (unsigned int ell_coarse = 0; ell_coarse < coarse_lattice->M; ++ell_coarse)
         {
             double result = 0;
@@ -132,23 +135,9 @@ public:
                 }
             }
         }
-        LinearOperator::SparseMatrixType A_sparse(nrow, ncol);
+        SparseMatrixType A_sparse(nrow, ncol);
         A_sparse.setFromTriplets(triplet_list.begin(), triplet_list.end());
         return A_sparse;
-    }
-
-    /** @brief Coarsen a linear operator to the next-coarser level
-     *
-     * Compute A^{c} = I_{2h}^{h} A I_{h}^{2h}
-     *
-     * @param[in] A Linear operator on current lattice
-     */
-    LinearOperator coarsen_operator(const LinearOperator &A) const
-    {
-        const LinearOperator::SparseMatrixType &A_restrict = to_sparse();
-        const LinearOperator::SparseMatrixType &A_prolong = A_restrict.transpose();
-        const LinearOperator::SparseMatrixType PT_A_P = A_restrict * A.as_sparse() * A_prolong;
-        return LinearOperator(lattice->get_coarse_lattice(), PT_A_P);
     }
 
     /** @brief underlying lattice */

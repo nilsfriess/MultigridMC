@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 #include <random>
 #include <Eigen/Dense>
+#include <Eigen/QR>
 #include "lattice.hh"
 #include "cholesky_solver.hh"
 #include "preconditioner.hh"
@@ -21,26 +22,46 @@ protected:
         unsigned int nx = 32;
         unsigned int ny = 32;
 
+        unsigned int seed = 1212417;
+        std::mt19937 rng(seed);
+        std::normal_distribution<double> normal_dist(0.0, 1.0);
+        std::uniform_real_distribution<double> uniform_dist(0.0, 1.0);
+
         std::shared_ptr<Lattice2d> lattice = std::make_shared<Lattice2d>(nx, ny);
         unsigned int ndof = lattice->M;
         double alpha_K = 1.5;
         double beta_K = 0.3;
         double alpha_b = 1.2;
         double beta_b = 0.1;
-        linear_operator = std::make_shared<DiffusionOperator2d>(lattice,
-                                                                alpha_K,
-                                                                beta_K,
-                                                                alpha_b,
-                                                                beta_b);
+
+        unsigned int n_meas = 10;
+        std::vector<Eigen::Vector2d> measurement_locations(n_meas);
+        Eigen::MatrixXd Sigma(n_meas, n_meas);
+        Sigma.setZero();
+        for (int k = 0; k < n_meas; ++k)
+        {
+            measurement_locations[k] = Eigen::Vector2d({uniform_dist(rng), uniform_dist(rng)});
+            Sigma(k, k) = 0.001 * (1.0 + 2.0 * uniform_dist(rng));
+        }
+        // Rotate randomly
+        Eigen::MatrixXd A(Eigen::MatrixXd::Random(n_meas, n_meas)), Q;
+        A.setRandom();
+        Eigen::HouseholderQR<Eigen::MatrixXd> qr(A);
+        Q = qr.householderQ();
+        Sigma = Q * Sigma * Q.transpose();
+        linear_operator = std::make_shared<MeasuredDiffusionOperator2d>(lattice,
+                                                                        measurement_locations,
+                                                                        Sigma,
+                                                                        alpha_K,
+                                                                        beta_K,
+                                                                        alpha_b,
+                                                                        beta_b);
         // Create states
-        unsigned int seed = 1212417;
-        std::mt19937 rng(seed);
-        std::normal_distribution<double> dist(0.0, 1.0);
         x_exact = Eigen::VectorXd(ndof);
         x = Eigen::VectorXd(ndof);
         for (unsigned int ell = 0; ell < ndof; ++ell)
         {
-            x_exact[ell] = dist(rng);
+            x_exact[ell] = normal_dist(rng);
         }
 
         b = Eigen::VectorXd(ndof);
@@ -49,7 +70,7 @@ protected:
 
 protected:
     /** @brief linear operator */
-    std::shared_ptr<DiffusionOperator2d> linear_operator;
+    std::shared_ptr<MeasuredDiffusionOperator2d> linear_operator;
     /** @brief exact solution */
     Eigen::VectorXd x_exact;
     /** @brief numerical solution */

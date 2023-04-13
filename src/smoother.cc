@@ -8,7 +8,7 @@
 /** apply SOR smoother */
 void SORSmoother::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x)
 {
-    const LinearOperator::SparseMatrixType &A_sparse = linear_operator->as_sparse();
+    const LinearOperator::SparseMatrixType &A_sparse = linear_operator->get_sparse();
     const auto row_ptr = A_sparse.outerIndexPtr();
     const auto col_ptr = A_sparse.innerIndexPtr();
     const auto val_ptr = A_sparse.valuePtr();
@@ -29,7 +29,7 @@ void SORSmoother::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x)
 /** apply SSOR smoother */
 void SSORSmoother::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x)
 {
-    const LinearOperator::SparseMatrixType &A_sparse = linear_operator->as_sparse();
+    const LinearOperator::SparseMatrixType &A_sparse = linear_operator->get_sparse();
     const auto row_ptr = A_sparse.outerIndexPtr();
     const auto col_ptr = A_sparse.innerIndexPtr();
     const auto val_ptr = A_sparse.valuePtr();

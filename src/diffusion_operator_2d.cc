@@ -73,38 +73,27 @@ MeasuredDiffusionOperator2d::MeasuredDiffusionOperator2d(const std::shared_ptr<L
                                                          const double alpha_K_,
                                                          const double beta_K_,
                                                          const double alpha_b_,
-                                                         const double beta_b_) : DiffusionOperator2d(lattice_,
-                                                                                                     alpha_K_,
-                                                                                                     beta_K_,
-                                                                                                     alpha_b_,
-                                                                                                     beta_b_),
-                                                                                 measurement_locations(measurement_locations_),
-                                                                                 Sigma(Sigma_)
+                                                         const double beta_b_) : LinearOperator(lattice_,
+                                                                                                measurement_locations_.size())
 {
+    DiffusionOperator2d diffusion_operator(lattice_,
+                                           alpha_K_,
+                                           beta_K_,
+                                           alpha_b_,
+                                           beta_b_);
+    A_sparse = diffusion_operator.get_sparse();
     unsigned int nx = lattice_->nx;
     unsigned int ny = lattice_->ny;
-    Eigen::MatrixXd Sigma_inv = Sigma.inverse();
-    typedef Eigen::Triplet<double> T;
-    std::vector<T> triplet_list;
+    Sigma_inv = Sigma_.inverse();
     unsigned int nrow = lattice->M;
-    unsigned int n_measurements = measurement_locations.size();
-    triplet_list.reserve(n_measurements * n_measurements);
+    unsigned int n_measurements = measurement_locations_.size();
+    B.setZero();
     for (int k = 0; k < n_measurements; ++k)
     {
-        for (int m = 0; m < n_measurements; ++m)
-        {
-            Eigen::Vector2d x_loc = measurement_locations[k];
-            Eigen::Vector2d y_loc = measurement_locations[m];
-            int i_k = int(round(x_loc[0] * nx));
-            int j_k = int(round(x_loc[1] * ny));
-            int i_m = int(round(y_loc[0] * nx));
-            int j_m = int(round(y_loc[1] * ny));
-            unsigned int ell_k = nx * j_k + i_k;
-            unsigned int ell_m = nx * j_m + i_m;
-            triplet_list.push_back(T(ell_k, ell_m, Sigma_inv(k, m)));
-        }
+        Eigen::Vector2d x_loc = measurement_locations_[k];
+        int i = int(round(x_loc[0] * nx));
+        int j = int(round(x_loc[1] * ny));
+        unsigned int ell = nx * j + i;
+        B(ell, k) = 1.0;
     }
-    SparseMatrixType A_low_rank(nrow, nrow);
-    A_low_rank.setFromTriplets(triplet_list.begin(), triplet_list.end());
-    A_sparse += A_low_rank;
 }

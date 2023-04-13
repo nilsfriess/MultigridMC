@@ -11,7 +11,7 @@ Sampler::Sampler(const LinearOperator &linear_operator_,
                                           rng(rng_),
                                           normal_dist(0.0, 1.0)
 {
-    const LinearOperator::SparseMatrixType &A_sparse = linear_operator.as_sparse();
+    const LinearOperator::SparseMatrixType &A_sparse = linear_operator.get_sparse();
     unsigned int nrow = A_sparse.rows();
     sqrt_inv_diag = new double[nrow];
     auto diag = A_sparse.diagonal();
@@ -24,7 +24,7 @@ Sampler::Sampler(const LinearOperator &linear_operator_,
 /** @brief apply Sampler */
 void GibbsSampler::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x)
 {
-    const LinearOperator::SparseMatrixType &A_sparse = linear_operator.as_sparse();
+    const LinearOperator::SparseMatrixType &A_sparse = linear_operator.get_sparse();
     const auto row_ptr = A_sparse.outerIndexPtr();
     const auto col_ptr = A_sparse.innerIndexPtr();
     const auto val_ptr = A_sparse.valuePtr();
