@@ -1,0 +1,75 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2cm]{geometry}
+\usepackage{amssymb,amsmath}
+\usepackage{algorithm,algpseudocode}
+\newcommand{\xtrue}{x_{\text{true}}}
+
+\title{Smoother with low-rank updates}
+\author{Eike Mueller, University of Bath}
+
+\begin{document}
+\maketitle
+Consider the following linear problem:
+\begin{equation}
+    Ax = \left(A_0 + B \Sigma^{-1} B^T \right)x = b\label{eqn:linear_system}
+\end{equation}
+Here $x,b\in\mathbb{R}^n$, $A,A_0$ are symmetric positive definite $n\times n$ matrices, where it is further assumed that $A_0$ is sparse. $\Sigma$ is a dense $m\times m$ matrix with $m\ll n$, and $B$ is a $n\times m$ matrix, so that $B\Sigma^{-1}B^T$ is a low-rank correction to $A_0$.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Iterative method}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Let $A_0 = M_0-N_0$, so that without the low-rank correction one can solve $A_0x=b$ with the iteration $x^{k+1} = M_0^{-1}(b + N_0x^k)$; for example, setting $M_0 = L_0 + D_0$ to the lower-triangular part of $A_0$ would lead to the familiar Gauss-Seidel iteration.
+
+To solve Eq. \eqref{eqn:linear_system}, we now consider the splitting $A=M-N$ with $M=M_0 + B^T \Sigma^{-1} B$, leading to the iteration
+\begin{equation}
+    \left(M_0 + B \Sigma^{-1} B^T \right)x^{k+1} = b + N_0 x^k\label{eqn:low_rank_iteration}
+\end{equation}
+The matrix $M_0 + B \Sigma^{-1}B^T$ can be inverted with the Woodbury matrix identity
+\begin{equation}
+    \left(M_0 + B \Sigma^{-1} B^T \right)^{-1} = M_0^{-1} - M_0^{-1} B \left(\Sigma + B^TM_0^{-1}B\right)^{-1}B^TM_0^{-1},
+\end{equation}
+which leads to:
+\begin{equation}
+    x^{k+1} = \left(M_0^{-1}-M_0^{-1}B \overline{\Sigma}^{-1}B^T M_0^{-1}\right)\left(b+N_0x^k\right)
+    \qquad\text{with $\overline{\Sigma} = \Sigma + B^TM_0^{-1}B$}.
+\end{equation}
+This can be written more compactly by introducing the $n\times m$ matrix $\overline{B} = M_0^{-1} B \overline{\Sigma}^{-1}$ and an intermediate variable $x^{k+1/2}$ as:
+\begin{equation}
+    \begin{aligned}
+        x^{k+1/2} & = M_0^{-1}(b+N_0x^k) = x^k + M_0^{-1}(b-A_0x^k)                                                           \\
+        x^{k+1}   & = \left(\text{Id}-\overline{B} B^T\right) x^{k+1/2} = x^{k+1/2} - \overline{B} \left(B^T x^{k+1/2}\right)
+    \end{aligned}
+\end{equation}
+Note that $x^{k+1/2}$ can be computed with the standard iterative method defined by the splitting $A_0=M_0-N_0$ applied to the equation $A_0x=b$. The entire method is written down in detail in Alg. \ref{alg:low_rank_stationary}.
+\begin{algorithm}
+    \caption{Stationary iteration with low-rank update}\label{alg:low_rank_stationary}
+    \begin{algorithmic}[1]
+        \State Compute the dense $m\times m$ matrix $\overline{\Sigma}^{-1} = (\Sigma+B^TM_0^{-1}B)^{-1}$
+        \State Compute the $n\times m$ matrix $\overline{B}= M_0^{-1} B\overline{\Sigma}^{-1}$
+        \State Choose some initial $x^0$
+        \For {$k=0,1,\dots,K_{\max}-1$}
+        \State Compute $x^{k+1/2} = M_0^{-1} (b+N_0 x^k)$ as usual
+        \State Compute the $m$-dimensional vector $y = B^T x^{k+1/2}$
+        \State Set $x^{k+1} = x^{k+1/2} + \overline{B} y$
+        \EndFor
+    \end{algorithmic}
+\end{algorithm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Convergence rate}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Observe that the true solution $\xtrue$ satisfies
+\begin{equation}
+    \begin{aligned}
+        b & = (X_0 + B\Sigma^{-1}B^T)\xtrue               \\
+          & = (M_0 + B\Sigma^{-1}B^T) \xtrue - N_0 \xtrue
+    \end{aligned}
+\end{equation}
+Inserting this into Eq. \eqref{eqn:low_rank_iteration} leads to the following relationship for the error $e^k:= x^k-\xtrue$:
+\begin{equation}
+    (M_0 + B\Sigma^{-1}B^T)e^{k+1} = N_0 e^k
+\end{equation}
+Or, equivalently:
+\begin{equation}
+    e^{k+1} = M_0\left(M_0 + B\Sigma^{-1}B^T\right)^{-1} \left(\text{Id}-M_0^{-1}A_0\right) e^k
+\end{equation}
+Note that the factor $\text{Id} - M_0^{-1}A_0$ arises in the stationary iteration with splitting $A_0=M_0-N_0$ for the system $A_0x=b$.
+\end{document}
