@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     for (int k = 0; k < n_meas; ++k)
     {
         measurement_locations[k] = Eigen::Vector2d({dist_uniform(rng), dist_uniform(rng)});
-        Sigma(k, k) = 0.00001 * (1.0 + 2.0 * dist_uniform(rng));
+        Sigma(k, k) = 0.001 * (1.0 + 2.0 * dist_uniform(rng));
     }
     // Rotate randomly
     Eigen::MatrixXd A(Eigen::MatrixXd::Random(n_meas, n_meas)), Q;
@@ -68,12 +68,11 @@ int main(int argc, char *argv[])
 
     Eigen::VectorXd b(ndof);
     linear_operator->apply(x_exact, b);
-    const double omega = 0.8;
     MultigridParameters multigrid_params;
     multigrid_params.nlevel = 6;
     multigrid_params.npresmooth = 1;
     multigrid_params.npostsmooth = 1;
-    std::shared_ptr<SSORSmootherFactory> smoother_factory = std::make_shared<SSORSmootherFactory>(omega);
+    std::shared_ptr<SGSLowRankSmootherFactory> smoother_factory = std::make_shared<SGSLowRankSmootherFactory>();
     std::shared_ptr<IntergridOperator2dLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperator2dLinearFactory>();
     std::shared_ptr<CholeskySolverFactory> coarse_solver_factory = std::make_shared<CholeskySolverFactory>();
     std::shared_ptr<MultigridPreconditioner> prec = std::make_shared<MultigridPreconditioner>(linear_operator,

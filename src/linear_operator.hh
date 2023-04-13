@@ -70,6 +70,9 @@ public:
         }
     }
 
+    /** @brief get the dimension of the low-rank correction */
+    const unsigned int get_m_lowrank() const { return m_lowrank; }
+
     /** @brief Coarsen linear operator to the next-coarser level
      *
      * Compute A^{c} = I_{2h}^{h} A I_{h}^{2h}
