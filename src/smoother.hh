@@ -125,7 +125,7 @@ protected:
  *   bar(B)_{FW} = (L   + 1/omega * D)^{-1} B ( Sigma + B^T (L   + 1/omega * D)^{-1} B )^{-1}
  *   bar(B)_{BW} = (L^T + 1/omega * D)^{-1} B ( Sigma + B^T (L^T + 1/omega * D)^{-1} B )^{-1}
  */
-class SGSLowRankSmoother : public Smoother
+class SSORLowRankSmoother : public Smoother
 {
 public:
     /** @brief Base type*/
@@ -135,8 +135,8 @@ public:
      * @param[in] linear_operator_ underlying linear operator
      * @param[in] omega_ SOR overrelaxation factor omega
      */
-    SGSLowRankSmoother(const std::shared_ptr<LinearOperator> linear_operator_,
-                       const double omega_);
+    SSORLowRankSmoother(const std::shared_ptr<LinearOperator> linear_operator_,
+                        const double omega_);
 
     /** @brief Carry out a single sweep
      *
@@ -225,17 +225,17 @@ private:
 };
 
 /** @brief SGS low rank smoother factory class */
-class SGSLowRankSmootherFactory : public SmootherFactory
+class SSORLowRankSmootherFactory : public SmootherFactory
 {
 public:
     /** @brief Create new instance
      *
      * @param[in] omega_ SOR overrelaxation factor
      */
-    SGSLowRankSmootherFactory(const double omega_) : omega(omega_) {}
+    SSORLowRankSmootherFactory(const double omega_) : omega(omega_) {}
 
     /** @brief Destructor */
-    virtual ~SGSLowRankSmootherFactory() {}
+    virtual ~SSORLowRankSmootherFactory() {}
 
     /** @brief Return smoother for a specific  linear operator
      *
@@ -243,7 +243,7 @@ public:
      */
     virtual std::shared_ptr<Smoother> get(std::shared_ptr<LinearOperator> linear_operator)
     {
-        return std::make_shared<SGSLowRankSmoother>(linear_operator, omega);
+        return std::make_shared<SSORLowRankSmoother>(linear_operator, omega);
     }
 
 protected:

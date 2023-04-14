@@ -35,8 +35,8 @@ void SSORSmoother::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x) const
 }
 
 /* Create a new instance */
-SGSLowRankSmoother::SGSLowRankSmoother(const std::shared_ptr<LinearOperator> linear_operator_,
-                                       const double omega_) : Base(linear_operator_), omega(omega_)
+SSORLowRankSmoother::SSORLowRankSmoother(const std::shared_ptr<LinearOperator> linear_operator_,
+                                         const double omega_) : Base(linear_operator_), omega(omega_)
 {
     // Smoothers
     sor_smoothers.push_back(SORSmoother(linear_operator, omega, forward));
@@ -56,7 +56,7 @@ SGSLowRankSmoother::SGSLowRankSmoother(const std::shared_ptr<LinearOperator> lin
 }
 
 /* Carry out a single sweep */
-void SGSLowRankSmoother::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x) const
+void SSORLowRankSmoother::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x) const
 {
     for (int sweep = 0; sweep < 2; ++sweep)
     {
