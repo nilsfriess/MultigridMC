@@ -13,6 +13,7 @@
 #include "loop_solver.hh"
 #include "multigrid_preconditioner.hh"
 #include "cholesky_solver.hh"
+#include "vtk_writer.hh"
 
 int main(int argc, char *argv[])
 {
@@ -43,7 +44,7 @@ int main(int argc, char *argv[])
     for (int k = 0; k < n_meas; ++k)
     {
         measurement_locations[k] = Eigen::Vector2d({dist_uniform(rng), dist_uniform(rng)});
-        Sigma(k, k) = 0.001 * (1.0 + 2.0 * dist_uniform(rng));
+        Sigma(k, k) = 0.0001 * (1.0 + 2.0 * dist_uniform(rng));
     }
     // Rotate randomly
     Eigen::MatrixXd A(Eigen::MatrixXd::Random(n_meas, n_meas)), Q;
@@ -72,7 +73,9 @@ int main(int argc, char *argv[])
     multigrid_params.nlevel = 6;
     multigrid_params.npresmooth = 1;
     multigrid_params.npostsmooth = 1;
-    std::shared_ptr<SGSLowRankSmootherFactory> smoother_factory = std::make_shared<SGSLowRankSmootherFactory>();
+    const double omega = 1.0;
+    std::cout << "omega = " << omega << std::endl;
+    std::shared_ptr<SGSLowRankSmootherFactory> smoother_factory = std::make_shared<SGSLowRankSmootherFactory>(omega);
     std::shared_ptr<IntergridOperator2dLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperator2dLinearFactory>();
     std::shared_ptr<CholeskySolverFactory> coarse_solver_factory = std::make_shared<CholeskySolverFactory>();
     std::shared_ptr<MultigridPreconditioner> prec = std::make_shared<MultigridPreconditioner>(linear_operator,
@@ -89,4 +92,9 @@ int main(int argc, char *argv[])
     solver.apply(b, x);
     double error = (x - x_exact).norm();
     std::cout << "error ||u-u_{exact}|| = " << error << std::endl;
+    VTKWriter2d vtk_writer("output.vtk", Cells, lattice);
+    vtk_writer.add_state(x_exact, "exact_solution");
+    vtk_writer.add_state(x, "numerical_solution");
+    vtk_writer.add_state(x - x_exact, "error");
+    vtk_writer.write();
 }

@@ -113,17 +113,17 @@ protected:
  *
  * This implements the following iteration
  *
- *   x^{k+1/4} = (L +   D)^{-1} (b + L^T x^k)
+ *   x^{k+1/4} = (L +   1/omega * D)^{-1} (b + (L^T - (1-omega)/omega * D) x^k)
  *   y^{k+1/2} = B^T x^{k+1/4}
  *   x^{k+1/2} = x^{k+1/4} - bar(B)_{FW} y^{k+1/2}
- *   x^{k+3/4} = (L^T + D)^{-1} (b + L   x^{k+1/2})
+ *   x^{k+3/4} = (L^T + 1/omega * D)^{-1} (b + (L - (1-omega)/omega * D) x^{k+1/2})
  *   y^{k+1}   = B^T x^{k+3/4}
  *   x^{k+1}   = x^{k+3/4} - bar(B)_{BW} y^{k+1}
  *
  * Here we have that
  *
- *   bar(B)_{FW} = (L   + D)^{-1} B ( Sigma + B^T (L   + D)^{-1} B )^{-1}
- *   bar(B)_{BW} = (L^T + D)^{-1} B ( Sigma + B^T (L^T + D)^{-1} B )^{-1}
+ *   bar(B)_{FW} = (L   + 1/omega * D)^{-1} B ( Sigma + B^T (L   + 1/omega * D)^{-1} B )^{-1}
+ *   bar(B)_{BW} = (L^T + 1/omega * D)^{-1} B ( Sigma + B^T (L^T + 1/omega * D)^{-1} B )^{-1}
  */
 class SGSLowRankSmoother : public Smoother
 {
@@ -133,8 +133,10 @@ public:
     /** @brief Create a new instance
      *
      * @param[in] linear_operator_ underlying linear operator
+     * @param[in] omega_ SOR overrelaxation factor omega
      */
-    SGSLowRankSmoother(const std::shared_ptr<LinearOperator> linear_operator_);
+    SGSLowRankSmoother(const std::shared_ptr<LinearOperator> linear_operator_,
+                       const double omega_);
 
     /** @brief Carry out a single sweep
      *
@@ -150,6 +152,8 @@ protected:
     std::vector<LinearOperator::DenseMatrixType> B_bar;
     /** @brief Forward and backward SOR smoothers */
     std::vector<SORSmoother> sor_smoothers;
+    /** @brief overrelaxation factor*/
+    const double omega;
 };
 
 /* ******************** factory classes ****************************** */
@@ -224,8 +228,11 @@ private:
 class SGSLowRankSmootherFactory : public SmootherFactory
 {
 public:
-    /** @brief Create new instance */
-    SGSLowRankSmootherFactory() {}
+    /** @brief Create new instance
+     *
+     * @param[in] omega_ SOR overrelaxation factor
+     */
+    SGSLowRankSmootherFactory(const double omega_) : omega(omega_) {}
 
     /** @brief Destructor */
     virtual ~SGSLowRankSmootherFactory() {}
@@ -236,8 +243,12 @@ public:
      */
     virtual std::shared_ptr<Smoother> get(std::shared_ptr<LinearOperator> linear_operator)
     {
-        return std::make_shared<SGSLowRankSmoother>(linear_operator);
+        return std::make_shared<SGSLowRankSmoother>(linear_operator, omega);
     }
+
+protected:
+    /** @brief overrelaxation factor */
+    const double omega;
 };
 
 #endif // SMOOTHER_HH
