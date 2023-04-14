@@ -9,7 +9,7 @@
 #include "cholesky_solver.hh"
 #include "preconditioner.hh"
 #include "multigrid_preconditioner.hh"
-#include "loop_solver.hh"
+#include "iterative_solver.hh"
 #include "diffusion_operator_2d.hh"
 
 /** @brief fixture class for solver tests */

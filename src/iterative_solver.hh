@@ -6,9 +6,9 @@
 #include "linear_solver.hh"
 #include "preconditioner.hh"
 
-/** @file loop_solver.hh
+/** @file iterative_solver.hh
  *
- * @brief A simple preconditioned loop solver.
+ * @brief Iterative solvers
  *
  */
 

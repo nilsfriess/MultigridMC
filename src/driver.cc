@@ -10,7 +10,7 @@
 #include "linear_operator.hh"
 #include "diffusion_operator_2d.hh"
 #include "intergrid_operator.hh"
-#include "loop_solver.hh"
+#include "iterative_solver.hh"
 #include "multigrid_preconditioner.hh"
 #include "cholesky_solver.hh"
 #include "vtk_writer.hh"
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     double beta_K = 0.3;
     double alpha_b = 1.2;
     double beta_b = 0.1;
-    unsigned int n_meas = 10;
+    unsigned int n_meas = 20;
     std::cout << "Number of measurements : " << n_meas << std::endl;
     std::vector<Eigen::Vector2d> measurement_locations(n_meas);
     Eigen::MatrixXd Sigma(n_meas, n_meas);
@@ -71,8 +71,8 @@ int main(int argc, char *argv[])
     linear_operator->apply(x_exact, b);
     MultigridParameters multigrid_params;
     multigrid_params.nlevel = 6;
-    multigrid_params.npresmooth = 1;
-    multigrid_params.npostsmooth = 1;
+    multigrid_params.npresmooth = 2;
+    multigrid_params.npostsmooth = 2;
     const double omega = 1.0;
     std::cout << "omega = " << omega << std::endl;
     std::shared_ptr<SSORLowRankSmootherFactory> smoother_factory = std::make_shared<SSORLowRankSmootherFactory>(omega);

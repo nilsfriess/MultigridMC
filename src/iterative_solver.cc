@@ -1,8 +1,8 @@
-#include "loop_solver.hh"
+#include "iterative_solver.hh"
 
-/** @file loop_solver.hh
+/** @file iterative_solver.hh
  *
- * @brief implementation of loop_solver.hh
+ * @brief implementation of iterative_solver.hh
  */
 
 /*  Solve the linear system Ax = b */
