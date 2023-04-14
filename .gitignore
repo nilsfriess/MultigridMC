@@ -2,5 +2,10 @@ CMakeCache.txt
 CMakeFiles
 Makefile
 cmake_install.cmake
-src/driver
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.synctex.gz
+notes/low_rank_smoother.pdf
 *~
