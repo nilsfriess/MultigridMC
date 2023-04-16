@@ -13,7 +13,7 @@ Consider the following linear problem:
 \begin{equation}
     Ax = \left(A_0 + B \Sigma^{-1} B^T \right)x = b\label{eqn:linear_system}
 \end{equation}
-Here $x,b\in\mathbb{R}^n$, $A,A_0$ are symmetric positive definite $n\times n$ matrices, where it is further assumed that $A_0$ is sparse. $\Sigma$ is a dense $m\times m$ matrix with $m\ll n$, and $B$ is a $n\times m$ matrix, so that $B\Sigma^{-1}B^T$ is a low-rank correction to $A_0$.
+Here $x,b\in\mathbb{R}^n$, $A,A_0$ are symmetric positive definite $n\times n$ matrices, where it is further assumed that $A_0$ is sparse. $\Sigma$ is a dense $m\times m$ matrix with $m\ll n$, and $B$ is an $n\times m$ matrix, so that $B\Sigma^{-1}B^T$ is a low-rank correction to $A_0$.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Iterative method}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -72,4 +72,28 @@ Or, equivalently:
     e^{k+1} = M_0\left(M_0 + B\Sigma^{-1}B^T\right)^{-1} \left(\text{Id}-M_0^{-1}A_0\right) e^k
 \end{equation}
 Note that the factor $\text{Id} - M_0^{-1}A_0$ arises in the stationary iteration with splitting $A_0=M_0-N_0$ for the system $A_0x=b$.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Sampling}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+As stated in Colin's paper \cite{Fox2017}, given a decomposition $A=M-N$, we can draw turn the smoother into a sampler as shown in Alg. \ref{alg:general_sampling} (which is \cite[Algorithm 5]{Fox2017}):
+\begin{algorithm}
+    \caption{Sampling}\label{alg:general_sampling}
+    \begin{algorithmic}[1]
+        \State Pick $x^0$
+        \For {$k=0,1,\dots$}
+        \State Draw $\xi\sim\mathcal{N}(0,(M^T+N)^{-1})$
+        \State Set $x^{k+1} = x^{k} + M^{-1}\left(\xi - Ax^k \right)$
+        \EndFor
+    \end{algorithmic}
+\end{algorithm}
+For $k\rightarrow \infty$ the distribution of the $x^k$ converges to $\mathcal{N}(0,A^{-1})$. If $x^0\sim\mathcal{N}(0,A^{-1})$, then $x^k\sim \mathcal{N}(0,A^{-1})$ for all $k$.
+
+If we use an (overrelaxed) Gibbs-sampler, i.e. $M_0=\omega^{-1} D+L$ (or $M=\omega^{-1} D+L^T$ for the equivalent backward iteration), then we have that
+\begin{equation}
+    M^T+N = \omega^{-1}D + B\Sigma^{-1}B^T,
+\end{equation}
+in other words, in Alg. \ref{alg:general_sampling} we have to be able to sample from multivariate normal distribution with a precision matrix $\omega^{-1}D + B\Sigma^{-1}B^T$ that is diagonal plus a low-rank update. Further, assume that \dots
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{unsrt}
+\bibliography{low_rank_smoother}
 \end{document}
