@@ -70,6 +70,9 @@ public:
         }
     }
 
+    /** @brief get number of unknowns */
+    const unsigned int get_ndof() const { return A_sparse.rows(); }
+
     /** @brief get the dimension of the low-rank correction */
     const unsigned int get_m_lowrank() const { return m_lowrank; }
 

@@ -3,6 +3,7 @@
 #include "test_intergrid.hh"
 #include "test_smoother.hh"
 #include "test_solver.hh"
+#include "test_sampler.hh"
 
 int main(int argc, char *argv[])
 {

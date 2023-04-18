@@ -5,7 +5,7 @@
 
 #include "sampler.hh"
 
-/** @brief Create a new instance */
+/* Create a new instance */
 Sampler::Sampler(const LinearOperator &linear_operator_,
                  std::mt19937_64 &rng_) : linear_operator(linear_operator_),
                                           rng(rng_),
@@ -21,7 +21,37 @@ Sampler::Sampler(const LinearOperator &linear_operator_,
     }
 }
 
-/** @brief apply Sampler */
+/* Create a new instance */
+CholeskySampler::CholeskySampler(const LinearOperator &linear_operator_,
+                                 std::mt19937_64 &rng_) : Base(linear_operator_,
+                                                               rng_),
+                                                          xi(linear_operator_.get_ndof())
+{
+    LinearOperator::SparseMatrixType A_sparse = linear_operator.get_sparse();
+    if (linear_operator.get_m_lowrank() > 0)
+    {
+        // Add contribution from low rank correction
+        const LinearOperator::DenseMatrixType &B = linear_operator.get_B();
+        const LinearOperator::DenseMatrixType &Sigma_inv = linear_operator.get_Sigma_inv();
+        const LinearOperator::SparseMatrixType B_sparse = B.sparseView();
+        const LinearOperator::SparseMatrixType B_tilde = Sigma_inv.sparseView() * B_sparse.transpose();
+        A_sparse += B_sparse * B_tilde;
+    }
+    LLT_of_A = std::make_shared<LLTType>(A_sparse);
+}
+
+/* apply Sampler */
+void CholeskySampler::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x)
+{
+    for (unsigned int ell = 0; ell < xi.size(); ++ell)
+    {
+        xi[ell] = normal_dist(rng);
+    }
+    auto U_triangular = LLT_of_A->matrixU();
+    x = U_triangular.solve(xi);
+}
+
+/* apply Sampler */
 void GibbsSampler::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x)
 {
     const LinearOperator::SparseMatrixType &A_sparse = linear_operator.get_sparse();
