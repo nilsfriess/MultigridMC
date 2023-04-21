@@ -1,6 +1,7 @@
 #ifndef TEST_SAMPLER_HH
 #define TEST_SAMPLER_HH TEST_SAMPLER_HH
 
+#include <utility>
 #include <gtest/gtest.h>
 #include <random>
 #include <Eigen/Dense>
@@ -70,15 +71,21 @@ public:
         Sigma_inv = Sigma.inverse();
     }
 
-    /** @brief compute (dense) covariance matrix */
-    DenseMatrixType covariance() const
+    /** @brief compute (dense) precision matrix */
+    DenseMatrixType precision() const
     {
         DenseMatrixType Q = A_sparse.toDense();
         if (lowrank_update)
         {
             Q += B * Sigma_inv * B.transpose();
         }
-        return Q.inverse();
+        return Q;
+    }
+
+    /** @brief compute (dense) covariance matrix */
+    DenseMatrixType covariance() const
+    {
+        return precision().inverse();
     }
 
 protected:
@@ -97,27 +104,52 @@ protected:
 
     /** @brief Compare measured covariance to true covariance
      *
-     * Apply given smoother repeatedly and measure covariance of samples. Returns
-     * the difference between true and measured covariance in L-infinity norm.
+     * For a randomly chosen f, apply given sampler repeatedly and measure mean
+     * and covariance of samples. Returns a tuple, which contains with following
+     * quantities:
+     *
+     *   first:  difference between Q^{-1} * f and sample_mean in the L-infinity norm
+     *   second: difference between exact and measured covariance matrix in the
+     *           L-infinity norm
      *
      * @param[in] linear_operator Underlying linear operator
      * @param[in] sampler Sampler to be used
      */
-    double covariance_error(const std::shared_ptr<TestOperator1d> linear_operator,
-                            const std::shared_ptr<Sampler> sampler)
+    std::pair<double, double> mean_covariance_error(const std::shared_ptr<TestOperator1d> linear_operator,
+                                                    const std::shared_ptr<Sampler> sampler)
     {
         unsigned int ndof = linear_operator->get_ndof();
+        Eigen::VectorXd f(ndof);
+        // Pick an random right hand side f
+        unsigned int seed = 1342517;
+        std::mt19937_64 rng(seed);
+        std::uniform_real_distribution<double> uniform_dist(0, 1);
+        Eigen::VectorXd mean_exact(ndof);
+        for (unsigned int ell = 0; ell < ndof; ++ell)
+        {
+            mean_exact[ell] = uniform_dist(rng);
+        }
+        LinearOperator::DenseMatrixType precision = linear_operator->precision();
+        f = precision * mean_exact;
+        // Estimators for E(x) and E(x^3)
+        Eigen::VectorXd Ex(ndof);
+        LinearOperator::DenseMatrixType Exx(ndof, ndof);
+        Ex.setZero();
+        Exx.setZero();
+        unsigned int nsamples = 200000;
         Eigen::VectorXd x(ndof);
-        Eigen::VectorXd b(ndof);
-        LinearOperator::DenseMatrixType covariance(ndof, ndof);
-        covariance.setZero();
-        unsigned int nsamples = 100000;
         for (int k = 0; k < nsamples; ++k)
         {
-            sampler->apply(b, x);
-            covariance += 1. / (k + 1) * (x * x.transpose() - covariance);
+            sampler->apply(f, x);
+            Ex += 1. / (k + 1) * (x - Ex);
+            Exx += 1. / (k + 1) * (x * x.transpose() - Exx);
         }
-        return (covariance - linear_operator->covariance()).lpNorm<Eigen::Infinity>();
+        // maximum likelihood estimator
+        LinearOperator::DenseMatrixType covariance = Exx - Ex * Ex.transpose();
+        LinearOperator::DenseMatrixType covariance_exact = linear_operator->covariance();
+        double error_mean = (Ex - mean_exact).lpNorm<Eigen::Infinity>();
+        double error_covariance = (covariance - covariance_exact).lpNorm<Eigen::Infinity>();
+        return std::make_pair(error_mean, error_covariance);
     }
 
 protected:
@@ -133,9 +165,10 @@ TEST_F(SamplerTest, TestCholeskySampler)
     std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(false);
     std::mt19937_64 rng(31841287);
     std::shared_ptr<CholeskySampler> sampler = std::make_shared<CholeskySampler>(*linear_operator, rng);
-    double error = covariance_error(linear_operator, sampler);
+    std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
     const double tolerance = 2.E-3;
-    EXPECT_NEAR(error, 0.0, tolerance);
+    EXPECT_NEAR(error.first, 0.0, tolerance);
+    EXPECT_NEAR(error.second, 0.0, tolerance);
 }
 
 /* Test Cholesky sampler with low rank correction
@@ -148,9 +181,10 @@ TEST_F(SamplerTest, TestCholeskySamplerLowRank)
     std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(true);
     std::mt19937_64 rng(31841287);
     std::shared_ptr<CholeskySampler> sampler = std::make_shared<CholeskySampler>(*linear_operator, rng);
-    double error = covariance_error(linear_operator, sampler);
+    std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
     const double tolerance = 2.E-3;
-    EXPECT_NEAR(error, 0.0, tolerance);
+    EXPECT_NEAR(error.first, 0.0, tolerance);
+    EXPECT_NEAR(error.second, 0.0, tolerance);
 }
 
 #endif // TEST_SAMPLER_HH

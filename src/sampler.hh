@@ -11,7 +11,14 @@
 
 /** @class Sampler
  *
- * @brief Sampler base class */
+ * @brief Sampler base class
+ *
+ * These samplers are used to sample from Gaussian distributions with a given
+ * precision matrix Q and mean Q^{-1} f, for which the probability density is
+ *
+ *   pi(x) = N exp(-1/2 x^T Q x + f^T x)
+ *
+ * where N is a normalisation constant.*/
 class Sampler
 {
 public:
@@ -31,10 +38,10 @@ public:
 
     /** @brief Draw a new sample x
      *
-     * @param[in] b right hand side
+     * @param[in] f right hand side
      * @param[inout] x new sample
      */
-    virtual void apply(const Eigen::VectorXd &b, Eigen::VectorXd &x) = 0;
+    virtual void apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) = 0;
 
 protected:
     /** @brief square root of inverse diagonal matrix entries (required in Gibbs sweep) */
@@ -52,9 +59,14 @@ protected:
  * @brief Sampler based on (sparse) Cholesky factorisation
  *
  * Given a precision matrix Q, compute the Cholesky factorisation
- * Q = U^T U. Draw a sample xi ~ N(0,I) from a multivariate
- * normal distribution and solve U x = xi. The sample x will then
- * be distributed according to ~exp(-1/2 x^T Q x).
+ * Q = U^T U. Then draw an independent sample from the distribution
+ * pi(x) = N exp(-1/2 x^T Q x + f^T x) in three steps:
+ *
+ *   1. Draw a sample xi ~ N(0,I) from a multivariate normal distribution
+ *      with mean 0 and variance I
+ *   2. solve the triangular system U^T g = f for g
+ *   3. solve the triangular U x = xi + g for x.
+ *
  */
 
 class CholeskySampler : public Sampler
@@ -72,10 +84,10 @@ public:
 
     /** @brief Draw a new sample x
      *
-     * @param[in] b right hand side
+     * @param[in] f right hand side
      * @param[inout] x new sample
      */
-    virtual void apply(const Eigen::VectorXd &b, Eigen::VectorXd &x);
+    virtual void apply(const Eigen::VectorXd &f, Eigen::VectorXd &x);
 
 protected:
     typedef Eigen::SimplicialLLT<LinearOperator::SparseMatrixType,
@@ -107,10 +119,10 @@ public:
 
     /** @brief Carry out a single Gibbs-sweep
      *
-     * @param[in] b right hand side
+     * @param[in] f right hand side
      * @param[inout] x vector to which the sweep is applied
      */
-    virtual void apply(const Eigen::VectorXd &b, Eigen::VectorXd &x);
+    virtual void apply(const Eigen::VectorXd &f, Eigen::VectorXd &x);
 };
 
 #endif // SAMPLER_HH

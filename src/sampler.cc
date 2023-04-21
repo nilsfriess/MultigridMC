@@ -41,18 +41,23 @@ CholeskySampler::CholeskySampler(const LinearOperator &linear_operator_,
 }
 
 /* apply Sampler */
-void CholeskySampler::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x)
+void CholeskySampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x)
 {
+    /* step 1: draw sample xi from normal distribution with zero mean and unit covariance*/
     for (unsigned int ell = 0; ell < xi.size(); ++ell)
     {
         xi[ell] = normal_dist(rng);
     }
+    /* step 2: solve U^T g = f */
+    auto L_triangular = LLT_of_A->matrixL();
+    Eigen::VectorXd g = L_triangular.solve(f);
+    /* step 3: solve U x = xi + g for x */
     auto U_triangular = LLT_of_A->matrixU();
-    x = U_triangular.solve(xi);
+    x = U_triangular.solve(xi + g);
 }
 
 /* apply Sampler */
-void GibbsSampler::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x)
+void GibbsSampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x)
 {
     const LinearOperator::SparseMatrixType &A_sparse = linear_operator.get_sparse();
     const auto row_ptr = A_sparse.outerIndexPtr();
@@ -70,6 +75,6 @@ void GibbsSampler::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x)
         const double a_sqrt_inv_diag = sqrt_inv_diag[ell];
         // subtract diagonal contribution
         residual -= x[ell] / (a_sqrt_inv_diag * a_sqrt_inv_diag);
-        x[ell] = ((b[ell] - residual) * a_sqrt_inv_diag + normal_dist(rng)) * a_sqrt_inv_diag;
+        x[ell] = ((f[ell] - residual) * a_sqrt_inv_diag + normal_dist(rng)) * a_sqrt_inv_diag;
     }
 }
