@@ -6,33 +6,17 @@
 #include "sampler.hh"
 
 /* Create a new instance */
-Sampler::Sampler(const LinearOperator &linear_operator_,
-                 std::mt19937_64 &rng_) : linear_operator(linear_operator_),
-                                          rng(rng_),
-                                          normal_dist(0.0, 1.0)
-{
-    const LinearOperator::SparseMatrixType &A_sparse = linear_operator.get_sparse();
-    unsigned int nrow = A_sparse.rows();
-    sqrt_inv_diag = new double[nrow];
-    auto diag = A_sparse.diagonal();
-    for (unsigned ell = 0; ell < nrow; ++ell)
-    {
-        sqrt_inv_diag[ell] = 1 / sqrt(diag[ell]);
-    }
-}
-
-/* Create a new instance */
-CholeskySampler::CholeskySampler(const LinearOperator &linear_operator_,
+CholeskySampler::CholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
                                  std::mt19937_64 &rng_) : Base(linear_operator_,
                                                                rng_),
-                                                          xi(linear_operator_.get_ndof())
+                                                          xi(linear_operator_->get_ndof())
 {
-    LinearOperator::SparseMatrixType A_sparse = linear_operator.get_sparse();
-    if (linear_operator.get_m_lowrank() > 0)
+    LinearOperator::SparseMatrixType A_sparse = linear_operator->get_sparse();
+    if (linear_operator->get_m_lowrank() > 0)
     {
         // Add contribution from low rank correction
-        const LinearOperator::DenseMatrixType &B = linear_operator.get_B();
-        const LinearOperator::DenseMatrixType &Sigma_inv = linear_operator.get_Sigma_inv();
+        const LinearOperator::DenseMatrixType &B = linear_operator->get_B();
+        const LinearOperator::DenseMatrixType &Sigma_inv = linear_operator->get_Sigma_inv();
         const LinearOperator::SparseMatrixType B_sparse = B.sparseView();
         const LinearOperator::SparseMatrixType B_tilde = Sigma_inv.sparseView() * B_sparse.transpose();
         A_sparse += B_sparse * B_tilde;
@@ -56,25 +40,33 @@ void CholeskySampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x)
     x = U_triangular.solve(xi + g);
 }
 
-/* apply Sampler */
-void GibbsSampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x)
+/* Create a new instance */
+SORSampler::SORSampler(const std::shared_ptr<LinearOperator> linear_operator_,
+                       std::mt19937_64 &rng_,
+                       const double omega_,
+                       const Direction direction_) : Base(linear_operator_, rng_),
+                                                     omega(omega_),
+                                                     direction(direction_),
+                                                     b_rhs(linear_operator_->get_ndof())
 {
-    const LinearOperator::SparseMatrixType &A_sparse = linear_operator.get_sparse();
-    const auto row_ptr = A_sparse.outerIndexPtr();
-    const auto col_ptr = A_sparse.innerIndexPtr();
-    const auto val_ptr = A_sparse.valuePtr();
+    const LinearOperator::SparseMatrixType &A_sparse = linear_operator->get_sparse();
     unsigned int nrow = A_sparse.rows();
-    for (int ell = 0; ell < nrow; ++ell)
+    sqrt_diag_over_omega = new double[nrow];
+    auto diag = A_sparse.diagonal();
+    for (unsigned ell = 0; ell < nrow; ++ell)
     {
-        double residual = 0.0;
-        for (int k = row_ptr[ell]; k < row_ptr[ell + 1]; ++k)
-        {
-            unsigned int ell_prime = col_ptr[k];
-            residual += val_ptr[k] * x[ell_prime];
-        }
-        const double a_sqrt_inv_diag = sqrt_inv_diag[ell];
-        // subtract diagonal contribution
-        residual -= x[ell] / (a_sqrt_inv_diag * a_sqrt_inv_diag);
-        x[ell] = ((f[ell] - residual) * a_sqrt_inv_diag + normal_dist(rng)) * a_sqrt_inv_diag;
+        sqrt_diag_over_omega[ell] = sqrt(diag[ell] * (2. - omega) / omega);
     }
+    smoother = std::make_shared<SORSmoother>(linear_operator, omega, direction);
+}
+
+/* apply Sampler */
+void SORSampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x)
+{
+    for (unsigned int ell = 0; ell < b_rhs.size(); ++ell)
+    {
+        double tmp = sqrt_diag_over_omega[ell];
+        b_rhs[ell] = tmp * normal_dist(rng) + f[ell];
+    }
+    smoother->apply(b_rhs, x);
 }

@@ -3,6 +3,7 @@
 #include <random>
 #include <Eigen/Dense>
 #include "linear_operator.hh"
+#include "smoother.hh"
 
 /** @file sampler.hh
  *
@@ -27,14 +28,10 @@ public:
      * @param[in] linear_operator_ underlying linear operator
      * @param[in] rng_ random number generator
      */
-    Sampler(const LinearOperator &linear_operator_,
-            std::mt19937_64 &rng_);
-
-    /** @brief destroy instance */
-    ~Sampler()
-    {
-        delete[] sqrt_inv_diag;
-    }
+    Sampler(const std::shared_ptr<LinearOperator> linear_operator_,
+            std::mt19937_64 &rng_) : linear_operator(linear_operator_),
+                                     rng(rng_),
+                                     normal_dist(0.0, 1.0) {}
 
     /** @brief Draw a new sample x
      *
@@ -44,10 +41,8 @@ public:
     virtual void apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) = 0;
 
 protected:
-    /** @brief square root of inverse diagonal matrix entries (required in Gibbs sweep) */
-    double *sqrt_inv_diag;
     /** @brief Underlying Linear operator */
-    const LinearOperator &linear_operator;
+    const std::shared_ptr<LinearOperator> linear_operator;
     /** @brief random number generator */
     std::mt19937_64 &rng;
     /** @brief normal distribution for Gibbs-sweep */
@@ -79,7 +74,7 @@ public:
      * @param[in] linear_operator_ underlying linear operator
      * @param[in] rng_ random number generator
      */
-    CholeskySampler(const LinearOperator &linear_operator_,
+    CholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
                     std::mt19937_64 &rng_);
 
     /** @brief Draw a new sample x
@@ -100,11 +95,14 @@ protected:
     Eigen::VectorXd xi;
 };
 
-/** @class GibbsSampler
+/** @class SORSampler
  *
- * @brief Gibbs Sampler
+ * @brief SOR Sampler
+ *
+ * Sampler based on the matrix splitting M = 1/omega*D+L (forward)
+ * or M = 1/omega*D+L^T (backward)
  */
-class GibbsSampler : public Sampler
+class SORSampler : public Sampler
 {
 public:
     /** @brief Base type*/
@@ -114,8 +112,16 @@ public:
      * @param[in] linear_operator_ underlying linear operator
      * @param[in] rng_ random number generator
      */
-    GibbsSampler(const LinearOperator &linear_operator_,
-                 std::mt19937_64 &rng_) : Base(linear_operator_, rng_){};
+    SORSampler(const std::shared_ptr<LinearOperator> linear_operator_,
+               std::mt19937_64 &rng_,
+               const double omega_,
+               const Direction direction_);
+
+    /** @brief destroy instance */
+    ~SORSampler()
+    {
+        delete[] sqrt_diag_over_omega;
+    }
 
     /** @brief Carry out a single Gibbs-sweep
      *
@@ -123,6 +129,18 @@ public:
      * @param[inout] x vector to which the sweep is applied
      */
     virtual void apply(const Eigen::VectorXd &f, Eigen::VectorXd &x);
+
+protected:
+    /** @brief Overrelaxation factor */
+    const double omega;
+    /** @brief Sweep direction */
+    const Direction direction;
+    /** @brief RHS sample */
+    Eigen::VectorXd b_rhs;
+    /** @brief square root of diagonal matrix entries divided by omega */
+    double *sqrt_diag_over_omega;
+    /** @brief Underlying smoother */
+    std::shared_ptr<SORSmoother> smoother;
 };
 
 #endif // SAMPLER_HH

@@ -136,8 +136,13 @@ protected:
         LinearOperator::DenseMatrixType Exx(ndof, ndof);
         Ex.setZero();
         Exx.setZero();
-        unsigned int nsamples = 200000;
+        unsigned int nsamples_warmup = 1000;
+        unsigned int nsamples = 500000;
         Eigen::VectorXd x(ndof);
+        for (int k = 0; k < nsamples_warmup; ++k)
+        {
+            sampler->apply(f, x);
+        }
         for (int k = 0; k < nsamples; ++k)
         {
             sampler->apply(f, x);
@@ -164,7 +169,27 @@ TEST_F(SamplerTest, TestCholeskySampler)
 {
     std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(false);
     std::mt19937_64 rng(31841287);
-    std::shared_ptr<CholeskySampler> sampler = std::make_shared<CholeskySampler>(*linear_operator, rng);
+    std::shared_ptr<CholeskySampler> sampler = std::make_shared<CholeskySampler>(linear_operator, rng);
+    std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
+    const double tolerance = 2.E-3;
+    EXPECT_NEAR(error.first, 0.0, tolerance);
+    EXPECT_NEAR(error.second, 0.0, tolerance);
+}
+
+/* Test SOR sampler without low rank correction
+ *
+ * Draw a large number of samples and check that their covariance agrees with
+ * the analytical value of the covariance.
+ */
+TEST_F(SamplerTest, TestSORSampler)
+{
+    std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(false);
+    std::mt19937_64 rng(31841287);
+    const double omega = 0.8;
+    std::shared_ptr<SORSampler> sampler = std::make_shared<SORSampler>(linear_operator,
+                                                                       rng,
+                                                                       omega,
+                                                                       forward);
     std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
     const double tolerance = 2.E-3;
     EXPECT_NEAR(error.first, 0.0, tolerance);
@@ -180,7 +205,7 @@ TEST_F(SamplerTest, TestCholeskySamplerLowRank)
 {
     std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(true);
     std::mt19937_64 rng(31841287);
-    std::shared_ptr<CholeskySampler> sampler = std::make_shared<CholeskySampler>(*linear_operator, rng);
+    std::shared_ptr<CholeskySampler> sampler = std::make_shared<CholeskySampler>(linear_operator, rng);
     std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
     const double tolerance = 2.E-3;
     EXPECT_NEAR(error.first, 0.0, tolerance);
