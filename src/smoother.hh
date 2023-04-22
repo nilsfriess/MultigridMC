@@ -53,6 +53,7 @@ public:
      *
      * @param[in] linear_operator_ underlying linear operator
      * @param[in] omega_ overrelaxation factor
+     * @param[in] direction_ sweep direction (forward or backward)
      */
     SORSmoother(const std::shared_ptr<LinearOperator> linear_operator_,
                 const double omega_,
