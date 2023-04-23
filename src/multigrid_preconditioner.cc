@@ -75,7 +75,6 @@ void MultigridPreconditioner::solve(const unsigned int level)
 void MultigridPreconditioner::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x)
 {
     b_ell[0] = b;
-    x_ell[0].setZero();
     solve(0);
     x = x_ell[0];
 }
