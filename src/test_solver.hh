@@ -149,7 +149,7 @@ TEST_F(SolverTest, TestMultigridLowRank)
     multigrid_params.npresmooth = 1;
     multigrid_params.npostsmooth = 1;
     const double omega = 1.0;
-    std::shared_ptr<SSORLowRankSmootherFactory> smoother_factory = std::make_shared<SSORLowRankSmootherFactory>(omega);
+    std::shared_ptr<SSORSmootherFactory> smoother_factory = std::make_shared<SSORSmootherFactory>(omega);
     std::shared_ptr<IntergridOperator2dLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperator2dLinearFactory>();
     std::shared_ptr<CholeskySolverFactory> coarse_solver_factory = std::make_shared<CholeskySolverFactory>();
     std::shared_ptr<MultigridPreconditioner> prec = std::make_shared<MultigridPreconditioner>(linear_operator_lowrank,

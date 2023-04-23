@@ -43,6 +43,26 @@ enum Direction
 /** @class SORSmoother
  *
  * @brief Successive overrelaxation smoother
+ *
+ * This implements the following iteration
+ *
+ *   x^{k+1/2} = (L +   1/omega * D)^{-1} (b + (L^T - (1-omega)/omega * D) x^k)
+ *   y^{k+1} = B^T x^{k+1/2}
+ *   x^{k+1} = x^{k+1/2} - bar(B)_{FW} y^{k+1}
+ *
+ * for the forward sweep or
+ *
+ *   x^{k+1/2} = (L^T + 1/omega * D)^{-1} (b + (L - (1-omega)/omega * D) x^k)
+ *   y^{k+1}   = B^T x^{k+1/2}
+ *   x^{k+1}   = x^{k+1/2} - bar(B)_{BW} y^{k+1}
+ *
+ * for the backward sweep
+ *
+ * Here we have that
+ *
+ *   bar(B)_{FW} = (L   + 1/omega * D)^{-1} B ( Sigma + B^T (L   + 1/omega * D)^{-1} B )^{-1}
+ *   bar(B)_{BW} = (L^T + 1/omega * D)^{-1} B ( Sigma + B^T (L^T + 1/omega * D)^{-1} B )^{-1}
+ *
  */
 class SORSmoother : public Smoother
 {
@@ -57,9 +77,7 @@ public:
      */
     SORSmoother(const std::shared_ptr<LinearOperator> linear_operator_,
                 const double omega_,
-                const Direction direction_) : Base(linear_operator_),
-                                              omega(omega_),
-                                              direction(direction_){};
+                const Direction direction_);
 
     /** @brief Carry out a single SOR-sweep
      *
@@ -68,16 +86,41 @@ public:
      */
     virtual void apply(const Eigen::VectorXd &b, Eigen::VectorXd &x) const;
 
+    /** @brief Carry out a single SOR-sweep on the sparse part of the matrix
+     *
+     * @param[in] b right hand side
+     * @param[inout] x vector to which the sweep is applied
+     */
+    void apply_sparse(const Eigen::VectorXd &b, Eigen::VectorXd &x) const;
+
 protected:
     /** @brief Overrelaxation factor */
     const double omega;
     /** @brief Sweep direction */
     const Direction direction;
+    /** @brief the matrix B that arises in the low-rank update of the linear operator */
+    LinearOperator::DenseMatrixType B;
+    /** @brief the matrix bar(B)_{FW} or bar(B)_{BW} used on the forward/backward sweeps */
+    std::shared_ptr<LinearOperator::DenseMatrixType> B_bar;
 };
 
 /** @class SSORSmoother
  *
- * @brief Symmetric successive overrelaxation smoother
+ * @brief Symmetric successive overrelaxation smoother with low rank updates
+ *
+ * This implements the following iteration
+ *
+ *   x^{k+1/4} = (L +   1/omega * D)^{-1} (b + (L^T - (1-omega)/omega * D) x^k)
+ *   y^{k+1/2} = B^T x^{k+1/4}
+ *   x^{k+1/2} = x^{k+1/4} - bar(B)_{FW} y^{k+1/2}
+ *   x^{k+3/4} = (L^T + 1/omega * D)^{-1} (b + (L - (1-omega)/omega * D) x^{k+1/2})
+ *   y^{k+1}   = B^T x^{k+3/4}
+ *   x^{k+1}   = x^{k+3/4} - bar(B)_{BW} y^{k+1}
+ *
+ * Here we have that
+ *
+ *   bar(B)_{FW} = (L   + 1/omega * D)^{-1} B ( Sigma + B^T (L   + 1/omega * D)^{-1} B )^{-1}
+ *   bar(B)_{BW} = (L^T + 1/omega * D)^{-1} B ( Sigma + B^T (L^T + 1/omega * D)^{-1} B )^{-1}
  */
 class SSORSmoother : public Smoother
 {
@@ -106,55 +149,6 @@ protected:
     const SORSmoother sor_forward;
     /** @brief Backward smoother */
     const SORSmoother sor_backward;
-};
-
-/** @class SGSLowRankSmoother
- *
- * @brief Symmetric Gauss-Seidel smoother with low-rank update correction
- *
- * This implements the following iteration
- *
- *   x^{k+1/4} = (L +   1/omega * D)^{-1} (b + (L^T - (1-omega)/omega * D) x^k)
- *   y^{k+1/2} = B^T x^{k+1/4}
- *   x^{k+1/2} = x^{k+1/4} - bar(B)_{FW} y^{k+1/2}
- *   x^{k+3/4} = (L^T + 1/omega * D)^{-1} (b + (L - (1-omega)/omega * D) x^{k+1/2})
- *   y^{k+1}   = B^T x^{k+3/4}
- *   x^{k+1}   = x^{k+3/4} - bar(B)_{BW} y^{k+1}
- *
- * Here we have that
- *
- *   bar(B)_{FW} = (L   + 1/omega * D)^{-1} B ( Sigma + B^T (L   + 1/omega * D)^{-1} B )^{-1}
- *   bar(B)_{BW} = (L^T + 1/omega * D)^{-1} B ( Sigma + B^T (L^T + 1/omega * D)^{-1} B )^{-1}
- */
-class SSORLowRankSmoother : public Smoother
-{
-public:
-    /** @brief Base type*/
-    typedef Smoother Base;
-    /** @brief Create a new instance
-     *
-     * @param[in] linear_operator_ underlying linear operator
-     * @param[in] omega_ SOR overrelaxation factor omega
-     */
-    SSORLowRankSmoother(const std::shared_ptr<LinearOperator> linear_operator_,
-                        const double omega_);
-
-    /** @brief Carry out a single sweep
-     *
-     * @param[in] b right hand side
-     * @param[inout] x vector to which the sweep is applied
-     */
-    virtual void apply(const Eigen::VectorXd &b, Eigen::VectorXd &x) const;
-
-protected:
-    /** @brief the matrix B that arises in the low-rank update of the linear operator */
-    LinearOperator::DenseMatrixType B;
-    /** @brief the matrices bar(B)_{FW} and bar(B)_{BW} used on the forward/backward sweeps */
-    std::vector<LinearOperator::DenseMatrixType> B_bar;
-    /** @brief Forward and backward SOR smoothers */
-    std::vector<SORSmoother> sor_smoothers;
-    /** @brief overrelaxation factor*/
-    const double omega;
 };
 
 /* ******************** factory classes ****************************** */
@@ -222,33 +216,6 @@ public:
 
 private:
     /** @brief overrelaxation parameter */
-    const double omega;
-};
-
-/** @brief SGS low rank smoother factory class */
-class SSORLowRankSmootherFactory : public SmootherFactory
-{
-public:
-    /** @brief Create new instance
-     *
-     * @param[in] omega_ SOR overrelaxation factor
-     */
-    SSORLowRankSmootherFactory(const double omega_) : omega(omega_) {}
-
-    /** @brief Destructor */
-    virtual ~SSORLowRankSmootherFactory() {}
-
-    /** @brief Return smoother for a specific  linear operator
-     *
-     * @param[in] linear_operator_ Underlying linear operator
-     */
-    virtual std::shared_ptr<Smoother> get(std::shared_ptr<LinearOperator> linear_operator)
-    {
-        return std::make_shared<SSORLowRankSmoother>(linear_operator, omega);
-    }
-
-protected:
-    /** @brief overrelaxation factor */
     const double omega;
 };
 

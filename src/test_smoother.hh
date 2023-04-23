@@ -110,7 +110,7 @@ TEST_F(SmootherTest, TestSSORLowRankSmoother)
 {
     x = x_exact;
     const double omega = 0.8;
-    SSORLowRankSmoother smoother(linear_operator_lowrank, omega);
+    SSORSmoother smoother(linear_operator_lowrank, omega);
     smoother.apply(b_lowrank, x);
     double tolerance = 1.E-12;
     double error = (x - x_exact).norm();
