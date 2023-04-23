@@ -120,7 +120,7 @@ public:
     /** @brief destroy instance */
     ~SORSampler()
     {
-        delete[] sqrt_diag_over_omega;
+        delete[] sqrt_precision_diag;
     }
 
     /** @brief Carry out a single Gibbs-sweep
@@ -138,7 +138,7 @@ protected:
     /** @brief RHS sample */
     Eigen::VectorXd b_rhs;
     /** @brief square root of diagonal matrix entries divided by omega */
-    double *sqrt_diag_over_omega;
+    double *sqrt_precision_diag;
     /** @brief Underlying smoother */
     std::shared_ptr<SORSmoother> smoother;
 };

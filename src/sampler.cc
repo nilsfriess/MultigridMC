@@ -51,11 +51,11 @@ SORSampler::SORSampler(const std::shared_ptr<LinearOperator> linear_operator_,
 {
     const LinearOperator::SparseMatrixType &A_sparse = linear_operator->get_sparse();
     unsigned int nrow = A_sparse.rows();
-    sqrt_diag_over_omega = new double[nrow];
+    sqrt_precision_diag = new double[nrow];
     auto diag = A_sparse.diagonal();
     for (unsigned ell = 0; ell < nrow; ++ell)
     {
-        sqrt_diag_over_omega[ell] = sqrt(diag[ell] * (2. - omega) / omega);
+        sqrt_precision_diag[ell] = sqrt(diag[ell] * (2. - omega) / omega);
     }
     smoother = std::make_shared<SORSmoother>(linear_operator, omega, direction);
 }
@@ -65,7 +65,7 @@ void SORSampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x)
 {
     for (unsigned int ell = 0; ell < b_rhs.size(); ++ell)
     {
-        double tmp = sqrt_diag_over_omega[ell];
+        double tmp = sqrt_precision_diag[ell];
         b_rhs[ell] = tmp * normal_dist(rng) + f[ell];
     }
     smoother->apply(b_rhs, x);
