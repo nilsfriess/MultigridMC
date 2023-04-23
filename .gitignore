@@ -6,6 +6,8 @@ cmake_install.cmake
 *.fdb_latexmk
 *.fls
 *.log
+*.bbl
+*.blg
 *.synctex.gz
 notes/low_rank_smoother.pdf
 *~
