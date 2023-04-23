@@ -136,11 +136,15 @@ protected:
     /** @brief Sweep direction */
     const Direction direction;
     /** @brief RHS sample */
-    Eigen::VectorXd b_rhs;
+    Eigen::VectorXd c_rhs;
+    /** @brief Low rank correction */
+    Eigen::VectorXd xi;
     /** @brief square root of diagonal matrix entries divided by omega */
     double *sqrt_precision_diag;
     /** @brief Underlying smoother */
     std::shared_ptr<SORSmoother> smoother;
+    /** @brief Cholesky factorisation U^T U = Sigma^{-1} of low rank covariance matrix */
+    std::shared_ptr<LinearOperator::DenseMatrixType> U_lowrank;
 };
 
 #endif // SAMPLER_HH
