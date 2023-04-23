@@ -22,9 +22,13 @@ jobs:
     - name: Download Eigen
       run: git clone https://gitlab.com/libeigen/eigen.git; cd eigen; git checkout 3.4
 
+    - name: Configure Eigen
+      working-directory: ${{github.workspace}}/eigen
+      run: cmake -B ${{github.workspace}}/eigen/build -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/eigen/build
+      
     - name: Install Eigen
       working-directory: ${{github.workspace}}/eigen
-      run: cmake -B ${{github.workspace}}/eigen/build -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/eigen/build; cmake --install ${{github.workspace}}/eigen/build
+      run: cmake --install build
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
