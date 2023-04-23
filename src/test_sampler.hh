@@ -176,40 +176,38 @@ TEST_F(SamplerTest, TestCholeskySampler)
     EXPECT_NEAR(error.second, 0.0, tolerance);
 }
 
-/* Test SOR sampler without low rank correction
+/* Test SSOR sampler without low rank correction
  *
  * Draw a large number of samples and check that their covariance agrees with
  * the analytical value of the covariance.
  */
-TEST_F(SamplerTest, TestSORSampler)
+TEST_F(SamplerTest, TestSSORSampler)
 {
     std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(false);
     std::mt19937_64 rng(31841287);
     const double omega = 0.8;
-    std::shared_ptr<SORSampler> sampler = std::make_shared<SORSampler>(linear_operator,
-                                                                       rng,
-                                                                       omega,
-                                                                       forward);
+    std::shared_ptr<SSORSampler> sampler = std::make_shared<SSORSampler>(linear_operator,
+                                                                         rng,
+                                                                         omega);
     std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
     const double tolerance = 2.E-3;
     EXPECT_NEAR(error.first, 0.0, tolerance);
     EXPECT_NEAR(error.second, 0.0, tolerance);
 }
 
-/* Test SOR sampler with low rank correction
+/* Test SSOR sampler with low rank correction
  *
  * Draw a large number of samples and check that their covariance agrees with
  * the analytical value of the covariance.
  */
-TEST_F(SamplerTest, TestSORSamplerLowRank)
+TEST_F(SamplerTest, TestSSORSamplerLowRank)
 {
     std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(true);
     std::mt19937_64 rng(31841287);
     const double omega = 0.8;
-    std::shared_ptr<SORSampler> sampler = std::make_shared<SORSampler>(linear_operator,
-                                                                       rng,
-                                                                       omega,
-                                                                       forward);
+    std::shared_ptr<SSORSampler> sampler = std::make_shared<SSORSampler>(linear_operator,
+                                                                         rng,
+                                                                         omega);
     std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
     const double tolerance = 2.E-3;
     EXPECT_NEAR(error.first, 0.0, tolerance);

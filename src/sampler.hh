@@ -38,7 +38,7 @@ public:
      * @param[in] f right hand side
      * @param[inout] x new sample
      */
-    virtual void apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) = 0;
+    virtual void apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const = 0;
 
 protected:
     /** @brief Underlying Linear operator */
@@ -46,7 +46,7 @@ protected:
     /** @brief random number generator */
     std::mt19937_64 &rng;
     /** @brief normal distribution for Gibbs-sweep */
-    std::normal_distribution<double> normal_dist;
+    mutable std::normal_distribution<double> normal_dist;
 };
 
 /** @class Cholesky Sampler
@@ -82,7 +82,7 @@ public:
      * @param[in] f right hand side
      * @param[inout] x new sample
      */
-    virtual void apply(const Eigen::VectorXd &f, Eigen::VectorXd &x);
+    virtual void apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const;
 
 protected:
     typedef Eigen::SimplicialLLT<LinearOperator::SparseMatrixType,
@@ -92,7 +92,7 @@ protected:
     /** @brief Cholesky factorisation */
     std::shared_ptr<LLTType> LLT_of_A;
     /** @brief vector with normal random variables */
-    Eigen::VectorXd xi;
+    mutable Eigen::VectorXd xi;
 };
 
 /** @class SORSampler
@@ -128,7 +128,7 @@ public:
      * @param[in] f right hand side
      * @param[inout] x vector to which the sweep is applied
      */
-    virtual void apply(const Eigen::VectorXd &f, Eigen::VectorXd &x);
+    virtual void apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const;
 
 protected:
     /** @brief Overrelaxation factor */
@@ -136,15 +136,49 @@ protected:
     /** @brief Sweep direction */
     const Direction direction;
     /** @brief RHS sample */
-    Eigen::VectorXd c_rhs;
+    mutable Eigen::VectorXd c_rhs;
     /** @brief Low rank correction */
-    Eigen::VectorXd xi;
+    mutable Eigen::VectorXd xi;
     /** @brief square root of diagonal matrix entries divided by omega */
     double *sqrt_precision_diag;
     /** @brief Underlying smoother */
     std::shared_ptr<SORSmoother> smoother;
     /** @brief Cholesky factorisation U^T U = Sigma^{-1} of low rank covariance matrix */
     std::shared_ptr<LinearOperator::DenseMatrixType> U_lowrank;
+};
+
+/** @class SSORSampler
+ *
+ * @brief Symmetric successive overrelaxation sampler with low rank updates
+ */
+class SSORSampler : public Sampler
+{
+public:
+    /** @brief Base type*/
+    typedef Sampler Base;
+    /** @brief Create a new instance
+     *
+     * @param[in] linear_operator_ underlying linear operator
+     * @param[in] omega_ overrelaxation factor
+     */
+    SSORSampler(const std::shared_ptr<LinearOperator> linear_operator_,
+                std::mt19937_64 &rng_,
+                const double omega_) : Base(linear_operator_, rng_),
+                                       sor_forward(linear_operator_, rng_, omega_, forward),
+                                       sor_backward(linear_operator_, rng_, omega_, backward){};
+
+    /** @brief Carry out a single SOR-sweep
+     *
+     * @param[in] b right hand side
+     * @param[inout] x vector to which the sweep is applied
+     */
+    virtual void apply(const Eigen::VectorXd &b, Eigen::VectorXd &x) const;
+
+protected:
+    /** @brief Forward smoother */
+    const SORSampler sor_forward;
+    /** @brief Backward smoother */
+    const SORSampler sor_backward;
 };
 
 #endif // SAMPLER_HH

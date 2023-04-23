@@ -25,7 +25,7 @@ CholeskySampler::CholeskySampler(const std::shared_ptr<LinearOperator> linear_op
 }
 
 /* apply Sampler */
-void CholeskySampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x)
+void CholeskySampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const
 {
     /* step 1: draw sample xi from normal distribution with zero mean and unit covariance*/
     for (unsigned int ell = 0; ell < xi.size(); ++ell)
@@ -69,7 +69,7 @@ SORSampler::SORSampler(const std::shared_ptr<LinearOperator> linear_operator_,
 }
 
 /* apply Sampler */
-void SORSampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x)
+void SORSampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const
 {
     // Diagonal part
     for (unsigned int ell = 0; ell < c_rhs.size(); ++ell)
@@ -88,4 +88,11 @@ void SORSampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x)
         c_rhs += B * (*U_lowrank) * xi;
     }
     smoother->apply(c_rhs, x);
+}
+
+/** apply SSOR sampler */
+void SSORSampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const
+{
+    sor_forward.apply(f, x);
+    sor_backward.apply(f, x);
 }
