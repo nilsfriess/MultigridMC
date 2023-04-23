@@ -64,8 +64,8 @@ public:
         A_sparse.setFromTriplets(triplet_list.begin(), triplet_list.end());
         B = DenseMatrixType(nrow, 2);
         B.setZero();
-        B(3, 0) = 1.0;
-        B(4, 1) = 1.0;
+        B(3, 0) = 10.0;
+        B(4, 1) = 10.0;
         DenseMatrixType Sigma(2, 2);
         Sigma << 4.2, -1.1, -1.1, 9.3;
         Sigma_inv = Sigma.inverse();
@@ -184,6 +184,26 @@ TEST_F(SamplerTest, TestCholeskySampler)
 TEST_F(SamplerTest, TestSORSampler)
 {
     std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(false);
+    std::mt19937_64 rng(31841287);
+    const double omega = 0.8;
+    std::shared_ptr<SORSampler> sampler = std::make_shared<SORSampler>(linear_operator,
+                                                                       rng,
+                                                                       omega,
+                                                                       forward);
+    std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
+    const double tolerance = 2.E-3;
+    EXPECT_NEAR(error.first, 0.0, tolerance);
+    EXPECT_NEAR(error.second, 0.0, tolerance);
+}
+
+/* Test SOR sampler with low rank correction
+ *
+ * Draw a large number of samples and check that their covariance agrees with
+ * the analytical value of the covariance.
+ */
+TEST_F(SamplerTest, TestSORSamplerLowRank)
+{
+    std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(true);
     std::mt19937_64 rng(31841287);
     const double omega = 0.8;
     std::shared_ptr<SORSampler> sampler = std::make_shared<SORSampler>(linear_operator,
