@@ -49,4 +49,17 @@ protected:
     mutable std::normal_distribution<double> normal_dist;
 };
 
+/* ******************** factory classes ****************************** */
+
+/** @brief Sampler factory base class */
+class SamplerFactory
+{
+public:
+    /** @brief extract a sampler for a given linear operator
+     *
+     * @param[in] linear_operator Underlying linear operator
+     */
+    virtual std::shared_ptr<Sampler> get(std::shared_ptr<LinearOperator> linear_operator) = 0;
+};
+
 #endif // SAMPLER_HH

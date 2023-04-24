@@ -46,4 +46,35 @@ protected:
     const SORSampler sor_backward;
 };
 
+/* ******************** factory classes ****************************** */
+
+/** @brief SSOR sampler factory */
+class SSORSamplerFactory
+{
+public:
+    /** @brief create a new instance
+     *
+     * @param[in] rng_ random number generator
+     * @param[in] omega_ overrelaxation parameter
+     */
+    SSORSamplerFactory(std::mt19937_64 &rng_,
+                       const double omega_) : rng(rng_),
+                                              omega(omega_) {}
+
+    /** @brief extract a sampler for a given linear operator
+     *
+     * @param[in] linear_operator Underlying linear operator
+     */
+    virtual std::shared_ptr<Sampler> get(std::shared_ptr<LinearOperator> linear_operator)
+    {
+        return std::make_shared<SSORSampler>(linear_operator, rng, omega);
+    };
+
+protected:
+    /** @brief random number generator */
+    std::mt19937_64 &rng;
+    /** @brief Overrelaxation factor */
+    const double omega;
+};
+
 #endif // SSOR_SAMPLER_HH

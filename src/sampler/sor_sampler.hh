@@ -63,4 +63,40 @@ protected:
     std::shared_ptr<LinearOperator::DenseMatrixType> U_lowrank;
 };
 
+/* ******************** factory classes ****************************** */
+
+/** @brief SOR sampler factory */
+class SORSamplerFactory
+{
+public:
+    /** @brief create a new instance
+     *
+     * @param[in] rng_ random number generator
+     * @param[in] omega_ overrelaxation parameter
+     * @param[in] direction_ sweeping direction (forward or backward)
+     */
+    SORSamplerFactory(std::mt19937_64 &rng_,
+                      const double omega_,
+                      const Direction direction_) : rng(rng_),
+                                                    omega(omega_),
+                                                    direction(direction_) {}
+
+    /** @brief extract a sampler for a given linear operator
+     *
+     * @param[in] linear_operator Underlying linear operator
+     */
+    virtual std::shared_ptr<Sampler> get(std::shared_ptr<LinearOperator> linear_operator)
+    {
+        return std::make_shared<SORSampler>(linear_operator, rng, omega, direction);
+    };
+
+protected:
+    /** @brief random number generator */
+    std::mt19937_64 &rng;
+    /** @brief Overrelaxation factor */
+    const double omega;
+    /** @brief Sweep direction */
+    const Direction direction;
+};
+
 #endif // SOR_SAMPLER_HH
