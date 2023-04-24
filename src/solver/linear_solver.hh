@@ -53,36 +53,6 @@ struct IterativeSolverParameters
     int verbose;
 };
 
-/** @class IterativeSolver
- *
- * @brief base class for iterative solvers
- */
-class IterativeSolver : public LinearSolver
-{
-public:
-    /** @brief Create a new instance
-     *
-     * @param[in] operator_ underlying linear operator
-     * @param[in] params_ solver parameters
-     */
-    IterativeSolver(std::shared_ptr<LinearOperator> linear_operator_,
-                    const IterativeSolverParameters params_) : LinearSolver(linear_operator_),
-                                                               params(params_)
-    {
-    }
-
-    /** @brief Solve the linear system Ax = b
-     *
-     * @param[in] b right hand side b
-     * @param[out] x solution x
-     */
-    virtual void apply(const Eigen::VectorXd &b, Eigen::VectorXd &x) = 0;
-
-protected:
-    /** @brief Solver Parameters */
-    const IterativeSolverParameters params;
-};
-
 /* ******************** factory classes ****************************** */
 
 /** @brief Linear solver factory base class */
