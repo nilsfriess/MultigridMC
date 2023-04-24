@@ -9,6 +9,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include "lattice/lattice.hh"
+#include "lattice/lattice2d.hh"
 
 /** @file intergrid_operator.hh
  * @brief Header file for intergrid operator classes

@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "linear_operator.hh"
-#include "lattice/lattice.hh"
+#include "lattice/lattice2d.hh"
 
 /** @file diffusion_operator_2d.hh
  *

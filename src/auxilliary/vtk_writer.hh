@@ -6,6 +6,7 @@
 #include <map>
 #include <Eigen/Dense>
 #include "lattice/lattice.hh"
+#include "lattice/lattice2d.hh"
 
 /** @file vtk_writer.hh
  *

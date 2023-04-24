@@ -6,7 +6,7 @@
 #include <random>
 #include <Eigen/Dense>
 #include <Eigen/QR>
-#include "lattice/lattice.hh"
+#include "lattice/lattice1d.hh"
 #include "linear_operator/linear_operator.hh"
 #include "sampler/sampler.hh"
 

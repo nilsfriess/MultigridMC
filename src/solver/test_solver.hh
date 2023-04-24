@@ -5,7 +5,7 @@
 #include <random>
 #include <Eigen/Dense>
 #include <Eigen/QR>
-#include "lattice/lattice.hh"
+#include "lattice/lattice2d.hh"
 #include "preconditioner/preconditioner.hh"
 #include "preconditioner/multigrid_preconditioner.hh"
 #include "solver/cholesky_solver.hh"

@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
 #include <memory>
 #include <Eigen/Dense>
-#include "lattice/lattice.hh"
+#include "lattice.hh"
+#include "lattice2d.hh"
+#include "lattice1d.hh"
 
 /** @brief test lattice classes */
 class LatticeTest : public ::testing::Test

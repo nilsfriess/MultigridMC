@@ -5,7 +5,7 @@
 #include <Eigen/Dense>
 #include <Eigen/QR>
 
-#include "lattice/lattice.hh"
+#include "lattice/lattice2d.hh"
 #include "smoother/smoother.hh"
 #include "linear_operator/linear_operator.hh"
 #include "linear_operator/diffusion_operator_2d.hh"
