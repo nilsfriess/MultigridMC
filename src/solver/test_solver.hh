@@ -6,6 +6,8 @@
 #include <Eigen/Dense>
 #include <Eigen/QR>
 #include "lattice/lattice2d.hh"
+#include "smoother/ssor_smoother.hh"
+#include "intergrid/intergrid_operator_2dlinear.hh"
 #include "preconditioner/preconditioner.hh"
 #include "preconditioner/multigrid_preconditioner.hh"
 #include "solver/cholesky_solver.hh"
@@ -117,12 +119,14 @@ TEST_F(SolverTest, TestMultigrid)
     multigrid_params.npresmooth = 1;
     multigrid_params.npostsmooth = 1;
     const double omega = 1.0;
-    std::shared_ptr<SSORSmootherFactory> smoother_factory = std::make_shared<SSORSmootherFactory>(omega);
+    std::shared_ptr<SSORSmootherFactory> presmoother_factory = std::make_shared<SSORSmootherFactory>(omega);
+    std::shared_ptr<SSORSmootherFactory> postsmoother_factory = std::make_shared<SSORSmootherFactory>(omega);
     std::shared_ptr<IntergridOperator2dLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperator2dLinearFactory>();
     std::shared_ptr<CholeskySolverFactory> coarse_solver_factory = std::make_shared<CholeskySolverFactory>();
     std::shared_ptr<MultigridPreconditioner> prec = std::make_shared<MultigridPreconditioner>(linear_operator,
                                                                                               multigrid_params,
-                                                                                              smoother_factory,
+                                                                                              presmoother_factory,
+                                                                                              postsmoother_factory,
                                                                                               intergrid_operator_factory,
                                                                                               coarse_solver_factory);
     IterativeSolverParameters solver_params;
@@ -149,12 +153,14 @@ TEST_F(SolverTest, TestMultigridLowRank)
     multigrid_params.npresmooth = 1;
     multigrid_params.npostsmooth = 1;
     const double omega = 1.0;
-    std::shared_ptr<SSORSmootherFactory> smoother_factory = std::make_shared<SSORSmootherFactory>(omega);
+    std::shared_ptr<SSORSmootherFactory> presmoother_factory = std::make_shared<SSORSmootherFactory>(omega);
+    std::shared_ptr<SSORSmootherFactory> postsmoother_factory = std::make_shared<SSORSmootherFactory>(omega);
     std::shared_ptr<IntergridOperator2dLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperator2dLinearFactory>();
     std::shared_ptr<CholeskySolverFactory> coarse_solver_factory = std::make_shared<CholeskySolverFactory>();
     std::shared_ptr<MultigridPreconditioner> prec = std::make_shared<MultigridPreconditioner>(linear_operator_lowrank,
                                                                                               multigrid_params,
-                                                                                              smoother_factory,
+                                                                                              presmoother_factory,
+                                                                                              postsmoother_factory,
                                                                                               intergrid_operator_factory,
                                                                                               coarse_solver_factory);
     IterativeSolverParameters solver_params;

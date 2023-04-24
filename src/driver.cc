@@ -75,12 +75,14 @@ int main(int argc, char *argv[])
     multigrid_params.npostsmooth = 2;
     const double omega = 1.0;
     std::cout << "omega = " << omega << std::endl;
-    std::shared_ptr<SSORSmootherFactory> smoother_factory = std::make_shared<SSORSmootherFactory>(omega);
+    std::shared_ptr<SSORSmootherFactory> presmoother_factory = std::make_shared<SSORSmootherFactory>(omega);
+    std::shared_ptr<SSORSmootherFactory> postsmoother_factory = std::make_shared<SSORSmootherFactory>(omega);
     std::shared_ptr<IntergridOperator2dLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperator2dLinearFactory>();
     std::shared_ptr<CholeskySolverFactory> coarse_solver_factory = std::make_shared<CholeskySolverFactory>();
     std::shared_ptr<MultigridPreconditioner> prec = std::make_shared<MultigridPreconditioner>(linear_operator,
                                                                                               multigrid_params,
-                                                                                              smoother_factory,
+                                                                                              presmoother_factory,
+                                                                                              postsmoother_factory,
                                                                                               intergrid_operator_factory,
                                                                                               coarse_solver_factory);
     IterativeSolverParameters solver_params;
