@@ -3,7 +3,7 @@
 #include <random>
 #include <Eigen/Dense>
 #include "linear_operator/linear_operator.hh"
-#include "smoother/smoother.hh"
+#include "smoother/sor_smoother.hh"
 #include "sampler.hh"
 
 /** @file sor_sampler.hh

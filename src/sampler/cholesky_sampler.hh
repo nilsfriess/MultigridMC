@@ -3,7 +3,6 @@
 #include <random>
 #include <Eigen/Dense>
 #include "linear_operator/linear_operator.hh"
-#include "smoother/smoother.hh"
 #include "sampler.hh"
 
 /** @file cholesky_sampler.hh

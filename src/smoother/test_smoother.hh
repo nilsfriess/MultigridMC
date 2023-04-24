@@ -6,7 +6,7 @@
 #include <Eigen/Dense>
 #include <Eigen/QR>
 #include "lattice/lattice.hh"
-#include "smoother/smoother.hh"
+#include "smoother/ssor_smoother.hh"
 #include "linear_operator/diffusion_operator_2d.hh"
 
 /** @brief fixture class for smoother tests */
