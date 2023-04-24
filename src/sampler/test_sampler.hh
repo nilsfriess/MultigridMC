@@ -9,6 +9,8 @@
 #include "lattice/lattice1d.hh"
 #include "linear_operator/linear_operator.hh"
 #include "sampler/sampler.hh"
+#include "sampler/cholesky_sampler.hh"
+#include "sampler/ssor_sampler.hh"
 
 /** @class TestOperator1d
  *
