@@ -11,6 +11,7 @@
 #include "sampler/sampler.hh"
 #include "sampler/cholesky_sampler.hh"
 #include "sampler/ssor_sampler.hh"
+#include "sampler/multigridmc_sampler.hh"
 
 /** @class TestOperator1d
  *
@@ -178,6 +179,22 @@ TEST_F(SamplerTest, TestCholeskySampler)
     EXPECT_NEAR(error.second, 0.0, tolerance);
 }
 
+/* Test Cholesky sampler with low rank correction
+ *
+ * Draw a large number of samples and check that their covariance agrees with
+ * the analytical value of the covariance.
+ */
+TEST_F(SamplerTest, TestCholeskySamplerLowRank)
+{
+    std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(true);
+    std::mt19937_64 rng(31841287);
+    std::shared_ptr<CholeskySampler> sampler = std::make_shared<CholeskySampler>(linear_operator, rng);
+    std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
+    const double tolerance = 2.E-3;
+    EXPECT_NEAR(error.first, 0.0, tolerance);
+    EXPECT_NEAR(error.second, 0.0, tolerance);
+}
+
 /* Test SSOR sampler without low rank correction
  *
  * Draw a large number of samples and check that their covariance agrees with
@@ -210,22 +227,6 @@ TEST_F(SamplerTest, TestSSORSamplerLowRank)
     std::shared_ptr<SSORSampler> sampler = std::make_shared<SSORSampler>(linear_operator,
                                                                          rng,
                                                                          omega);
-    std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
-    const double tolerance = 2.E-3;
-    EXPECT_NEAR(error.first, 0.0, tolerance);
-    EXPECT_NEAR(error.second, 0.0, tolerance);
-}
-
-/* Test Cholesky sampler with low rank correction
- *
- * Draw a large number of samples and check that their covariance agrees with
- * the analytical value of the covariance.
- */
-TEST_F(SamplerTest, TestCholeskySamplerLowRank)
-{
-    std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(true);
-    std::mt19937_64 rng(31841287);
-    std::shared_ptr<CholeskySampler> sampler = std::make_shared<CholeskySampler>(linear_operator, rng);
     std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
     const double tolerance = 2.E-3;
     EXPECT_NEAR(error.first, 0.0, tolerance);
