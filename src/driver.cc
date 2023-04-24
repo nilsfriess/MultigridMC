@@ -9,7 +9,7 @@
 #include "smoother/smoother.hh"
 #include "linear_operator/linear_operator.hh"
 #include "linear_operator/diffusion_operator_2d.hh"
-#include "intergrid/intergrid_operator.hh"
+#include "intergrid/intergrid_operator_2dlinear.hh"
 #include "solver/cholesky_solver.hh"
 #include "solver/iterative_solver.hh"
 #include "preconditioner/multigrid_preconditioner.hh"

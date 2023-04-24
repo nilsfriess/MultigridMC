@@ -4,7 +4,8 @@
 #include <gtest/gtest.h>
 #include <random>
 #include <Eigen/Dense>
-#include "intergrid/intergrid_operator.hh"
+#include "intergrid/intergrid_operator_2davg.hh"
+#include "intergrid/intergrid_operator_2dlinear.hh"
 #include "linear_operator/diffusion_operator_2d.hh"
 
 /** @brief fixture class for intergrid tests */

@@ -9,7 +9,6 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include "lattice/lattice.hh"
-#include "lattice/lattice2d.hh"
 
 /** @file intergrid_operator.hh
  * @brief Header file for intergrid operator classes
@@ -151,40 +150,6 @@ public:
     unsigned int *colidx;
 };
 
-/** @class IntergridOperatorAvg
- * IntergridOperator which implements constant averaging
- *
- */
-class IntergridOperator2dAvg : public IntergridOperator
-{
-public:
-    /** @brief Base type */
-    typedef IntergridOperator Base;
-
-    /** @brief Create a new instance
-     *
-     * @param[in] lattice_ underlying lattice object
-     */
-    IntergridOperator2dAvg(const std::shared_ptr<Lattice2d> lattice_);
-};
-
-/** @class IntergridOperatorAvg
- * IntergridOperator which implements linear averaging
- *
- */
-class IntergridOperator2dLinear : public IntergridOperator
-{
-public:
-    /** @brief Base type */
-    typedef IntergridOperator Base;
-
-    /** @brief Create a new instance
-     *
-     * @param[in] lattice_ underlying lattice object
-     */
-    IntergridOperator2dLinear(const std::shared_ptr<Lattice2d> lattice_);
-};
-
 /* ******************** factory classes ****************************** */
 
 /** @brief Intergrid factory base class */
@@ -193,28 +158,6 @@ class IntergridOperatorFactory
 public:
     /** @brief extract a smoother for a given action */
     virtual std::shared_ptr<IntergridOperator> get(std::shared_ptr<Lattice> lattice) = 0;
-};
-
-/** @brief Factory for 2d averaging intergrid operators */
-class IntergridOperator2dAvgFactory : public IntergridOperatorFactory
-{
-public:
-    /** @brief extract a smoother for a given action */
-    virtual std::shared_ptr<IntergridOperator> get(std::shared_ptr<Lattice> lattice)
-    {
-        return std::make_shared<IntergridOperator2dAvg>(std::dynamic_pointer_cast<Lattice2d>(lattice));
-    };
-};
-
-/** @brief Factory for 2d linear intergrid operators */
-class IntergridOperator2dLinearFactory : public IntergridOperatorFactory
-{
-public:
-    /** @brief extract a smoother for a given action */
-    virtual std::shared_ptr<IntergridOperator> get(std::shared_ptr<Lattice> lattice)
-    {
-        return std::make_shared<IntergridOperator2dLinear>(std::dynamic_pointer_cast<Lattice2d>(lattice));
-    };
 };
 
 #endif // INTERGRID_OPERATOR_HH
