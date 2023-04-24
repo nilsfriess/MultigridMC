@@ -56,4 +56,30 @@ protected:
     mutable Eigen::VectorXd xi;
 };
 
+/* ******************** factory classes ****************************** */
+
+/** @brief Cholesky sampler factory */
+class CholeskySamplerFactory
+{
+public:
+    /** @brief create a new instance
+     *
+     * @param[in] rng_ random number generator
+     */
+    CholeskySamplerFactory(std::mt19937_64 &rng_) : rng(rng_) {}
+
+    /** @brief extract a sampler for a given linear operator
+     *
+     * @param[in] linear_operator Underlying linear operator
+     */
+    virtual std::shared_ptr<Sampler> get(std::shared_ptr<LinearOperator> linear_operator)
+    {
+        return std::make_shared<CholeskySampler>(linear_operator, rng);
+    };
+
+protected:
+    /** @brief random number generator */
+    std::mt19937_64 &rng;
+};
+
 #endif // CHOLESKY_SAMPLER_HH
