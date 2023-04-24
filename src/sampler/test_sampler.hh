@@ -8,6 +8,7 @@
 #include <Eigen/QR>
 #include "lattice/lattice1d.hh"
 #include "linear_operator/linear_operator.hh"
+#include "intergrid/intergrid_operator_1dlinear.hh"
 #include "sampler/sampler.hh"
 #include "sampler/cholesky_sampler.hh"
 #include "sampler/ssor_sampler.hh"
@@ -208,6 +209,39 @@ TEST_F(SamplerTest, TestSSORSampler)
     std::shared_ptr<SSORSampler> sampler = std::make_shared<SSORSampler>(linear_operator,
                                                                          rng,
                                                                          omega);
+    std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
+    const double tolerance = 2.E-3;
+    EXPECT_NEAR(error.first, 0.0, tolerance);
+    EXPECT_NEAR(error.second, 0.0, tolerance);
+}
+
+/* Test Multigrid MC sampler without low rank correction
+ *
+ * Draw a large number of samples and check that their covariance agrees with
+ * the analytical value of the covariance.
+ */
+TEST_F(SamplerTest, TestMultigridMCSampler)
+{
+    MultigridMCParameters multigridmc_params;
+    multigridmc_params.nlevel = 2;
+    multigridmc_params.npresample = 1;
+    multigridmc_params.npostsample = 1;
+    std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(false);
+    std::mt19937_64 rng(31841287);
+    const double omega = 0.8;
+    std::shared_ptr<SSORSamplerFactory> presampler_factory = std::make_shared<SSORSamplerFactory>(rng,
+                                                                                                  omega);
+    std::shared_ptr<SSORSamplerFactory> postsampler_factory = std::make_shared<SSORSamplerFactory>(rng,
+                                                                                                   omega);
+    std::shared_ptr<IntergridOperator1dLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperator1dLinearFactory>();
+    std::shared_ptr<CholeskySamplerFactory> coarse_sampler_factory = std::make_shared<CholeskySamplerFactory>(rng);
+    std::shared_ptr<MultigridMCSampler> sampler = std::make_shared<MultigridMCSampler>(linear_operator,
+                                                                                       rng,
+                                                                                       multigridmc_params,
+                                                                                       presampler_factory,
+                                                                                       postsampler_factory,
+                                                                                       intergrid_operator_factory,
+                                                                                       coarse_sampler_factory);
     std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
     const double tolerance = 2.E-3;
     EXPECT_NEAR(error.first, 0.0, tolerance);

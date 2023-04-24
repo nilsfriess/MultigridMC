@@ -59,7 +59,7 @@ protected:
 /* ******************** factory classes ****************************** */
 
 /** @brief Cholesky sampler factory */
-class CholeskySamplerFactory
+class CholeskySamplerFactory : public SamplerFactory
 {
 public:
     /** @brief create a new instance

@@ -48,19 +48,19 @@ public:
                        std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory_,
                        std::shared_ptr<SamplerFactory> coarse_sampler_factory_);
 
-    /** @brief Solve the linear system Ax = b
+    /** @brief Draw a new sample
      *
-     * @param[in] b right hand side b
+     * @param[in] f right hand side b
      * @param[out] x solution x
      */
-    virtual void apply(const Eigen::VectorXd &b, Eigen::VectorXd &x);
+    virtual void apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const;
 
 protected:
     /** @brief Recursive solve on a givel level
      *
      * @param[in] level level on which to solve recursively
      */
-    void sample(const unsigned int level);
+    void sample(const unsigned int level) const;
 
     /** @brief parameters */
     const MultigridMCParameters params;
@@ -83,11 +83,11 @@ protected:
     /** @brief intergrid operators on all levels (except the coarsest) */
     std::vector<std::shared_ptr<IntergridOperator>> intergrid_operators;
     /** @brief Solution on each level */
-    std::vector<Eigen::VectorXd> x_ell;
+    mutable std::vector<Eigen::VectorXd> x_ell;
     /** @brief RHS on each level */
-    std::vector<Eigen::VectorXd> f_ell;
+    mutable std::vector<Eigen::VectorXd> f_ell;
     /** @brief Residual on each level */
-    std::vector<Eigen::VectorXd> r_ell;
+    mutable std::vector<Eigen::VectorXd> r_ell;
 };
 
 #endif // MULTIGRIDMC_SAMPLER_HH

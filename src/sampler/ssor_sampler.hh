@@ -49,7 +49,7 @@ protected:
 /* ******************** factory classes ****************************** */
 
 /** @brief SSOR sampler factory */
-class SSORSamplerFactory
+class SSORSamplerFactory : public SamplerFactory
 {
 public:
     /** @brief create a new instance

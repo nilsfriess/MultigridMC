@@ -44,8 +44,8 @@ MultigridMCSampler::MultigridMCSampler(std::shared_ptr<LinearOperator> linear_op
     coarse_sampler = coarse_sampler_factory->get(lin_op);
 }
 
-/** Recursive solve on a given level */
-void MultigridMCSampler::sample(const unsigned int level)
+/** Recursive sampling on a given level */
+void MultigridMCSampler::sample(const unsigned int level) const
 {
     if (level == params.nlevel - 1)
     {
@@ -77,7 +77,7 @@ void MultigridMCSampler::sample(const unsigned int level)
 }
 
 /** Solve the linear system Ax = b with one iteration of the multigrid V-cycle */
-void MultigridMCSampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x)
+void MultigridMCSampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const
 {
     f_ell[0] = f;
     x_ell[0] = x;

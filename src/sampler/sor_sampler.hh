@@ -66,7 +66,7 @@ protected:
 /* ******************** factory classes ****************************** */
 
 /** @brief SOR sampler factory */
-class SORSamplerFactory
+class SORSamplerFactory : public SamplerFactory
 {
 public:
     /** @brief create a new instance
