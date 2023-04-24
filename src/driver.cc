@@ -13,7 +13,7 @@
 #include "solver/cholesky_solver.hh"
 #include "solver/iterative_solver.hh"
 #include "preconditioner/multigrid_preconditioner.hh"
-#include "auxilliary/vtk_writer.hh"
+#include "auxilliary/vtk_writer2d.hh"
 
 int main(int argc, char *argv[])
 {
