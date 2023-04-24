@@ -2,8 +2,8 @@
 #define SAMPLER_HH SAMPLER_HH
 #include <random>
 #include <Eigen/Dense>
-#include "linear_operator.hh"
-#include "smoother.hh"
+#include "linear_operator/linear_operator.hh"
+#include "smoother/smoother.hh"
 
 /** @file sampler.hh
  *

@@ -2,9 +2,9 @@
 #define LOOP_SOLVER_HH LOOP_SOLVER_HH
 
 #include <Eigen/Dense>
-#include "linear_operator.hh"
+#include "linear_operator/linear_operator.hh"
 #include "linear_solver.hh"
-#include "preconditioner.hh"
+#include "preconditioner/preconditioner.hh"
 
 /** @file iterative_solver.hh
  *

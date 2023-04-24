@@ -2,7 +2,7 @@
 #define PRECONDITIONER_HH PRECONDITIONER_HH
 #include <memory>
 #include <Eigen/Dense>
-#include "linear_operator.hh"
+#include "linear_operator/linear_operator.hh"
 
 /** @file preconditioner.hh
  *

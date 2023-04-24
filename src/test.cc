@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include "test_lattice.hh"
-#include "test_intergrid.hh"
-#include "test_smoother.hh"
-#include "test_solver.hh"
-#include "test_sampler.hh"
+#include "lattice/test_lattice.hh"
+#include "intergrid/test_intergrid.hh"
+#include "smoother/test_smoother.hh"
+#include "solver/test_solver.hh"
+#include "sampler/test_sampler.hh"
 
 int main(int argc, char *argv[])
 {

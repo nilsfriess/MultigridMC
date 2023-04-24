@@ -2,7 +2,7 @@
 #define CHOLESKY_SOLVER_HH CHOLESKY_SOLVER_HH
 #include <memory>
 #include <Eigen/SparseCholesky>
-#include "linear_operator.hh"
+#include "linear_operator/linear_operator.hh"
 #include "linear_solver.hh"
 
 /** @file cholesky_solver.hh

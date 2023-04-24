@@ -5,9 +5,9 @@
 #include <random>
 #include <Eigen/Dense>
 #include <Eigen/QR>
-#include "lattice.hh"
-#include "smoother.hh"
-#include "diffusion_operator_2d.hh"
+#include "lattice/lattice.hh"
+#include "smoother/smoother.hh"
+#include "linear_operator/diffusion_operator_2d.hh"
 
 /** @brief fixture class for smoother tests */
 class SmootherTest : public ::testing::Test

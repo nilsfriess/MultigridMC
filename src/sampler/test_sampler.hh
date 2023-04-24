@@ -6,9 +6,9 @@
 #include <random>
 #include <Eigen/Dense>
 #include <Eigen/QR>
-#include "lattice.hh"
-#include "linear_operator.hh"
-#include "sampler.hh"
+#include "lattice/lattice.hh"
+#include "linear_operator/linear_operator.hh"
+#include "sampler/sampler.hh"
 
 /** @class TestOperator1d
  *

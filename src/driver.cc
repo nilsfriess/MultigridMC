@@ -5,15 +5,15 @@
 #include <Eigen/Dense>
 #include <Eigen/QR>
 
-#include "lattice.hh"
-#include "smoother.hh"
-#include "linear_operator.hh"
-#include "diffusion_operator_2d.hh"
-#include "intergrid_operator.hh"
-#include "iterative_solver.hh"
-#include "multigrid_preconditioner.hh"
-#include "cholesky_solver.hh"
-#include "vtk_writer.hh"
+#include "lattice/lattice.hh"
+#include "smoother/smoother.hh"
+#include "linear_operator/linear_operator.hh"
+#include "linear_operator/diffusion_operator_2d.hh"
+#include "intergrid/intergrid_operator.hh"
+#include "solver/cholesky_solver.hh"
+#include "solver/iterative_solver.hh"
+#include "preconditioner/multigrid_preconditioner.hh"
+#include "auxilliary/vtk_writer.hh"
 
 int main(int argc, char *argv[])
 {

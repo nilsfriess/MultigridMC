@@ -5,7 +5,7 @@
 #include <fstream>
 #include <map>
 #include <Eigen/Dense>
-#include "lattice.hh"
+#include "lattice/lattice.hh"
 
 /** @file vtk_writer.hh
  *

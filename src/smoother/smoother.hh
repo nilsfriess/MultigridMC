@@ -2,7 +2,7 @@
 #define SMOOTHER_HH SMOOTHER_HH
 #include <random>
 #include <Eigen/Dense>
-#include "linear_operator.hh"
+#include "linear_operator/linear_operator.hh"
 
 /** @file Smoother.hh
  *

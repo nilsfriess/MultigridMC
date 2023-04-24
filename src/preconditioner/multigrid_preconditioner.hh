@@ -3,11 +3,11 @@
 #include <memory>
 #include <vector>
 #include <Eigen/Dense>
-#include "linear_operator.hh"
-#include "intergrid_operator.hh"
-#include "linear_solver.hh"
+#include "linear_operator/linear_operator.hh"
+#include "intergrid/intergrid_operator.hh"
+#include "solver/linear_solver.hh"
 #include "preconditioner.hh"
-#include "smoother.hh"
+#include "smoother/smoother.hh"
 
 /** @file multigrid_preconditioner.hh
  *

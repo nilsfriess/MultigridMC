@@ -1,16 +1,13 @@
 enable_testing()
 
-set(SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/linear_operator.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/sampler.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/smoother.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/diffusion_operator_2d.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/intergrid_operator.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/cholesky_solver.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/multigrid_preconditioner.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/iterative_solver.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/vtk_writer.cc
-)
+add_subdirectory(lattice)
+add_subdirectory(solver)
+add_subdirectory(sampler)
+add_subdirectory(preconditioner)
+add_subdirectory(smoother)
+add_subdirectory(linear_operator)
+add_subdirectory(intergrid)
+add_subdirectory(auxilliary)
 
 # Main executable
 add_executable(driver driver.cc ${SOURCES})

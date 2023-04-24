@@ -5,8 +5,8 @@
 #include <cmath>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
-#include "lattice.hh"
-#include "intergrid_operator.hh"
+#include "lattice/lattice.hh"
+#include "intergrid/intergrid_operator.hh"
 
 /** @file LinearOperator.hh
  * @brief Header file for LinearOperator classes

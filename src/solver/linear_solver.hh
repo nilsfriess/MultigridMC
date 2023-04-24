@@ -2,7 +2,7 @@
 #define SOLVER_HH SOLVER_HH
 #include <memory>
 #include <Eigen/Dense>
-#include "linear_operator.hh"
+#include "linear_operator/linear_operator.hh"
 
 /** @file linear_solver.hh
  *

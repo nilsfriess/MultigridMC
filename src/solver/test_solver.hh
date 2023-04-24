@@ -5,12 +5,12 @@
 #include <random>
 #include <Eigen/Dense>
 #include <Eigen/QR>
-#include "lattice.hh"
-#include "cholesky_solver.hh"
-#include "preconditioner.hh"
-#include "multigrid_preconditioner.hh"
-#include "iterative_solver.hh"
-#include "diffusion_operator_2d.hh"
+#include "lattice/lattice.hh"
+#include "preconditioner/preconditioner.hh"
+#include "preconditioner/multigrid_preconditioner.hh"
+#include "solver/cholesky_solver.hh"
+#include "solver/iterative_solver.hh"
+#include "linear_operator/diffusion_operator_2d.hh"
 
 /** @brief fixture class for solver tests */
 class SolverTest : public ::testing::Test
