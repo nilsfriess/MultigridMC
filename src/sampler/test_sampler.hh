@@ -164,107 +164,81 @@ protected:
 protected:
 };
 
-/* Test Cholesky sampler without low rank correction
+/* Test Cholesky sampler without / with low rank correction
  *
  * Draw a large number of samples and check that their covariance agrees with
  * the analytical value of the covariance.
  */
 TEST_F(SamplerTest, TestCholeskySampler)
 {
-    std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(false);
-    std::mt19937_64 rng(31841287);
-    std::shared_ptr<CholeskySampler> sampler = std::make_shared<CholeskySampler>(linear_operator, rng);
-    std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
-    const double tolerance = 2.E-3;
-    EXPECT_NEAR(error.first, 0.0, tolerance);
-    EXPECT_NEAR(error.second, 0.0, tolerance);
+    for (bool lowrank_correction : {false, true})
+    {
+        std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
+        std::mt19937_64 rng(31841287);
+        std::shared_ptr<CholeskySampler> sampler = std::make_shared<CholeskySampler>(linear_operator, rng);
+        std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
+        const double tolerance = 2.E-3;
+        EXPECT_NEAR(error.first, 0.0, tolerance);
+        EXPECT_NEAR(error.second, 0.0, tolerance);
+    }
 }
 
-/* Test Cholesky sampler with low rank correction
- *
- * Draw a large number of samples and check that their covariance agrees with
- * the analytical value of the covariance.
- */
-TEST_F(SamplerTest, TestCholeskySamplerLowRank)
-{
-    std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(true);
-    std::mt19937_64 rng(31841287);
-    std::shared_ptr<CholeskySampler> sampler = std::make_shared<CholeskySampler>(linear_operator, rng);
-    std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
-    const double tolerance = 2.E-3;
-    EXPECT_NEAR(error.first, 0.0, tolerance);
-    EXPECT_NEAR(error.second, 0.0, tolerance);
-}
-
-/* Test SSOR sampler without low rank correction
+/* Test SSOR sampler without / with low rank correction
  *
  * Draw a large number of samples and check that their covariance agrees with
  * the analytical value of the covariance.
  */
 TEST_F(SamplerTest, TestSSORSampler)
 {
-    std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(false);
-    std::mt19937_64 rng(31841287);
-    const double omega = 0.8;
-    std::shared_ptr<SSORSampler> sampler = std::make_shared<SSORSampler>(linear_operator,
-                                                                         rng,
-                                                                         omega);
-    std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
-    const double tolerance = 2.E-3;
-    EXPECT_NEAR(error.first, 0.0, tolerance);
-    EXPECT_NEAR(error.second, 0.0, tolerance);
+    for (bool lowrank_correction : {false, true})
+    {
+        std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
+        std::mt19937_64 rng(31841287);
+        const double omega = 0.8;
+        std::shared_ptr<SSORSampler> sampler = std::make_shared<SSORSampler>(linear_operator,
+                                                                             rng,
+                                                                             omega);
+        std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
+        const double tolerance = 2.E-3;
+        EXPECT_NEAR(error.first, 0.0, tolerance);
+        EXPECT_NEAR(error.second, 0.0, tolerance);
+    }
 }
 
-/* Test Multigrid MC sampler without low rank correction
+/* Test Multigrid MC sampler without / with low rank correction
  *
  * Draw a large number of samples and check that their covariance agrees with
  * the analytical value of the covariance.
  */
 TEST_F(SamplerTest, TestMultigridMCSampler)
 {
-    MultigridMCParameters multigridmc_params;
-    multigridmc_params.nlevel = 2;
-    multigridmc_params.npresample = 1;
-    multigridmc_params.npostsample = 1;
-    std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(false);
-    std::mt19937_64 rng(31841287);
-    const double omega = 0.8;
-    std::shared_ptr<SSORSamplerFactory> presampler_factory = std::make_shared<SSORSamplerFactory>(rng,
-                                                                                                  omega);
-    std::shared_ptr<SSORSamplerFactory> postsampler_factory = std::make_shared<SSORSamplerFactory>(rng,
-                                                                                                   omega);
-    std::shared_ptr<IntergridOperator1dLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperator1dLinearFactory>();
-    std::shared_ptr<CholeskySamplerFactory> coarse_sampler_factory = std::make_shared<CholeskySamplerFactory>(rng);
-    std::shared_ptr<MultigridMCSampler> sampler = std::make_shared<MultigridMCSampler>(linear_operator,
-                                                                                       rng,
-                                                                                       multigridmc_params,
-                                                                                       presampler_factory,
-                                                                                       postsampler_factory,
-                                                                                       intergrid_operator_factory,
-                                                                                       coarse_sampler_factory);
-    std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
-    const double tolerance = 2.E-3;
-    EXPECT_NEAR(error.first, 0.0, tolerance);
-    EXPECT_NEAR(error.second, 0.0, tolerance);
-}
-
-/* Test SSOR sampler with low rank correction
- *
- * Draw a large number of samples and check that their covariance agrees with
- * the analytical value of the covariance.
- */
-TEST_F(SamplerTest, TestSSORSamplerLowRank)
-{
-    std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(true);
-    std::mt19937_64 rng(31841287);
-    const double omega = 0.8;
-    std::shared_ptr<SSORSampler> sampler = std::make_shared<SSORSampler>(linear_operator,
-                                                                         rng,
-                                                                         omega);
-    std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
-    const double tolerance = 2.E-3;
-    EXPECT_NEAR(error.first, 0.0, tolerance);
-    EXPECT_NEAR(error.second, 0.0, tolerance);
+    for (bool lowrank_correction : {false, true})
+    {
+        MultigridMCParameters multigridmc_params;
+        multigridmc_params.nlevel = 2;
+        multigridmc_params.npresample = 1;
+        multigridmc_params.npostsample = 1;
+        std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
+        std::mt19937_64 rng(31841287);
+        const double omega = 0.8;
+        std::shared_ptr<SSORSamplerFactory> presampler_factory = std::make_shared<SSORSamplerFactory>(rng,
+                                                                                                      omega);
+        std::shared_ptr<SSORSamplerFactory> postsampler_factory = std::make_shared<SSORSamplerFactory>(rng,
+                                                                                                       omega);
+        std::shared_ptr<IntergridOperator1dLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperator1dLinearFactory>();
+        std::shared_ptr<CholeskySamplerFactory> coarse_sampler_factory = std::make_shared<CholeskySamplerFactory>(rng);
+        std::shared_ptr<MultigridMCSampler> sampler = std::make_shared<MultigridMCSampler>(linear_operator,
+                                                                                           rng,
+                                                                                           multigridmc_params,
+                                                                                           presampler_factory,
+                                                                                           postsampler_factory,
+                                                                                           intergrid_operator_factory,
+                                                                                           coarse_sampler_factory);
+        std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
+        const double tolerance = 2.E-3;
+        EXPECT_NEAR(error.first, 0.0, tolerance);
+        EXPECT_NEAR(error.second, 0.0, tolerance);
+    }
 }
 
 #endif // TEST_SAMPLER_HH
