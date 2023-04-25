@@ -93,6 +93,15 @@ public:
     /** @brief Convert Sigma^{-1} to dense storage format */
     const DenseMatrixType &get_Sigma_inv() const { return Sigma_inv; };
 
+    /** @brief compute (dense) precision matrix */
+    DenseMatrixType precision() const;
+
+    /** @brief compute (dense) covariance matrix */
+    DenseMatrixType covariance() const
+    {
+        return precision().inverse();
+    }
+
 protected:
     /** @brief underlying lattice */
     const std::shared_ptr<Lattice> lattice;

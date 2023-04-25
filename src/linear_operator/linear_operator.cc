@@ -20,3 +20,14 @@ LinearOperator LinearOperator::coarsen(const std::shared_ptr<IntergridOperator> 
     lin_op.Sigma_inv = Sigma_inv;
     return lin_op;
 }
+
+/* compute (dense) precision matrix */
+LinearOperator::DenseMatrixType LinearOperator::precision() const
+{
+    DenseMatrixType Q = A_sparse.toDense();
+    if (m_lowrank > 0)
+    {
+        Q += B * Sigma_inv * B.transpose();
+    }
+    return Q;
+}

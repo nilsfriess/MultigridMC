@@ -75,23 +75,6 @@ public:
         Sigma_inv = Sigma.inverse();
     }
 
-    /** @brief compute (dense) precision matrix */
-    DenseMatrixType precision() const
-    {
-        DenseMatrixType Q = A_sparse.toDense();
-        if (lowrank_update)
-        {
-            Q += B * Sigma_inv * B.transpose();
-        }
-        return Q;
-    }
-
-    /** @brief compute (dense) covariance matrix */
-    DenseMatrixType covariance() const
-    {
-        return precision().inverse();
-    }
-
 protected:
     /** @brief use a low-rank update? */
     const bool lowrank_update;
