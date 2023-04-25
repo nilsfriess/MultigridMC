@@ -8,6 +8,7 @@ add_subdirectory(smoother)
 add_subdirectory(linear_operator)
 add_subdirectory(intergrid)
 add_subdirectory(auxilliary)
+add_subdirectory(qoi)
 
 # Main executable
 add_executable(driver driver.cc ${SOURCES})
