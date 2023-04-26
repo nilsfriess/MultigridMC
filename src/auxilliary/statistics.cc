@@ -29,11 +29,11 @@ void Statistics::record_sample(const Eigen::VectorXd Q)
     unsigned int N_k = n_samples - k;
     if (N_k == 1)
     {
-      S_k.push_back(Q_k[0].cwiseProduct(Q_k[k]));
+      S_k.push_back(Q_k[0] * Q_k[k].transpose());
     }
     else
     {
-      S_k[k] += (Q_k[0].cwiseProduct(Q_k[k]) - S_k[k]) / (1.0 * N_k);
+      S_k[k] += (Q_k[0] * Q_k[k].transpose() - S_k[k]) / (1.0 * N_k);
     }
   }
 }
@@ -50,31 +50,30 @@ Eigen::VectorXd Statistics::average() const
   return avg;
 }
 
-/* Return vector with diagonal autocorrelation function \f$C(k)\f$ */
-std::vector<Eigen::VectorXd> Statistics::auto_corr() const
+/* Return vector with autocovariance function \f$C(k)\f$ */
+std::vector<Eigen::MatrixXd> Statistics::auto_covariance() const
 {
-  std::vector<Eigen::VectorXd> autocorr_k;
+  std::vector<Eigen::MatrixXd> autocov;
   for (auto it = S_k.begin(); it != S_k.end(); ++it)
   {
-    autocorr_k.push_back(*it - avg.cwiseProduct(avg));
+    autocov.push_back(*it - avg * avg.transpose());
   }
-  return autocorr_k;
+  return autocov;
 }
 
-/* Return integrated autocorrelation time \f$\tau_{\text{int}}\f$ */
-Eigen::VectorXd Statistics::tau_int() const
+/* Return integrated auto covariance matrix \f$\tau_{\text{int}}\f$ */
+Eigen::MatrixXd Statistics::tau_int() const
 {
-  const std::vector<Eigen::VectorXd> &C_k_ = auto_corr();
-  unsigned int dim = C_k_[0].size();
-  Eigen::VectorXd tau_int_tmp(dim);
-  Eigen::VectorXd ones(dim);
-  ones.setOnes();
-  tau_int_tmp.setZero();
-  for (unsigned int k = 1; k < C_k_.size(); ++k)
+  const std::vector<Eigen::MatrixXd> &C_k_ = auto_covariance();
+  Eigen::MatrixXd covariance = C_k_[0];
+  unsigned int dim = covariance.rows();
+  Eigen::MatrixXd tau_int_tmp = covariance;
+  unsigned int kmax = C_k_.size();
+  for (unsigned int k = 1; k < kmax; ++k)
   {
-    tau_int_tmp += (1. - k / (1.0 * n_samples)) * C_k_[k];
+    tau_int_tmp += 2 * (1. - k / (1.0 * kmax)) * C_k_[k];
   }
-  return ones.cwiseMax(ones + 2.0 * tau_int_tmp.cwiseQuotient(C_k_[0]));
+  return tau_int_tmp * covariance.inverse();
 }
 
 /* Return the number of samples (across all processors) */

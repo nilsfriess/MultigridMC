@@ -30,27 +30,24 @@
  *     \text{Var}[Q] = \frac{1}{N-1}\sum_{i=0}^{N-1}(Q_i-\overline{Q}) (Q_i-\overline{Q})^T
  *   \f]
  *
- * - *Autocorrelation function (for diagonal entries of covariance matrix)*
+ * - *Auto covariance function*
  *   \f[
- *     C(k) = \langle (Q_i-\overline{Q})(Q_{i-k}-\overline{Q}) \rangle\\
- *          = \langle Q_i Q_{i-k} \rangle - \overline{Q}^2
+ *     C(k) = \langle (Q_i-\overline{Q})(Q_{i+k}-\overline{Q})^T \rangle\\
+ *          = \langle Q_i Q_{i+k}^T \rangle - \overline{Q}^2
  *   \f]
  *
- * - *Integrated autocorrelation (for diagonal entries of covariance matrix)*
+ * - *Integrated auto covariance matrix*
  *   \f[
- *     \tau_{\text{int}} = 1 + 2 \sum_{k=1}^{N-1}\left(1-\frac{k}{N}\right)
- *                         \frac{C(k)}{C(0)}
+ *     \tau_{\text{int}} = Id + 2 \sum_{k=1}^{N-1}\left(1-\frac{k}{N}\right)
+ *                         C(k) C(0)^{-1}
  *   \f]
  *
  * To achieve this, the calculates the quantities
  * \f[
- *    S_k = \frac{1}{N_k} \sum_{i=k}^{N-1} S_i S_{i-k}^T
+ *    S_k = \frac{1}{N_k} \sum_{i=k}^{N-1} Q_i Q_{i+k}^T
  * \f]
  * for \f$k=0,\dots,k_{\max}\f$ where \f$N_k:=N-k\f$.
  *
- * The calculation of autocorrelation time and variance will only be
- * reset if the hard_reset() method is called. This ensures that statistics
- * for those quantities can already be collected in the warmup-phase.
  */
 class Statistics
 {
@@ -91,11 +88,11 @@ public:
   /** @brief Return estimator for average */
   Eigen::VectorXd average() const;
 
-  /** @brief Return vector with autocorrelation function \f$C(k)\f$ for diagonal elements */
-  std::vector<Eigen::VectorXd> auto_corr() const;
+  /** @brief Return vector with auto covariance function \f$C(k)\f$ */
+  std::vector<Eigen::MatrixXd> auto_covariance() const;
 
-  /** @brief Return integrated autocorrelation time \f$\tau_{\text{int}}\f$ for diagonal elements */
-  Eigen::VectorXd tau_int() const;
+  /** @brief Return integrated auto covariance time \f$\tau_{\text{int}}\f$ */
+  Eigen::MatrixXd tau_int() const;
 
   /** @brief Return size of autocorrelation window */
   unsigned int autocorr_window() const { return k_max; }
@@ -118,11 +115,11 @@ private:
   /** @brief Vector with estimated autocorrelations
    * This stores (in this order) \f$S_0,S_1,\dots,S_{k_{\max}}\f$.
    */
-  std::vector<Eigen::VectorXd> S_k;
+  std::vector<Eigen::MatrixXd> S_k;
   /** @brief Running average for quantity */
   Eigen::VectorXd avg;
   /** @brief Running average for Q^2 */
-  Eigen::VectorXd avg2;
+  Eigen::MatrixXd avg2;
 };
 
 std::ostream &operator<<(std::ostream &os, const Statistics &stats);

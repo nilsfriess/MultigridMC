@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include "auxilliary/test_statistics.hh"
 #include "lattice/test_lattice.hh"
 #include "intergrid/test_intergrid.hh"
 #include "smoother/test_smoother.hh"
