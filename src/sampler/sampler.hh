@@ -40,6 +40,12 @@ public:
      */
     virtual void apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const = 0;
 
+    /** @brief return pointer to underlying linear operator */
+    std::shared_ptr<LinearOperator> get_linear_operator() const
+    {
+        return linear_operator;
+    };
+
 protected:
     /** @brief Underlying Linear operator */
     const std::shared_ptr<LinearOperator> linear_operator;
