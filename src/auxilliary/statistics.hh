@@ -36,10 +36,13 @@
  *          = \langle Q_i Q_{i+k}^T \rangle - \overline{Q}^2
  *   \f]
  *
- * - *Integrated auto covariance matrix*
+ * - *Integrated auto correlation time
+ * Consider the autocorrelation function in a specific direction v, defined as C(v,k) = v^T C(k) v
+ * From this, it is possible to infer an associated integrated autocorrelation time as
+ *
  *   \f[
  *     \tau_{\text{int}} = Id + 2 \sum_{k=1}^{N-1}\left(1-\frac{k}{N}\right)
- *                         C(k) C(0)^{-1}
+ *                         C(v,k)/C(v,0)
  *   \f]
  *
  * To achieve this, the calculates the quantities
@@ -91,8 +94,11 @@ public:
   /** @brief Return vector with auto covariance function \f$C(k)\f$ */
   std::vector<Eigen::MatrixXd> auto_covariance() const;
 
-  /** @brief Return integrated auto covariance time \f$\tau_{\text{int}}\f$ */
-  Eigen::MatrixXd tau_int() const;
+  /** @brief Return integrated auto covariance time \f$\tau_{\text{int}}\f$
+   *
+   * @param[in] v direction in which the integrated autocorrelation time is computed
+   */
+  double tau_int(const Eigen::VectorXd v) const;
 
   /** @brief Return size of autocorrelation window */
   unsigned int autocorr_window() const { return k_max; }

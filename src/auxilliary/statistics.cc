@@ -61,19 +61,21 @@ std::vector<Eigen::MatrixXd> Statistics::auto_covariance() const
   return autocov;
 }
 
-/* Return integrated auto covariance matrix \f$\tau_{\text{int}}\f$ */
-Eigen::MatrixXd Statistics::tau_int() const
+/* Return integrated auto covariance matrix \f$\tau_{\text{int}}\f$ in a specific direction */
+double Statistics::tau_int(const Eigen::VectorXd v) const
 {
   const std::vector<Eigen::MatrixXd> &C_k_ = auto_covariance();
   Eigen::MatrixXd covariance = C_k_[0];
+  double variance = v.transpose() * covariance * v;
   unsigned int dim = covariance.rows();
-  Eigen::MatrixXd tau_int_tmp = covariance;
+  double tau_int_tmp = 1.0;
   unsigned int kmax = C_k_.size();
   for (unsigned int k = 1; k < kmax; ++k)
   {
-    tau_int_tmp += 2 * (1. - k / (1.0 * kmax)) * C_k_[k];
+    double cov = v.transpose() * C_k_[k] * v;
+    tau_int_tmp += 2 * (1. - k / (1.0 * kmax)) * cov / variance;
   }
-  return tau_int_tmp * covariance.inverse();
+  return tau_int_tmp;
 }
 
 /* Return the number of samples (across all processors) */
@@ -90,8 +92,15 @@ std::ostream &operator<<(std::ostream &os, const Statistics &stats)
   os << stats.get_label() << ": Avg = " << stats.average() << std::endl;
   os << " " << stats.get_label() << ": Var = " << stats.covariance() << std::endl;
   os << std::setprecision(3) << std::fixed;
-  os << " " << stats.get_label() << ": tau_{int}   = " << stats.tau_int()
-     << std::endl;
+  int dim = stats.average().rows();
+  for (int j = 0; j < dim; ++j)
+  {
+    Eigen::VectorXd v(dim);
+    v.setZero();
+    v[j] = 1.0;
+    os << " " << stats.get_label() << ": tau_{int,j} = " << stats.tau_int(v)
+       << std::endl;
+  }
   os << " " << stats.get_label() << ": window      = " << stats.autocorr_window()
      << std::endl;
   os << " " << stats.get_label() << ": # samples   = " << stats.samples()

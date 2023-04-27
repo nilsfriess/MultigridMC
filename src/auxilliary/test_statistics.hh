@@ -140,3 +140,27 @@ TEST_F(StatisticsTest, TestAutoCovariance)
     const double tolerance = thorough_testing ? 1.5E-3 : 2.E-2;
     EXPECT_NEAR(diff, 0, tolerance);
 }
+
+/** @brief check integrated autocorrelation time */
+TEST_F(StatisticsTest, TestIntegratedAutocorrelation)
+{
+    unsigned int window = 20;
+    Statistics stat("test_covariance", window);
+    const unsigned int nsamples = thorough_testing ? 100000000 : 1000000;
+    generate_samples(nsamples, stat);
+    Eigen::Vector2d v;
+    v.setZero();
+    v(0) = 0.2;
+    v(0) = 0.8;
+    Eigen::Vector2d w = (Eigen::Matrix2d::Identity() - A_iter * A_iter).inverse() * v;
+    Eigen::Vector2d wk = w;
+    double tau_int_exact = 1.0;
+    for (int k = 1; k < window; ++k)
+    {
+        wk = A_iter * wk;
+        tau_int_exact += 2. * (1. - k / (1.0 * window)) * v.dot(wk) / v.dot(w);
+    }
+    double tau_int = stat.tau_int(v);
+    const double tolerance = thorough_testing ? 1.5E-3 : 2.E-2;
+    EXPECT_NEAR(tau_int - tau_int_exact, 0, tolerance);
+}
