@@ -64,6 +64,9 @@ public:
     return std::make_shared<Lattice1d>(n / 2);
   };
 
+  /** @brief get info string */
+  virtual std::string get_info() const;
+
   /** @brief extent of lattice */
   const unsigned int n;
 };

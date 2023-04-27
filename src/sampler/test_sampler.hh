@@ -8,7 +8,9 @@
 #include <Eigen/QR>
 #include "lattice/lattice1d.hh"
 #include "linear_operator/linear_operator.hh"
+#include "linear_operator/diffusion_operator_2d.hh"
 #include "intergrid/intergrid_operator_1dlinear.hh"
+#include "intergrid/intergrid_operator_2dlinear.hh"
 #include "sampler/sampler.hh"
 #include "sampler/cholesky_sampler.hh"
 #include "sampler/ssor_sampler.hh"
@@ -101,9 +103,11 @@ protected:
      *
      * @param[in] linear_operator Underlying linear operator
      * @param[in] sampler Sampler to be used
+     * @param[in] nsamples number of
      */
-    std::pair<double, double> mean_covariance_error(const std::shared_ptr<TestOperator1d> linear_operator,
-                                                    const std::shared_ptr<Sampler> sampler)
+    std::pair<double, double> mean_covariance_error(const std::shared_ptr<LinearOperator> linear_operator,
+                                                    const std::shared_ptr<Sampler> sampler,
+                                                    const unsigned int nsamples)
     {
         unsigned int ndof = linear_operator->get_ndof();
         Eigen::VectorXd f(ndof);
@@ -124,7 +128,6 @@ protected:
         Ex.setZero();
         Exx.setZero();
         unsigned int nsamples_warmup = 1000;
-        unsigned int nsamples = 500000;
         Eigen::VectorXd x(ndof);
         for (int k = 0; k < nsamples_warmup; ++k)
         {
@@ -152,14 +155,14 @@ protected:
  * Draw a large number of samples and check that their covariance agrees with
  * the analytical value of the covariance.
  */
-TEST_F(SamplerTest, TestCholeskySampler)
+TEST_F(SamplerTest, TestCholeskySampler1d)
 {
     for (bool lowrank_correction : {false, true})
     {
         std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
         std::mt19937_64 rng(31841287);
         std::shared_ptr<CholeskySampler> sampler = std::make_shared<CholeskySampler>(linear_operator, rng);
-        std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
+        std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, 500000);
         const double tolerance = 2.E-3;
         EXPECT_NEAR(error.first, 0.0, tolerance);
         EXPECT_NEAR(error.second, 0.0, tolerance);
@@ -171,7 +174,7 @@ TEST_F(SamplerTest, TestCholeskySampler)
  * Draw a large number of samples and check that their covariance agrees with
  * the analytical value of the covariance.
  */
-TEST_F(SamplerTest, TestSSORSampler)
+TEST_F(SamplerTest, TestSSORSampler1d)
 {
     for (bool lowrank_correction : {false, true})
     {
@@ -181,7 +184,7 @@ TEST_F(SamplerTest, TestSSORSampler)
         std::shared_ptr<SSORSampler> sampler = std::make_shared<SSORSampler>(linear_operator,
                                                                              rng,
                                                                              omega);
-        std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
+        std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, 500000);
         const double tolerance = 2.E-3;
         EXPECT_NEAR(error.first, 0.0, tolerance);
         EXPECT_NEAR(error.second, 0.0, tolerance);
@@ -193,14 +196,15 @@ TEST_F(SamplerTest, TestSSORSampler)
  * Draw a large number of samples and check that their covariance agrees with
  * the analytical value of the covariance.
  */
-TEST_F(SamplerTest, TestMultigridMCSampler)
+TEST_F(SamplerTest, TestMultigridMCSampler1d)
 {
     for (bool lowrank_correction : {false, true})
     {
         MultigridMCParameters multigridmc_params;
-        multigridmc_params.nlevel = 2;
+        multigridmc_params.nlevel = 3;
         multigridmc_params.npresample = 1;
         multigridmc_params.npostsample = 1;
+        multigridmc_params.verbose = 0;
         std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
         std::mt19937_64 rng(31841287);
         const double omega = 0.8;
@@ -217,11 +221,84 @@ TEST_F(SamplerTest, TestMultigridMCSampler)
                                                                                            postsampler_factory,
                                                                                            intergrid_operator_factory,
                                                                                            coarse_sampler_factory);
-        std::pair<double, double> error = mean_covariance_error(linear_operator, sampler);
+        std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, 500000);
         const double tolerance = 2.E-3;
         EXPECT_NEAR(error.first, 0.0, tolerance);
         EXPECT_NEAR(error.second, 0.0, tolerance);
     }
+}
+
+/* Test Multigrid MC sampler without / with low rank correction in 2d
+ *
+ * Draw a large number of samples and check that their covariance agrees with
+ * the analytical value of the covariance.
+ */
+TEST_F(SamplerTest, TestMultigridMCSampler2d)
+{
+    unsigned int seed = 1212417;
+    std::mt19937_64 rng(seed);
+    std::normal_distribution<double> dist_normal(0.0, 1.0);
+    std::uniform_real_distribution<double> dist_uniform(0.0, 1.0);
+    int nx = thorough_testing ? 16 : 8;
+    int ny = thorough_testing ? 16 : 8;
+    std::shared_ptr<Lattice2d> lattice = std::make_shared<Lattice2d>(nx, ny);
+    unsigned int ndof = lattice->M;
+    double alpha_K = 1.5;
+    double beta_K = 0.3;
+    double alpha_b = 1.2;
+    double beta_b = 0.1;
+    unsigned int n_meas = 4;
+    std::vector<Eigen::Vector2d> measurement_locations(n_meas);
+    Eigen::MatrixXd Sigma(n_meas, n_meas);
+    Sigma.setZero();
+    measurement_locations[0] = Eigen::Vector2d({0.25, 0.25});
+    measurement_locations[1] = Eigen::Vector2d({0.25, 0.75});
+    measurement_locations[2] = Eigen::Vector2d({0.75, 0.25});
+    measurement_locations[3] = Eigen::Vector2d({0.75, 0.75});
+    for (int k = 0; k < n_meas; ++k)
+    {
+        Sigma(k, k) = 1.E-2 * (1.0 + 2.0 * dist_uniform(rng));
+    }
+    // Rotate randomly
+    Eigen::MatrixXd A(Eigen::MatrixXd::Random(n_meas, n_meas)), Q;
+    A.setRandom();
+    Eigen::HouseholderQR<Eigen::MatrixXd> qr(A);
+    Q = qr.householderQ();
+    Sigma = Q * Sigma * Q.transpose();
+    std::shared_ptr<MeasuredDiffusionOperator2d>
+        linear_operator = std::make_shared<MeasuredDiffusionOperator2d>(lattice,
+                                                                        measurement_locations,
+                                                                        Sigma,
+                                                                        alpha_K,
+                                                                        beta_K,
+                                                                        alpha_b,
+                                                                        beta_b);
+
+    MultigridMCParameters multigridmc_params;
+    multigridmc_params.nlevel = 3;
+    multigridmc_params.npresample = 1;
+    multigridmc_params.npostsample = 1;
+    multigridmc_params.verbose = 0;
+    const double omega = 1.0;
+    std::shared_ptr<SSORSamplerFactory> presampler_factory = std::make_shared<SSORSamplerFactory>(rng,
+                                                                                                  omega);
+    std::shared_ptr<SSORSamplerFactory> postsampler_factory = std::make_shared<SSORSamplerFactory>(rng,
+                                                                                                   omega);
+    std::shared_ptr<IntergridOperator2dLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperator2dLinearFactory>();
+    std::shared_ptr<CholeskySamplerFactory> coarse_sampler_factory = std::make_shared<CholeskySamplerFactory>(rng);
+    std::shared_ptr<Sampler> sampler = std::make_shared<MultigridMCSampler>(linear_operator,
+                                                                            rng,
+                                                                            multigridmc_params,
+                                                                            presampler_factory,
+                                                                            postsampler_factory,
+                                                                            intergrid_operator_factory,
+                                                                            coarse_sampler_factory);
+
+    const unsigned int nsamples = thorough_testing ? 1000000 : 10000;
+    std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, nsamples);
+    const double tolerance = thorough_testing ? 2.E-3 : 2.E-2;
+    EXPECT_NEAR(error.first, 0.0, tolerance);
+    EXPECT_NEAR(error.second, 0.0, tolerance);
 }
 
 #endif // TEST_SAMPLER_HH

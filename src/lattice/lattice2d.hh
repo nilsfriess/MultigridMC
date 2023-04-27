@@ -82,6 +82,9 @@ public:
     return std::make_shared<Lattice2d>(nx / 2, ny / 2);
   };
 
+  /** @brief get info string */
+  virtual std::string get_info() const;
+
   /** @brief extent in x-direction */
   const unsigned int nx;
   /** @brief extent in y-direction */

@@ -1,6 +1,7 @@
 #ifndef LATTICE_HH
 #define LATTICE_HH LATTICE_HH
 #include <memory>
+#include <string>
 #include <iostream>
 #include <Eigen/Dense>
 
@@ -43,6 +44,9 @@ public:
 
   /** @brief get coarsened version of lattice */
   virtual std::shared_ptr<Lattice> get_coarse_lattice() const = 0;
+
+  /** @brief get info string */
+  virtual std::string get_info() const = 0;
 
   /** @brief total number of lattice sites */
   const unsigned int M;
