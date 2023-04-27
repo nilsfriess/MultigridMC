@@ -3,6 +3,7 @@
 #include <cmath>
 #include <random>
 #include <Eigen/Dense>
+#include "config.h"
 #include "statistics.hh"
 
 /** @brief test statistics class
@@ -119,4 +120,28 @@ TEST_F(StatisticsTest, TestCovariance)
     Eigen::Matrix2d cov_numerical = stat.covariance();
     const double tolerance = 3.E-3;
     EXPECT_NEAR((cov_numerical - cov_exact).norm(), 0, tolerance);
+}
+
+/** @brief check auto covariance */
+TEST_F(StatisticsTest, TestAutoCovariance)
+{
+    unsigned int window = 6;
+    Statistics stat("test_covariance", window);
+    const unsigned int nsamples = thorough_testing ? 100000000 : 1000000;
+    generate_samples(nsamples, stat);
+    Eigen::Matrix2d autocov_exact = (Eigen::Matrix2d::Identity() - A_iter * A_iter).inverse();
+    std::vector<Eigen::MatrixXd> autocov_numerical = stat.auto_covariance();
+    double diff = 0.0;
+    for (int k = 0; k < window; ++k)
+    {
+        diff += (autocov_numerical[k] - autocov_exact).norm();
+        std::cout << " k = " << k << std::endl;
+        std::cout << autocov_numerical[k] << std::endl;
+        std::cout << autocov_exact << std::endl;
+        std::cout << diff << std::endl
+                  << std::endl;
+        autocov_exact *= A_iter;
+    }
+    const double tolerance = thorough_testing ? 3.E-3 : 2.E-2;
+    EXPECT_NEAR(diff, 0, tolerance);
 }

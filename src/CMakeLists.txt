@@ -17,8 +17,18 @@ set_target_properties(driver PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ../bin)
 
 # Tests
+option(USE_THOROUGH_TESTS "Use thorough tests?" ON)
+
+if(USE_THOROUGH_TESTS)
+    set(THOROUGH_TESTING "true")
+endif()
+
+configure_file(config.h.in config.h)
+
 add_executable(test test.cc ${SOURCES})
+target_include_directories(test PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")
 target_link_libraries(test Eigen3::Eigen GTest::gtest_main)
+
 set_target_properties(test PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ../bin)
 
