@@ -48,7 +48,7 @@ protected:
         for (int k = 0; k < n_meas; ++k)
         {
             measurement_locations[k] = Eigen::Vector2d({uniform_dist(rng), uniform_dist(rng)});
-            Sigma(k, k) = 0.001 * (1.0 + 2.0 * uniform_dist(rng));
+            Sigma(k, k) = 0.1 * (1.0 + 2.0 * uniform_dist(rng));
         }
         // Rotate randomly
         Eigen::MatrixXd A(Eigen::MatrixXd::Random(n_meas, n_meas)), Q;
@@ -110,7 +110,7 @@ TEST_F(SolverTest, TestCholesky)
 /* Test Multigrid solver for standard diffusion operator
  *
  * Computes b = A.x_{exact} for the diffusion operator and then solves A.x = b for x.
- * We expect that ||x-x_{exact}|| is close to zero.
+ * We expect that ||x-x_{exact}||/||x-x_{exact}|| is close to zero.
  */
 TEST_F(SolverTest, TestMultigrid)
 {
@@ -130,21 +130,22 @@ TEST_F(SolverTest, TestMultigrid)
                                                                                               intergrid_operator_factory,
                                                                                               coarse_solver_factory);
     IterativeSolverParameters solver_params;
-    solver_params.rtol = 1.0E-11;
-    solver_params.atol = 1.0E-9;
-    solver_params.maxiter = 20;
+    solver_params.rtol = 1.0E-13;
+    solver_params.atol = 1.0E-12;
+    solver_params.maxiter = 100;
     solver_params.verbose = 0;
     LoopSolver solver(linear_operator, prec, solver_params);
     solver.apply(b, x);
-    double tolerance = 1.E-9;
-    double error = (x - x_exact).norm();
+    double tolerance = 1.E-10;
+    double error = (x - x_exact).norm() / x_exact.norm();
+    ;
     EXPECT_NEAR(error, 0.0, tolerance);
 }
 
 /* Test Multigrid solver
  *
  * Computes b = A.x_{exact} for the measured diffusion operator and then solves A.x = b for x.
- * We expect that ||x-x_{exact}|| is close to zero.
+ * We expect that ||x-x_{exact}||/||x-x_{exact}|| is close to zero.
  */
 TEST_F(SolverTest, TestMultigridLowRank)
 {
@@ -164,14 +165,13 @@ TEST_F(SolverTest, TestMultigridLowRank)
                                                                                               intergrid_operator_factory,
                                                                                               coarse_solver_factory);
     IterativeSolverParameters solver_params;
-    solver_params.rtol = 1.0E-11;
-    solver_params.atol = 1.0E-9;
-    solver_params.maxiter = 20;
-    solver_params.verbose = 0;
+    solver_params.rtol = 1.0E-13;
+    solver_params.atol = 1.0E-11;
+    solver_params.maxiter = 100;
     LoopSolver solver(linear_operator_lowrank, prec, solver_params);
     solver.apply(b_lowrank, x);
-    double tolerance = 1.E-9;
-    double error = (x - x_exact).norm();
+    double tolerance = 1.E-10;
+    double error = (x - x_exact).norm() / x_exact.norm();
     EXPECT_NEAR(error, 0.0, tolerance);
 }
 

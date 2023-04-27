@@ -98,7 +98,7 @@ TEST_F(SmootherTest, TestSSORSmoother)
     SSORSmoother smoother(linear_operator, omega);
     smoother.apply(b, x);
     double tolerance = 1.E-12;
-    double error = (x - x_exact).norm();
+    double error = (x - x_exact).norm() / x_exact.norm();
     EXPECT_NEAR(error, 0.0, tolerance);
 }
 
@@ -113,7 +113,7 @@ TEST_F(SmootherTest, TestSSORLowRankSmoother)
     SSORSmoother smoother(linear_operator_lowrank, omega);
     smoother.apply(b_lowrank, x);
     double tolerance = 1.E-12;
-    double error = (x - x_exact).norm();
+    double error = (x - x_exact).norm() / x_exact.norm();
     EXPECT_NEAR(error, 0.0, tolerance);
 }
 

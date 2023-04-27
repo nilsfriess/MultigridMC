@@ -36,19 +36,19 @@ DiffusionOperator2d::DiffusionOperator2d(const std::shared_ptr<Lattice2d> lattic
             double K_west = K_diff((i - 0.5) * hx, j * hy);
             double b_centre = b_zero(i * hx, j * hy);
             // centre
-            triplet_list.push_back(T(ell, ell, b_centre + (K_east + K_west) / (hx * hx) + (K_north + K_south) / (hy * hy)));
+            triplet_list.push_back(T(ell, ell, b_centre * hx * hy + (K_east + K_west) * hy / hx + (K_north + K_south) * hx / hy));
             // south
             ell_prime = nx * ((j - 1 + ny) % ny) + i;
-            triplet_list.push_back(T(ell, ell_prime, -K_south / (hy * hy)));
+            triplet_list.push_back(T(ell, ell_prime, -K_south * hx / hy));
             // north
             ell_prime = nx * ((j + 1) % ny) + i;
-            triplet_list.push_back(T(ell, ell_prime, -K_north / (hy * hy)));
+            triplet_list.push_back(T(ell, ell_prime, -K_north * hx / hy));
             // west
             ell_prime = nx * j + ((i - 1) % nx);
-            triplet_list.push_back(T(ell, ell_prime, -K_west / (hy * hy)));
+            triplet_list.push_back(T(ell, ell_prime, -K_west * hy / hx));
             // east
             ell_prime = nx * j + ((i + 1 + nx) % nx);
-            triplet_list.push_back(T(ell, ell_prime, -K_east / (hy * hy)));
+            triplet_list.push_back(T(ell, ell_prime, -K_east * hy / hx));
         }
     }
     A_sparse.setFromTriplets(triplet_list.begin(), triplet_list.end());
