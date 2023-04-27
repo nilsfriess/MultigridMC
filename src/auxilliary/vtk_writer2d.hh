@@ -25,11 +25,13 @@ public:
      * @param[in] filename_ name of file to write to
      * @param[in] entity_ grid entity which data is associated with
      * @param[in] lattice_ lattice on which data is held
+     * @param[in] verbose_ verbosity level
      */
     VTKWriter2d(const std::string filename_,
                 const Entity entity_,
-                const std::shared_ptr<Lattice2d> lattice_) : VTKWriter(filename_, entity_),
-                                                             lattice(lattice_) {}
+                const std::shared_ptr<Lattice2d> lattice_,
+                const int verbose_ = 0) : VTKWriter(filename_, entity_, verbose_),
+                                          lattice(lattice_) {}
 
     /** @brief write all sample states to disk */
     virtual void write() const;

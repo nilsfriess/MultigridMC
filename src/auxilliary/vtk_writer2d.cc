@@ -32,7 +32,8 @@ void VTKWriter2d::write() const
     for (auto it = sample_states.begin(); it != sample_states.end(); ++it)
     {
         std::string label = it->first;
-        std::cout << "Writing " << label << std::endl;
+        if (verbose > 0)
+            std::cout << "Writing " << label << std::endl;
         Eigen::VectorXd phi = it->second;
         out << "SCALARS " << label << " double 1" << std::endl;
         out << "LOOKUP_TABLE default" << std::endl;
