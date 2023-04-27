@@ -42,7 +42,8 @@ void SORSmoother::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x) const
     // Low rank update (apply only if necessary)
     if (linear_operator->get_m_lowrank() > 0)
     {
-        x -= (*B_bar) * B.transpose() * x;
+        auto BT_x = B.transpose() * x;
+        x -= (*B_bar) * BT_x;
     }
 }
 
