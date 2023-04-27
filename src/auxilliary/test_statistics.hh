@@ -102,11 +102,11 @@ protected:
 TEST_F(StatisticsTest, TestAverage)
 {
     Statistics stat("test_average", 10);
-    const unsigned int nsamples = 1000000;
+    const unsigned int nsamples = thorough_testing ? 100000000 : 1000000;
     generate_samples(nsamples, stat);
     Eigen::Vector2d avg_exact = (Eigen::Matrix2d::Identity() - A_iter).inverse() * v_shift;
     Eigen::Vector2d avg_numerical = stat.average();
-    const double tolerance = 3.E-3;
+    const double tolerance = thorough_testing ? 1.E-3 : 3.E-3;
     EXPECT_NEAR((avg_numerical - avg_exact).norm(), 0, tolerance);
 }
 
@@ -114,11 +114,11 @@ TEST_F(StatisticsTest, TestAverage)
 TEST_F(StatisticsTest, TestCovariance)
 {
     Statistics stat("test_covariance", 10);
-    const unsigned int nsamples = 1000000;
+    const unsigned int nsamples = thorough_testing ? 100000000 : 1000000;
     generate_samples(nsamples, stat);
     Eigen::Matrix2d cov_exact = (Eigen::Matrix2d::Identity() - A_iter * A_iter).inverse();
     Eigen::Matrix2d cov_numerical = stat.covariance();
-    const double tolerance = 3.E-3;
+    const double tolerance = thorough_testing ? 1.0E-3 : 3.E-3;
     EXPECT_NEAR((cov_numerical - cov_exact).norm(), 0, tolerance);
 }
 
@@ -135,13 +135,8 @@ TEST_F(StatisticsTest, TestAutoCovariance)
     for (int k = 0; k < window; ++k)
     {
         diff += (autocov_numerical[k] - autocov_exact).norm();
-        std::cout << " k = " << k << std::endl;
-        std::cout << autocov_numerical[k] << std::endl;
-        std::cout << autocov_exact << std::endl;
-        std::cout << diff << std::endl
-                  << std::endl;
         autocov_exact *= A_iter;
     }
-    const double tolerance = thorough_testing ? 3.E-3 : 2.E-2;
+    const double tolerance = thorough_testing ? 1.5E-3 : 2.E-2;
     EXPECT_NEAR(diff, 0, tolerance);
 }
