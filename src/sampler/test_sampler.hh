@@ -6,6 +6,7 @@
 #include <random>
 #include <Eigen/Dense>
 #include <Eigen/QR>
+#include "config.h"
 #include "lattice/lattice1d.hh"
 #include "linear_operator/linear_operator.hh"
 #include "linear_operator/diffusion_operator_2d.hh"
@@ -75,6 +76,7 @@ public:
         DenseMatrixType Sigma(2, 2);
         Sigma << 4.2, -1.1, -1.1, 9.3;
         Sigma_inv = Sigma.inverse();
+        Sigma_inv_BT = Sigma_inv * B.transpose();
     }
 
 protected:

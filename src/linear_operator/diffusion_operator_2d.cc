@@ -96,4 +96,5 @@ MeasuredDiffusionOperator2d::MeasuredDiffusionOperator2d(const std::shared_ptr<L
         unsigned int ell = nx * j + i;
         B(ell, k) = 1.0;
     }
+    Sigma_inv_BT = Sigma_inv * B.transpose();
 }

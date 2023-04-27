@@ -66,7 +66,8 @@ public:
         // Add low-rank correction, if necessary
         if (m_lowrank > 0)
         {
-            y += B * Sigma_inv * B.transpose() * x;
+            auto Sigma_BT_x = Sigma_inv_BT * x;
+            y += B * Sigma_BT_x;
         }
     }
 
@@ -111,6 +112,8 @@ protected:
     SparseMatrixType A_sparse;
     /** @brief matrix B */
     DenseMatrixType B;
+    /** @brief matrix Sigma_inv_BT */
+    DenseMatrixType Sigma_inv_BT;
     /** @brief dense representation of m x m matrix Sigma^{-1} */
     DenseMatrixType Sigma_inv;
 };
