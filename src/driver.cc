@@ -6,6 +6,7 @@
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 #include <Eigen/QR>
+#include "libconfig.hh"
 
 #include "lattice/lattice2d.hh"
 #include "smoother/ssor_smoother.hh"
@@ -63,6 +64,18 @@ void run(std::shared_ptr<Sampler> sampler,
 }
 int main(int argc, char *argv[])
 {
+    libconfig::Config cfg;
+
+    // Read the file. If there is an error, report it and exit.
+    try
+    {
+        cfg.readFile("parameters.cfg");
+    }
+    catch (const libconfig::FileIOException &fioex)
+    {
+        std::cerr << "Error while reading configuration file \'parameters.cfg\'." << std::endl;
+        return (EXIT_FAILURE);
+    }
     unsigned int nx, ny;
     if (argc != 3)
     {
