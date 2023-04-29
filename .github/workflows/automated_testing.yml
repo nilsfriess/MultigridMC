@@ -37,6 +37,10 @@ jobs:
       working-directory: ${{github.workspace}}/libconfig
       run: cmake -B ${{github.workspace}}/libconfig/build -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/libconfig/build
     
+    - name: Build libconfig
+      working-directory: ${{github.workspace}}/libconfig
+      run: cmake --build build
+    
     - name: Install libconfig
       working-directory: ${{github.workspace}}/libconfig
       run: cmake --install build
