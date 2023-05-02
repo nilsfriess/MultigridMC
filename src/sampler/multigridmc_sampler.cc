@@ -30,7 +30,7 @@ MultigridMCSampler::MultigridMCSampler(std::shared_ptr<LinearOperator> linear_op
     {
         if (params.verbose > 0)
         {
-            std::cout << "level " << level << " lattice : " << lattice->get_info() << std::endl;
+            std::cout << "  level " << level << " lattice : " << lattice->get_info() << std::endl;
         }
         x_ell.push_back(Eigen::VectorXd(lattice->M));
         f_ell.push_back(Eigen::VectorXd(lattice->M));
