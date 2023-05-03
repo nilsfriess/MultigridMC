@@ -46,6 +46,9 @@ public:
     {
     }
 
+    /** @brief destructor */
+    virtual ~LinearOperator() = default;
+
     /** @brief Extract underlying lattice */
     std::shared_ptr<Lattice> get_lattice() const
     {

@@ -79,7 +79,20 @@ protected:
     const double beta_b;
 };
 
-/** @brief diffusion operator with measurements */
+/** @brief diffusion operator with measurements
+ *
+ * Assume that we measured data as Y = B^T X + E, where X is drawn from a prior
+ * distribution N(xbar,Q^{-1}) and E is draw from an (independent) multivariate normal
+ * distribution N(0,Sigma) with covariance Sigma. The conditional distribution of X given y
+ * is then a multivariate normal distribution with mean
+ *
+ *   x_{X|y} = xbar + Q^{-1} B (Sigma + B^T Q^{-1} B)^{-1} (y - B^T xbar)
+ *
+ * and precision matrix
+ *
+ *   Q_{X|y} = Q + B Sigma^{-1} B^T.
+ *
+ */
 class MeasuredDiffusionOperator2d : public LinearOperator
 {
 public:
@@ -103,6 +116,14 @@ public:
                                 const double beta_K_ = 0.2,
                                 const double alpha_b_ = 0.9,
                                 const double beta_b_ = 0.1);
+
+    /** @brief Compute posterior mean
+     *
+     * @param[in] xbar prior mean
+     * @param[in] y measured values
+     */
+    Eigen::VectorXd posterior_mean(const Eigen::VectorXd &xbar,
+                                   const Eigen::VectorXd &y);
 };
 
 #endif // DIFFUSION_OPERATOR_2D_HH
