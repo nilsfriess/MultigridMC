@@ -222,19 +222,17 @@ int read_configuration_file(const std::string filename,
     return 0;
 }
 
-/** @brief generate a number of samples and write timeseries to disk
- *
- * The field is measured in the centre of the domain
+/** @brief generate a number of samples, meaure runtime and write timeseries to disk
  *
  * @param[in] sampler sampler to be used
  * @param[in] sampling_params parameters for sampling
  * @param[in] measurement_params parameters for measurements
  * @param[in] filename name of file to write to
  */
-void run(std::shared_ptr<Sampler> sampler,
-         const SamplingParameters &sampling_params,
-         const MeasurementParameters &measurement_params,
-         const std::string filename)
+void measure_sampling_time(std::shared_ptr<Sampler> sampler,
+                           const SamplingParameters &sampling_params,
+                           const MeasurementParameters &measurement_params,
+                           const std::string filename)
 {
     const std::shared_ptr<MeasuredDiffusionOperator2d> linear_operator = std::dynamic_pointer_cast<MeasuredDiffusionOperator2d>(sampler->get_linear_operator());
     unsigned int ndof = linear_operator->get_ndof();
@@ -242,12 +240,14 @@ void run(std::shared_ptr<Sampler> sampler,
     // prior mean (set to zero)
     Eigen::VectorXd xbar(ndof);
     xbar.setZero();
+    // posterior mean
     Eigen::VectorXd x_post = linear_operator->posterior_mean(xbar,
                                                              measurement_params.mean);
     std::shared_ptr<Lattice2d> lattice = std::dynamic_pointer_cast<Lattice2d>(linear_operator->get_lattice());
     Eigen::VectorXd x(ndof);
-    Eigen::VectorXd f = linear_operator->get_sparse() * x_post;
+    Eigen::VectorXd f(ndof);
     x.setZero();
+    linear_operator->apply(x_post, f);
     for (int k = 0; k < sampling_params.nwarmup; ++k)
     {
         sampler->apply(f, x);
@@ -272,6 +272,52 @@ void run(std::shared_ptr<Sampler> sampler,
         out << *it << std::endl;
 
     out.close();
+}
+
+/** @brief compute mean and variance field
+ *
+ * @param[in] sampler sampler to be used
+ * @param[in] sampling_params parameters for sampling
+ * @param[in] measurement_params parameters for measurements
+ * @param[in] filename name of file to write to
+ */
+void posterior_statistics(std::shared_ptr<Sampler> sampler,
+                          const SamplingParameters &sampling_params,
+                          const MeasurementParameters &measurement_params,
+                          const std::string filename)
+{
+    const std::shared_ptr<MeasuredDiffusionOperator2d> linear_operator = std::dynamic_pointer_cast<MeasuredDiffusionOperator2d>(sampler->get_linear_operator());
+    unsigned int ndof = linear_operator->get_ndof();
+
+    // prior mean (set to zero)
+    Eigen::VectorXd xbar(ndof);
+    xbar.setZero();
+    Eigen::VectorXd x_post = linear_operator->posterior_mean(xbar,
+                                                             measurement_params.mean);
+    std::shared_ptr<Lattice2d> lattice = std::dynamic_pointer_cast<Lattice2d>(linear_operator->get_lattice());
+    Eigen::VectorXd x(ndof);
+    Eigen::VectorXd f(ndof);
+    x.setZero();
+    linear_operator->apply(x_post, f);
+    for (int k = 0; k < sampling_params.nwarmup; ++k)
+    {
+        sampler->apply(f, x);
+    };
+    Eigen::VectorXd mean(ndof);
+    Eigen::VectorXd variance(ndof);
+    mean.setZero();
+    variance.setZero();
+    for (int k = 0; k < sampling_params.nsamples; ++k)
+    {
+        sampler->apply(f, x);
+        mean += (x - mean) / (k + 1.0);
+        variance += (x.cwiseProduct(x) - variance) / (k + 1.0);
+    }
+    VTKWriter2d vtk_writer(filename, Cells, lattice, 1);
+    vtk_writer.add_state(x_post, "x_post");
+    vtk_writer.add_state(mean, "mean");
+    vtk_writer.add_state(variance - mean.cwiseProduct(mean), "variance");
+    vtk_writer.write();
 }
 
 /* *********************************************************************** *
@@ -343,28 +389,32 @@ int main(int argc, char *argv[])
     if (general_params.do_cholesky)
     {
         std::cout << "Cholesky" << std::endl;
-        run(cholesky_sampler,
-            sampling_params,
-            measurement_params,
-            "timeseries_cholesky.txt");
+        measure_sampling_time(cholesky_sampler,
+                              sampling_params,
+                              measurement_params,
+                              "timeseries_cholesky.txt");
         std::cout << std::endl;
     }
     if (general_params.do_ssor)
     {
         std::cout << "SSOR" << std::endl;
-        run(ssor_sampler,
-            sampling_params,
-            measurement_params,
-            "timeseries_ssor.txt");
+        measure_sampling_time(ssor_sampler,
+                              sampling_params,
+                              measurement_params,
+                              "timeseries_ssor.txt");
         std::cout << std::endl;
     }
     if (general_params.do_multigridmc)
     {
         std::cout << "Multigrid MC" << std::endl;
-        run(multigridmc_sampler,
-            sampling_params,
-            measurement_params,
-            "timeseries_multigridmc.txt");
+        measure_sampling_time(multigridmc_sampler,
+                              sampling_params,
+                              measurement_params,
+                              "timeseries_multigridmc.txt");
+        posterior_statistics(multigridmc_sampler,
+                             sampling_params,
+                             measurement_params,
+                             "posterior.vtk");
         std::cout << std::endl;
     }
 }
