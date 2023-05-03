@@ -106,7 +106,7 @@ Eigen::VectorXd MeasuredDiffusionOperator2d::posterior_mean(const Eigen::VectorX
     Eigen::SimplicialLLT<SparseMatrixType> solver;
     solver.compute(A_sparse);
     // Compute Bbar = Q^{-1} B
-    Eigen::VectorXd Bbar = solver.solve(B);
-    Eigen::VectorXd x_post = xbar + Bbar * (Sigma_inv.inverse() + B.transpose() * Bbar).inverse() * (y - A_sparse * xbar);
+    Eigen::MatrixXd Bbar = solver.solve(B);
+    Eigen::VectorXd x_post = xbar + Bbar * (Sigma_inv.inverse() + B.transpose() * Bbar).inverse() * (y - B.transpose() * xbar);
     return x_post;
 }
