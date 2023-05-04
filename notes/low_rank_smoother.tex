@@ -69,9 +69,12 @@ Inserting this into Eq. \eqref{eqn:low_rank_iteration} leads to the following re
 \end{equation}
 Or, equivalently:
 \begin{equation}
-    e^{k+1} = M_0\left(M_0 + B\Sigma^{-1}B^T\right)^{-1} \left(\text{Id}-M_0^{-1}A_0\right) e^k
+    e^{k+1} = \left(\text{Id} + B\Sigma^{-1}B^T M_0^{-1}\right)^{-1} \left(\text{Id}-M_0^{-1}A_0\right) e^k
 \end{equation}
-Note that the factor $\text{Id} - M_0^{-1}A_0$ arises in the stationary iteration with splitting $A_0=M_0-N_0$ for the system $A_0x=b$.
+Note that the factor $\text{Id} - M_0^{-1}A_0$ arises in the stationary iteration with splitting $A_0=M_0-N_0$ for the system $A_0x=b$. Further, if $M_0$ is positive definite then $B\Sigma^{-1}B^T M_0^{-1}$ is positive definite and the factor $\left(\text{Id} + B\Sigma^{-1}B^T M_0^{-1}\right)^{-1}$ is contracting, i.e.
+\begin{equation}
+  ||\left(\text{Id} + B\Sigma^{-1}B^T M_0^{-1}\right)^{-1}v||\le ||v||.
+\end{equation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Sampling}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
