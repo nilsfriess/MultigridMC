@@ -9,7 +9,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-undefined-var-template")
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 find_package(libconfig 1.7.3 REQUIRED NO_MODULE)
-find_library(LIBCONFIG config++)
+find_library(CONFIG++_LIBRARY config++)
+
+if(CONFIG++_LIBRARY)
+  message(STATUS "Found libconfig++ library at ${CONFIG++_LIBRARY}")
+else(CONFIG++_LIBRARY)
+  message(FATAL_ERROR "Cound not find libconfig++ library!")
+endif(CONFIG++_LIBRARY)
 
 if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)

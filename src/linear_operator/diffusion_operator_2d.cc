@@ -98,3 +98,15 @@ MeasuredDiffusionOperator2d::MeasuredDiffusionOperator2d(const std::shared_ptr<L
     }
     Sigma_inv_BT = Sigma_inv * B.transpose();
 }
+
+/* Compute posterior mean */
+Eigen::VectorXd MeasuredDiffusionOperator2d::posterior_mean(const Eigen::VectorXd &xbar,
+                                                            const Eigen::VectorXd &y)
+{
+    Eigen::SimplicialLLT<SparseMatrixType> solver;
+    solver.compute(A_sparse);
+    // Compute Bbar = Q^{-1} B
+    Eigen::MatrixXd Bbar = solver.solve(B);
+    Eigen::VectorXd x_post = xbar + Bbar * (Sigma_inv.inverse() + B.transpose() * Bbar).inverse() * (y - B.transpose() * xbar);
+    return x_post;
+}

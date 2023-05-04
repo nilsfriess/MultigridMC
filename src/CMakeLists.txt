@@ -12,7 +12,7 @@ add_subdirectory(qoi)
 
 # Main executable
 add_executable(driver driver.cc ${SOURCES})
-target_link_libraries(driver Eigen3::Eigen libconfig::config ${LIBCONFIG})
+target_link_libraries(driver Eigen3::Eigen libconfig::config ${CONFIG++_LIBRARY})
 set_target_properties(driver PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ../bin)
 
