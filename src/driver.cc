@@ -3,6 +3,7 @@
 #include <random>
 #include <fstream>
 #include <chrono>
+#include <cmath>
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 #include <Eigen/QR>
@@ -274,17 +275,51 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
     out.close();
 }
 
+/** @brief write VTK file with circle around a point
+ *
+ * @param[in] centre centre of circle
+ * @param[in] radius radius of circle
+ * @param[in] filename name of vtk file to write
+ */
+void write_vtk_circle(const Eigen::Vector2d centre,
+                      const double radius,
+                      const std::string filename)
+{
+    // Grid specification
+    std::ofstream out(filename.c_str());
+    out << "# vtk DataFile Version 2.0" << std::endl;
+    out << "Sample state" << std::endl;
+    out << "ASCII" << std::endl;
+    out << "DATASET POLYDATA" << std::endl;
+    out << std::endl;
+    // number of points used to discretise the circle
+    unsigned int npoints = 100;
+    double z_offset = 1.E-6;
+    out << "POINTS " << npoints << " double" << std::endl;
+    for (int j = 0; j < npoints; ++j)
+    {
+        double x = centre[0] + radius * cos(2 * M_PI * j / (1.0 * npoints)) - 0.5;
+        double y = centre[1] + radius * sin(2 * M_PI * j / (1.0 * npoints)) - 0.5;
+        out << x << " " << y << " " << z_offset << std::endl;
+    }
+    out << "POLYGONS 1 " << (npoints + 1) << std::endl;
+    out << npoints;
+    for (int j = 0; j < npoints; ++j)
+    {
+        out << " " << j;
+    }
+    out << std::endl;
+}
+
 /** @brief compute mean and variance field
  *
  * @param[in] sampler sampler to be used
  * @param[in] sampling_params parameters for sampling
  * @param[in] measurement_params parameters for measurements
- * @param[in] filename name of file to write to
  */
 void posterior_statistics(std::shared_ptr<Sampler> sampler,
                           const SamplingParameters &sampling_params,
-                          const MeasurementParameters &measurement_params,
-                          const std::string filename)
+                          const MeasurementParameters &measurement_params)
 {
     const std::shared_ptr<MeasuredDiffusionOperator2d> linear_operator = std::dynamic_pointer_cast<MeasuredDiffusionOperator2d>(sampler->get_linear_operator());
     unsigned int ndof = linear_operator->get_ndof();
@@ -313,11 +348,14 @@ void posterior_statistics(std::shared_ptr<Sampler> sampler,
         mean += (x - mean) / (k + 1.0);
         variance += (x.cwiseProduct(x) - variance) / (k + 1.0);
     }
-    VTKWriter2d vtk_writer(filename, Cells, lattice, 1);
+    VTKWriter2d vtk_writer("posterior.vtk", Cells, lattice, 1);
     vtk_writer.add_state(x_post, "x_post");
     vtk_writer.add_state(mean, "mean");
     vtk_writer.add_state(variance - mean.cwiseProduct(mean), "variance");
     vtk_writer.write();
+    write_vtk_circle(measurement_params.sample_location,
+                     0.02,
+                     "sample_location.vtk");
 }
 
 /* *********************************************************************** *
@@ -413,8 +451,7 @@ int main(int argc, char *argv[])
                               "timeseries_multigridmc.txt");
         posterior_statistics(multigridmc_sampler,
                              sampling_params,
-                             measurement_params,
-                             "posterior.vtk");
+                             measurement_params);
         std::cout << std::endl;
     }
 }
