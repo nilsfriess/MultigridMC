@@ -4,7 +4,7 @@
 \usepackage{algorithm,algpseudocode}
 \newcommand{\xtrue}{x_{\text{true}}}
 
-\title{Smoother with low-rank updates}
+\title{Smoothing and sampling with low-rank updates}
 \author{Eike Mueller, University of Bath}
 
 \begin{document}
@@ -69,18 +69,19 @@ Inserting this into Eq. \eqref{eqn:low_rank_iteration} leads to the following re
 \end{equation}
 Or, equivalently:
 \begin{equation}
-    e^{k+1} = \left(\text{Id} + B\Sigma^{-1}B^T M_0^{-1}\right)^{-1} \left(\text{Id}-M_0^{-1}A_0\right) e^k
+    e^{k+1} = \left(\text{Id} + M_0^{-1}B\Sigma^{-1}B^T \right)^{-1} \left(\text{Id}-M_0^{-1}A_0\right) e^k
 \end{equation}
-Note that the factor $\text{Id} - M_0^{-1}A_0$ arises in the stationary iteration with splitting $A_0=M_0-N_0$ for the system $A_0x=b$. Further, if $M_0$ is positive definite then $B\Sigma^{-1}B^T M_0^{-1}$ is positive definite and the factor $\left(\text{Id} + B\Sigma^{-1}B^T M_0^{-1}\right)^{-1}$ is contracting, i.e.
+Note that the factor $\text{Id} - M_0^{-1}A_0$ arises in the stationary iteration with splitting $A_0=M_0-N_0$ for the system $A_0x=b$. Further, if $M_0$ is positive definite then $M_0^{-1}B\Sigma^{-1}B^T $ is positive definite and the factor $\left(\text{Id} + M_0^{-1}B\Sigma^{-1}B^T \right)^{-1}$ is contracting, i.e.
 \begin{equation}
-  ||\left(\text{Id} + B\Sigma^{-1}B^T M_0^{-1}\right)^{-1}v||\le ||v||.
+    ||\left(\text{Id} + M_0^{-1}B\Sigma^{-1}B^T \right)^{-1}v|| \le ||v||
 \end{equation}
+Hence, if the original method with contracting factor $\text{Id} - M_0^{-1}A_0$ converges, then the smoother with the low-rank update will also converge.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Sampling}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 As stated in Colin's paper \cite{Fox2017}, given a decomposition $A=M-N$, we can draw turn the smoother into a sampler as shown in Alg. \ref{alg:general_sampling} (which is \cite[Algorithm 5]{Fox2017}):
 \begin{algorithm}
-    \caption{Sampling with matrix splitting $A=M-N$}\label{alg:general_sampling}
+    \caption{Sampling from $\mathcal{N}(A^{-1},A^{-1}f)$ with matrix splitting $A=M-N$}\label{alg:general_sampling}
     \begin{algorithmic}[1]
         \State Pick $x^0$
         \For {$k=0,1,\dots$}
@@ -95,9 +96,9 @@ If we use an (overrelaxed) Gibbs-sampler, i.e. $M_0=\omega^{-1} D+L$ (or $M=\ome
 \begin{equation}
     M^T+N = \Sigma_{\text{SOR}} = \frac{2-\omega}{\omega}D + B\Sigma^{-1}B^T,
 \end{equation}
-in other words, in Alg. \ref{alg:general_sampling} we have to be able to sample from multivariate normal distribution with a covariance matrix $\Sigma_{\text{SOR}}=\frac{2-\omega}{\omega}D + B\Sigma^{-1}B^T$ that is diagonal plus a low-rank update. To achieve this, draw $\xi^k_\text{diag}\sim\mathcal{N}(0,I_{n\times n})\in\mathbb{R}^n$ and $\xi^k_\text{LR}\sim\mathcal{N}(0,I_{m\times m})\in\mathbb{R}^m$ and set
+in other words, in Alg. \ref{alg:general_sampling} we have to be able to sample from multivariate normal distribution $\mathcal{N}(\Sigma_{\text{SOR}},f)$ with mean $f$ and a covariance matrix $\Sigma_{\text{SOR}}=\frac{2-\omega}{\omega}D + B\Sigma^{-1}B^T$ that is diagonal plus a low-rank update. To achieve this, draw $\xi^k_\text{diag}\sim\mathcal{N}(0,I_{n\times n})\in\mathbb{R}^n$ and $\xi^k_\text{LR}\sim\mathcal{N}(0,I_{m\times m})\in\mathbb{R}^m$ and set
 \begin{equation}
-    c^k = \sqrt{\frac{2-\omega}{\omega}}D^{1/2} \xi^k_{\text{diag}} + B\Sigma^{-1/2} \xi^k_{\text{LR}} + f
+    c^k = \sqrt{\frac{2-\omega}{\omega}}D^{1/2} \xi^k_{\text{diag}} + B\Sigma^{-1/2} \xi^k_{\text{LR}} + f.
 \end{equation}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
