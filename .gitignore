@@ -10,4 +10,5 @@ cmake_install.cmake
 *.blg
 *.synctex.gz
 notes/low_rank_smoother.pdf
+notes/results.pdf
 *~
