@@ -102,6 +102,44 @@ in other words, in Alg. \ref{alg:general_sampling} we have to be able to sample 
 \end{equation}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Parallelisation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The SOR smoother is inherently sequential, so it can not be used in a parallel context. To address this issue, we can use the red-black (RB) reordered variant. For this, we write
+\begin{equation}
+    x = P x_{\text{rb}} \qquad \text{with $x_{rb} = \begin{pmatrix}x_r \\ x_b\end{pmatrix}$}.
+\end{equation}
+Here $P$ is a permutation matrix. The vectors $x_r$ and $x_b$ contain the unknowns at the ``red'' and ``black'' lattice sites. Then, after multiplication by $P$, $A_0x=b$ is equivalent to
+\begin{equation}
+    (PA_0P^T) Px = Px \quad \Leftrightarrow\quad A_{0,rb} x_{rb} = b_{rb}
+\end{equation}
+We can write $A_{0,rb}$ as
+\begin{equation}
+    A_{0,rb} = \begin{pmatrix}
+        D_{rr} & U_{rb} \\
+        L_{rb} & D_{bb}
+    \end{pmatrix}
+\end{equation}
+where $D_{rr}$ and $D_{bb}$ are diagonal matrices. Since $A_0$ is symmetric, the matrix $A_{0,rb} = PA_0P^T$ is also symmetric and hence $U_{rb} = L_{rb}^T$.
+The forward RB SOR smoother corresponds to the matrix splitting
+\begin{xalignat}{2}
+    M_{0,rb} &= \begin{pmatrix}
+        \frac{1}{\omega}D_{rr} & 0                      \\
+        L_{rb}                 & \frac{1}{\omega}D_{bb}
+    \end{pmatrix},&
+    N_{0,rb} = M_{0,rb} - A_{rb} &= \begin{pmatrix}
+        \frac{1-\omega}{\omega}D_{rr} & U_{rb}                        \\
+        0                             & \frac{1-\omega}{\omega}D_{bb}
+    \end{pmatrix}
+\end{xalignat}
+Note that in the corresponding sampler we still need to draw from a distribution with diagonal covariance matrix since
+\begin{equation}
+    M_{0,rb}^T + N_{0,rb} = \begin{pmatrix}
+        \frac{2-\omega}{\omega}D_{rr} & 0                             \\
+        0                             & \frac{2-\omega}{\omega}D_{bb}
+    \end{pmatrix}
+\end{equation}
+Hence in practice nothing changes, we can use the same sampling algorithm as above but iterate over the unknowns in a different order in the SOR sweep.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bibliographystyle{unsrt}
 \bibliography{low_rank_smoother}
 \end{document}
