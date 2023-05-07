@@ -20,10 +20,10 @@ make
 to build the code.
 
 ## Running the code
-The executable is `driver` in the `bin` sub directory. To run the code, use
+The executable is `driver` in the `bin` subdirectory. To run the code, use
 
 ```
-./bin/driver NX NY
+./bin/driver CONFIG_FILE
 ```
 
-where `NX`, `NY` specifies the lattice size.
+where `CONFIG_FILE` is the name of the file that contains the runtime configuration; an example can be found in [parameters_template.cfg](parameters_template.cfg).
