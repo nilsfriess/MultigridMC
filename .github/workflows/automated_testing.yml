@@ -21,7 +21,7 @@ jobs:
 
     - name: Download CholMod
       working-directory: ${{github.workspace}}
-      run: apt-get download libcholmod3; export PKG=`ls *.deb`; dpkg -x ${PKG} cholmod; ls cholmod
+      run: apt-get download libcholmod3; export PKG=`ls *.deb`; dpkg -x ${PKG} cholmod; ls cholmod/usr
 
     - name: Download Eigen
       run: git clone https://gitlab.com/libeigen/eigen.git; cd eigen; git checkout 3.4
