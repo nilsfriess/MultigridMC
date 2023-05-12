@@ -19,9 +19,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Install CholMod
-      working-directory: ${{github.workspace}}
-      run: apt install libcholmod3
+    - name: Download SuiteSparse
+      run: git clone https://github.com/DrTimothyAldenDavis/SuiteSparse.git; cd SuiteSparse
+
+    - name: Install SuiteSparse
+      working-directory: ${{github.workspace}}/SuiteSparse
+      run: make local
 
     - name: Download Eigen
       run: git clone https://gitlab.com/libeigen/eigen.git; cd eigen; git checkout 3.4
