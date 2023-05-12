@@ -2,6 +2,7 @@
 #define CHOLESKY_SAMPLER_HH CHOLESKY_SAMPLER_HH
 #include <random>
 #include <Eigen/Dense>
+#include "auxilliary/cholmod_wrapper.hh"
 #include "linear_operator/linear_operator.hh"
 #include "sampler.hh"
 
@@ -50,8 +51,11 @@ protected:
                                  Eigen::Upper,
                                  Eigen::NaturalOrdering<int>>
         LLTType;
+
     /** @brief Cholesky factorisation */
     std::shared_ptr<LLTType> LLT_of_A;
+    /** @brief Cholmod supernodal factorisation */
+    std::shared_ptr<CholmodLLT> CholmodLLT_of_A;
     /** @brief vector with normal random variables */
     mutable Eigen::VectorXd xi;
 };

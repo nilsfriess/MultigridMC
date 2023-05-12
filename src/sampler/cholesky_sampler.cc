@@ -22,6 +22,7 @@ CholeskySampler::CholeskySampler(const std::shared_ptr<LinearOperator> linear_op
         A_sparse += B_sparse * B_tilde;
     }
     LLT_of_A = std::make_shared<LLTType>(A_sparse);
+    CholmodLLT_of_A = std::make_shared<CholmodLLT>(A_sparse);
 }
 
 /* apply Sampler */
@@ -33,9 +34,26 @@ void CholeskySampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const
         xi[ell] = normal_dist(rng);
     }
     /* step 2: solve U^T g = f */
-    auto L_triangular = LLT_of_A->matrixL();
-    Eigen::VectorXd g = L_triangular.solve(f);
+    bool use_cholmod = true;
+    Eigen::VectorXd g(xi.size());
+    if (use_cholmod)
+    {
+
+        CholmodLLT_of_A->solveL(f, g);
+    }
+    else
+    {
+        auto L_triangular = LLT_of_A->matrixL();
+        g = L_triangular.solve(f);
+    }
     /* step 3: solve U x = xi + g for x */
-    auto U_triangular = LLT_of_A->matrixU();
-    x = U_triangular.solve(xi + g);
+    if (use_cholmod)
+    {
+        CholmodLLT_of_A->solveLT(xi + g, x);
+    }
+    else
+    {
+        auto U_triangular = LLT_of_A->matrixU();
+        x = U_triangular.solve(xi + g);
+    }
 }
