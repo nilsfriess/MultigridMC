@@ -85,20 +85,29 @@ void EigenSimplicialLLT::solve(const Eigen::VectorXd &b, Eigen::VectorXd &x) con
 {
     auto L_triangular = simplicial_LLT->matrixL();
     auto LT_triangular = simplicial_LLT->matrixU();
-    Eigen::VectorXd y = L_triangular.solve(b);
-    x = LT_triangular.solve(y);
+    const auto &P = simplicial_LLT->permutationP();
+    const auto &Pinv = simplicial_LLT->permutationPinv();
+    Eigen::VectorXd Pb = P * b;
+    Eigen::VectorXd y = L_triangular.solve(Pb);
+    Eigen::VectorXd Px = LT_triangular.solve(y);
+    x = Pinv * Px;
 }
 
 /* Solve lower triangular system L x = b */
 void EigenSimplicialLLT::solveL(const Eigen::VectorXd &b, Eigen::VectorXd &x) const
 {
     auto L_triangular = simplicial_LLT->matrixL();
-    x = L_triangular.solve(b);
+    const auto &P = simplicial_LLT->permutationP();
+    // permute RHS
+    Eigen::VectorXd Pb = P * b;
+    x = L_triangular.solve(Pb);
 }
 
 /* Solve upper triangular system L^T x = b */
 void EigenSimplicialLLT::solveLT(const Eigen::VectorXd &b, Eigen::VectorXd &x) const
 {
     auto LT_triangular = simplicial_LLT->matrixU();
-    x = LT_triangular.solve(b);
+    const auto &Pinv = simplicial_LLT->permutationPinv();
+    Eigen::VectorXd Px = LT_triangular.solve(b);
+    x = Pinv * Px;
 }

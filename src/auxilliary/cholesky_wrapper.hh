@@ -129,8 +129,9 @@ public:
     using Base::MatrixType;
     typedef Eigen::SimplicialLLT<LinearOperator::SparseMatrixType,
                                  Eigen::Lower,
-                                 Eigen::NaturalOrdering<int>>
+                                 Eigen::AMDOrdering<int>>
         SimplicialLLTType;
+    typedef typename Eigen::SimplicialCholeskyBase<SimplicialLLTType> EigenSimplicialCholeskyBase;
     /** @brief Constructor
      *
      * @param[in] matrix_ Matrix A to be Cholesky-factorised
