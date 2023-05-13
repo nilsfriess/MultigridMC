@@ -7,7 +7,7 @@
 #include <random>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
-#include "cholmod_wrapper.hh"
+#include "cholesky_wrapper.hh"
 #include "cholmod.h"
 
 /** @brief fixture class for Cholmod tests */

@@ -1,4 +1,4 @@
-#include "cholmod_wrapper.hh"
+#include "cholesky_wrapper.hh"
 
 /** @file cholmod_wrapper.cc
  *

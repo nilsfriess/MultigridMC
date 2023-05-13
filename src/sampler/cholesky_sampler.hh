@@ -2,7 +2,7 @@
 #define CHOLESKY_SAMPLER_HH CHOLESKY_SAMPLER_HH
 #include <random>
 #include <Eigen/Dense>
-#include "auxilliary/cholmod_wrapper.hh"
+#include "auxilliary/cholesky_wrapper.hh"
 #include "linear_operator/linear_operator.hh"
 #include "sampler.hh"
 
