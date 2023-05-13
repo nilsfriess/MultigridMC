@@ -102,7 +102,7 @@ protected:
 TEST_F(StatisticsTest, TestAverage)
 {
     Statistics stat("test_average", 10);
-    const unsigned int nsamples = thorough_testing ? 100000000 : 1000000;
+    const unsigned int nsamples = thorough_testing ? 100000000 : 2000000;
     generate_samples(nsamples, stat);
     Eigen::Vector2d avg_exact = (Eigen::Matrix2d::Identity() - A_iter).inverse() * v_shift;
     Eigen::Vector2d avg_numerical = stat.average();
@@ -114,7 +114,7 @@ TEST_F(StatisticsTest, TestAverage)
 TEST_F(StatisticsTest, TestCovariance)
 {
     Statistics stat("test_covariance", 10);
-    const unsigned int nsamples = thorough_testing ? 100000000 : 1000000;
+    const unsigned int nsamples = thorough_testing ? 100000000 : 2000000;
     generate_samples(nsamples, stat);
     Eigen::Matrix2d cov_exact = (Eigen::Matrix2d::Identity() - A_iter * A_iter).inverse();
     Eigen::Matrix2d cov_numerical = stat.covariance();
