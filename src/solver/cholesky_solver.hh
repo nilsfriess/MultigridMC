@@ -2,6 +2,7 @@
 #define CHOLESKY_SOLVER_HH CHOLESKY_SOLVER_HH
 #include <memory>
 #include <Eigen/SparseCholesky>
+#include "auxilliary/cholesky_wrapper.hh"
 #include "linear_operator/linear_operator.hh"
 #include "linear_solver.hh"
 
@@ -34,8 +35,8 @@ protected:
     /** @brief Expose of sparse matrix to be used */
     typedef LinearOperator::SparseMatrixType SparseMatrixType;
     typedef LinearOperator::DenseMatrixType DenseMatrixType;
-    /** @brief Underlying Eigen solver */
-    Eigen::SimplicialLLT<SparseMatrixType> solver;
+    /** @brief Underlying Cholesky solver */
+    std::shared_ptr<CholmodLLT> solver;
     /** @brief Dense low-rank matrix B */
     DenseMatrixType B;
     /** @brief dense low rank matrix A^{-1} B bar(Sigma)^{-1} */
