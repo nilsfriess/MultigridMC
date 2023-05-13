@@ -14,7 +14,6 @@ link_libraries(Eigen3::Eigen)
 
 # Main executable
 add_executable(driver driver.cc ${SOURCES})
-target_link_libraries(driver libconfig::config ${CONFIG++_LIBRARY})
 set_target_properties(driver PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ../bin)
 
