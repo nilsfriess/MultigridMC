@@ -421,8 +421,7 @@ int main(int argc, char *argv[])
                                                                                         intergrid_operator_factory,
                                                                                         coarse_sampler_factory);
     std::shared_ptr<Sampler> ssor_sampler = std::make_shared<SSORSampler>(linear_operator, rng, smoother_params.omega);
-    const int verbose = 1;
-    std::shared_ptr<Sampler> cholesky_sampler = std::make_shared<CholeskySampler>(linear_operator, rng, verbose);
+    std::shared_ptr<Sampler> cholesky_sampler = std::make_shared<CholeskySampler>(linear_operator, rng);
     std::cout << std::endl;
     // Run sampling experiments
     if (general_params.do_cholesky)

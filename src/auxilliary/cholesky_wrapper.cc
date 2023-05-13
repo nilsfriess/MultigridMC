@@ -6,8 +6,7 @@
  */
 
 /* Constructor */
-CholmodLLT::CholmodLLT(const MatrixType &matrix) : nrow(matrix.rows()),
-                                                   ncol(matrix.cols())
+CholmodLLT::CholmodLLT(const MatrixType &matrix_) : Base(matrix_)
 {
     const MatrixType A_lower = MatrixType(matrix.triangularView<Eigen::Lower>());
     unsigned int nnz = A_lower.nonZeros();
@@ -27,6 +26,11 @@ CholmodLLT::CholmodLLT(const MatrixType &matrix) : nrow(matrix.rows()),
     ctx->final_ll = true;
     L_cholmod = cholmod_analyze(A_cholmod, ctx);
     cholmod_factorize(A_cholmod, L_cholmod, ctx);
+    if ((!L_cholmod->is_super) && (nrow > 64))
+    {
+        std::cout << "WARNING: CholMod factorisation of " << nrow << " x " << ncol
+                  << " matrix is not supernodal." << std::endl;
+    }
 }
 
 /* Solve full system LL^T x = b */
@@ -68,4 +72,33 @@ void CholmodLLT::solveLT(const Eigen::VectorXd &b, Eigen::VectorXd &x) const
     std::copy_n((double *)x_cholmod->x, nrow, &x[0]);
     cholmod_free_dense(&Px_cholmod, ctx);
     cholmod_free_dense(&x_cholmod, ctx);
+}
+
+/* Constructor */
+EigenSimplicialLLT::EigenSimplicialLLT(const MatrixType &matrix_) : Base(matrix_)
+{
+    simplicial_LLT = std::make_shared<SimplicialLLTType>(matrix);
+}
+
+/* Solve full system LL^T x = b */
+void EigenSimplicialLLT::solve(const Eigen::VectorXd &b, Eigen::VectorXd &x) const
+{
+    auto L_triangular = simplicial_LLT->matrixL();
+    auto LT_triangular = simplicial_LLT->matrixU();
+    Eigen::VectorXd y = L_triangular.solve(b);
+    x = LT_triangular.solve(y);
+}
+
+/* Solve lower triangular system L x = b */
+void EigenSimplicialLLT::solveL(const Eigen::VectorXd &b, Eigen::VectorXd &x) const
+{
+    auto L_triangular = simplicial_LLT->matrixL();
+    x = L_triangular.solve(b);
+}
+
+/* Solve upper triangular system L^T x = b */
+void EigenSimplicialLLT::solveLT(const Eigen::VectorXd &b, Eigen::VectorXd &x) const
+{
+    auto LT_triangular = simplicial_LLT->matrixU();
+    x = LT_triangular.solve(b);
 }

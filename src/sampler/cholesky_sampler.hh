@@ -35,11 +35,9 @@ public:
      *
      * @param[in] linear_operator_ underlying linear operator
      * @param[in] rng_ random number generator
-     * @param[in] verbose_ verbosity level
      */
     CholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
-                    std::mt19937_64 &rng_,
-                    const int verbose = 0);
+                    std::mt19937_64 &rng_);
 
     /** @brief Draw a new sample x
      *
@@ -49,19 +47,11 @@ public:
     virtual void apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const;
 
 protected:
-    typedef Eigen::SimplicialLLT<LinearOperator::SparseMatrixType,
-                                 Eigen::Upper,
-                                 Eigen::NaturalOrdering<int>>
-        LLTType;
-
-    /** @brief Cholesky factorisation */
-    std::shared_ptr<LLTType> LLT_of_A;
+    typedef CholmodLLT LLTType;
     /** @brief Cholmod supernodal factorisation */
-    std::shared_ptr<CholmodLLT> CholmodLLT_of_A;
+    std::shared_ptr<LLTType> LLT_of_A;
     /** @brief vector with normal random variables */
     mutable Eigen::VectorXd xi;
-    /** @brief verbosity level */
-    const int verbose;
 };
 
 /* ******************** factory classes ****************************** */

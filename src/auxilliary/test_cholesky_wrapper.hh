@@ -11,7 +11,7 @@
 #include "cholmod.h"
 
 /** @brief fixture class for Cholmod tests */
-class CholmodWrapperTest : public ::testing::Test
+class CholeskyWrapperTest : public ::testing::Test
 {
 protected:
     /** @brief initialise tests */
@@ -36,30 +36,57 @@ protected:
             }
         }
         A_sparse.setFromTriplets(triplet_list.begin(), triplet_list.end());
+        // Construct solution, RHS and numerical solution
+        int seed = 1212957;
+        std::mt19937 rng(seed);
+        std::normal_distribution<double> normal_dist;
+        x = Eigen::VectorXd(nrow);
+        x_exact = Eigen::VectorXd(nrow);
+        for (unsigned int j = 0; j < nrow; ++j)
+        {
+            x_exact(j) = normal_dist(rng);
+        }
+        b = A_sparse * x_exact;
     }
 
 protected:
     /** @brief Sparse matrix that will be Cholesky factorised */
     Eigen::SparseMatrix<double> A_sparse;
+    /** @brief Numerical solution*/
+    Eigen::VectorXd x;
+    /** @brief Exact solution*/
+    Eigen::VectorXd x_exact;
+    /** @brief right hand side A x_{exact} = b*/
+    Eigen::VectorXd b;
 };
 
-/* Test Cholmod solver using a monolithic solve */
-TEST_F(CholmodWrapperTest, TestSolve)
+/* Test Simplicial Cholesky solver using a monolithic solve */
+TEST_F(CholeskyWrapperTest, TestEigenSimplicialSolve)
 {
     const double tolerance = 1.E-12;
-    unsigned int nrow = A_sparse.rows();
-    unsigned int ncol = A_sparse.cols();
-    int seed = 1212957;
-    std::mt19937 rng(seed);
-    std::normal_distribution<double> normal_dist;
-    Eigen::VectorXd x(nrow);
-    Eigen::VectorXd x_exact(nrow);
-    for (unsigned int j = 0; j < nrow; ++j)
-    {
-        x_exact(j) = normal_dist(rng);
-    }
-    Eigen::VectorXd b = A_sparse * x_exact;
-    x.setZero();
+    EigenSimplicialLLT llt(A_sparse);
+    llt.solve(b, x);
+    double error = (x - x_exact).norm();
+
+    EXPECT_NEAR(error, 0.0, tolerance);
+}
+
+/* Test Simplicial Cholesky solver using two subsequent solves */
+TEST_F(CholeskyWrapperTest, TestEigenSimplicialSolveLLT)
+{
+    const double tolerance = 1.E-12;
+    Eigen::VectorXd y(x.size());
+    EigenSimplicialLLT llt(A_sparse);
+    llt.solveL(b, y);
+    llt.solveLT(y, x);
+    double error = (x - x_exact).norm();
+    EXPECT_NEAR(error, 0.0, tolerance);
+}
+
+/* Test Cholmod solver using a monolithic solve */
+TEST_F(CholeskyWrapperTest, TestCholmodSolve)
+{
+    const double tolerance = 1.E-12;
     CholmodLLT llt(A_sparse);
     llt.solve(b, x);
     double error = (x - x_exact).norm();
@@ -68,24 +95,10 @@ TEST_F(CholmodWrapperTest, TestSolve)
 }
 
 /* Test Cholmod solver using two subsequent solves */
-TEST_F(CholmodWrapperTest, TestSolveLLT)
+TEST_F(CholeskyWrapperTest, TestCholmodSolveLLT)
 {
     const double tolerance = 1.E-12;
-    unsigned int nrow = A_sparse.rows();
-    unsigned int ncol = A_sparse.cols();
-    int seed = 1212957;
-    std::mt19937 rng(seed);
-    std::normal_distribution<double> normal_dist;
-
-    Eigen::VectorXd x(nrow);
-    Eigen::VectorXd y(nrow);
-    Eigen::VectorXd x_exact(nrow);
-    for (unsigned int j = 0; j < nrow; ++j)
-    {
-        x_exact(j) = normal_dist(rng);
-    }
-    Eigen::VectorXd b = A_sparse * x_exact;
-    x.setZero();
+    Eigen::VectorXd y(x.size());
     CholmodLLT llt(A_sparse);
     llt.solveL(b, y);
     llt.solveLT(y, x);
