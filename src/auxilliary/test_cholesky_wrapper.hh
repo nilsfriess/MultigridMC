@@ -8,7 +8,6 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include "cholesky_wrapper.hh"
-#include "cholmod.h"
 
 /** @brief fixture class for Cholmod tests */
 class CholeskyWrapperTest : public ::testing::Test
