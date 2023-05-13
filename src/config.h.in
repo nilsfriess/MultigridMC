@@ -8,4 +8,6 @@
 // run basic, cheaper tests
 #define thorough_testing false
 #endif // THOROUGH_TESTING
+// Define NCHOLMOD if Cholmod is NOT used
+#cmakedefine NCHOLMOD
 #endif

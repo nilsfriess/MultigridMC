@@ -296,7 +296,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
                                                                             intergrid_operator_factory,
                                                                             coarse_sampler_factory);
 
-    const unsigned int nsamples = thorough_testing ? 1000000 : 10000;
+    const unsigned int nsamples = thorough_testing ? 2000000 : 10000;
     std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, nsamples);
     const double tolerance = thorough_testing ? 2.E-3 : 2.E-2;
     EXPECT_NEAR(error.first, 0.0, tolerance);

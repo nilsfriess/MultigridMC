@@ -33,9 +33,8 @@ void CholeskySampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const
         xi[ell] = normal_dist(rng);
     }
     /* step 2: solve U^T g = f */
-    auto L_triangular = LLT_of_A->matrixL();
-    Eigen::VectorXd g = L_triangular.solve(f);
+    Eigen::VectorXd g(xi.size());
+    LLT_of_A->solveL(f, g);
     /* step 3: solve U x = xi + g for x */
-    auto U_triangular = LLT_of_A->matrixU();
-    x = U_triangular.solve(xi + g);
+    LLT_of_A->solveLT(xi + g, x);
 }

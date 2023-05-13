@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "config.h"
+#include "auxilliary/test_cholesky_wrapper.hh"
 #include "auxilliary/test_statistics.hh"
 #include "lattice/test_lattice.hh"
 #include "intergrid/test_intergrid.hh"
@@ -26,5 +27,12 @@ int main(int argc, char *argv[])
     std::cout << "+----------------------------+" << std::endl;
     std::cout << std::endl;
   }
+#ifdef NCHOLMOD
+  std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+  std::cout << "WARNING: Skipping tests of CholMod Cholesky factorisation." << std::endl;
+  std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+  std::cout << std::endl;
+#endif // NCHOLMOD
+
   return RUN_ALL_TESTS();
 }

@@ -2,6 +2,7 @@
 #define CHOLESKY_SAMPLER_HH CHOLESKY_SAMPLER_HH
 #include <random>
 #include <Eigen/Dense>
+#include "auxilliary/cholesky_wrapper.hh"
 #include "linear_operator/linear_operator.hh"
 #include "sampler.hh"
 
@@ -46,10 +47,13 @@ public:
     virtual void apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const;
 
 protected:
-    typedef Eigen::SimplicialLLT<LinearOperator::SparseMatrixType,
-                                 Eigen::Upper,
-                                 Eigen::NaturalOrdering<int>>
-        LLTType;
+#ifndef NCHOLMOD
+    /** @brief Use Cholmod's supernodal Cholesky factorisation */
+    typedef CholmodLLT LLTType;
+#else  // NCHOLMOD
+    /** @brief Use Eigen's native Cholesky factorisation */
+    typedef EigenSimplicialLLT LLTType;
+#endif // NCHOLMOD
     /** @brief Cholesky factorisation */
     std::shared_ptr<LLTType> LLT_of_A;
     /** @brief vector with normal random variables */
