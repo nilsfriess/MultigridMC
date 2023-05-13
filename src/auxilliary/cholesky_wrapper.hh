@@ -3,7 +3,10 @@
 #include <algorithm>
 #include <Eigen/Dense>
 #include <Eigen/SparseCholesky>
+#include "config.h"
+#ifndef NCHOLMOD
 #include "cholmod.h"
+#endif // NCHOLMOD
 #include "linear_operator/linear_operator.hh"
 
 /** @file cholesky_wrapper.hh
@@ -60,9 +63,8 @@ protected:
     const unsigned int ncol;
 };
 
-/** @brief Wrapper around Cholmod's Cholesky factorisation
- *
- */
+/** @brief Wrapper around Cholmod's Cholesky factorisation */
+#ifndef NCHOLMOD
 class CholmodLLT : public CholeskyLLT
 {
 public:
@@ -118,6 +120,7 @@ protected:
     /** @brief Cholmod factor */
     cholmod_factor *L_cholmod;
 };
+#endif // NCHOLMOD
 
 /** @brief Wrapper around Eigen's simplical Cholesky factorisation
  *

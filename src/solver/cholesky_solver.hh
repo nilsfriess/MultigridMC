@@ -35,8 +35,16 @@ protected:
     /** @brief Expose of sparse matrix to be used */
     typedef LinearOperator::SparseMatrixType SparseMatrixType;
     typedef LinearOperator::DenseMatrixType DenseMatrixType;
+
+#ifndef NCHOLMOD
+    /** @brief Use Cholmod's supernodal Cholesky factorisation */
+    typedef CholmodLLT LLTType;
+#else  // NCHOLMOD
+    /** @brief Use Eigen's native Cholesky factorisation */
+    typedef EigenSimplicialLLT LLTType;
+#endif // NCHOLMOD
     /** @brief Underlying Cholesky solver */
-    std::shared_ptr<CholmodLLT> solver;
+    std::shared_ptr<LLTType> solver;
     /** @brief Dense low-rank matrix B */
     DenseMatrixType B;
     /** @brief dense low rank matrix A^{-1} B bar(Sigma)^{-1} */

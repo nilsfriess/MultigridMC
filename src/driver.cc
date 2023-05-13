@@ -9,6 +9,7 @@
 #include <Eigen/QR>
 #include "libconfig.hh"
 
+#include "config.h"
 #include "lattice/lattice2d.hh"
 #include "smoother/ssor_smoother.hh"
 #include "linear_operator/linear_operator.hh"
@@ -387,6 +388,14 @@ int main(int argc, char *argv[])
         std::cout << "Usage: " << argv[0] << " CONFIGURATIONFILE" << std::endl;
         exit(-1);
     }
+#ifndef NCHOLMOD
+    std::cout << "Using Cholesky factorisation from CholMod." << std::endl;
+#else  // NCHOLMOD
+    std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+    std::cout << "WARNING: Falling back on Eigen's SimplicalLLT Cholesky factorisation." << std::endl;
+    std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+    std::cout << std::endl;
+#endif // NCHOLMOD
     // Construct lattice and linear operator
     std::shared_ptr<Lattice2d> lattice = std::make_shared<Lattice2d>(lattice_params.nx,
                                                                      lattice_params.ny);

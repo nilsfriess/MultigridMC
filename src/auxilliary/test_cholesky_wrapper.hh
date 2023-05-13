@@ -86,17 +86,22 @@ TEST_F(CholeskyWrapperTest, TestEigenSimplicialSolveLLT)
 /* Test Cholmod solver using a monolithic solve */
 TEST_F(CholeskyWrapperTest, TestCholmodSolve)
 {
+#ifndef NCHOLMOD
     const double tolerance = 1.E-12;
     CholmodLLT llt(A_sparse);
     llt.solve(b, x);
     double error = (x - x_exact).norm();
 
     EXPECT_NEAR(error, 0.0, tolerance);
+#else
+    GTEST_SKIP();
+#endif // NCHOLMOD
 }
 
 /* Test Cholmod solver using two subsequent solves */
 TEST_F(CholeskyWrapperTest, TestCholmodSolveLLT)
 {
+#ifndef NCHOLMOD
     const double tolerance = 1.E-12;
     Eigen::VectorXd y(x.size());
     CholmodLLT llt(A_sparse);
@@ -104,6 +109,9 @@ TEST_F(CholeskyWrapperTest, TestCholmodSolveLLT)
     llt.solveLT(y, x);
     double error = (x - x_exact).norm();
     EXPECT_NEAR(error, 0.0, tolerance);
+#else
+    GTEST_SKIP();
+#endif // NCHOLMOD
 }
 
 #endif // TEST_CHOLMOD_WRAPPER_HH

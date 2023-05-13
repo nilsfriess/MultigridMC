@@ -47,8 +47,14 @@ public:
     virtual void apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const;
 
 protected:
+#ifndef NCHOLMOD
+    /** @brief Use Cholmod's supernodal Cholesky factorisation */
     typedef CholmodLLT LLTType;
-    /** @brief Cholmod supernodal factorisation */
+#else  // NCHOLMOD
+    /** @brief Use Eigen's native Cholesky factorisation */
+    typedef EigenSimplicialLLT LLTType;
+#endif // NCHOLMOD
+    /** @brief Cholesky factorisation */
     std::shared_ptr<LLTType> LLT_of_A;
     /** @brief vector with normal random variables */
     mutable Eigen::VectorXd xi;

@@ -1,10 +1,11 @@
 #include "cholesky_wrapper.hh"
 
-/** @file cholmod_wrapper.cc
+/** @file cholesky_wrapper.cc
  *
- * @brief Implementation of cholmod_wrapper.hh
+ * @brief Implementation of cholesky_wrapper.hh
  */
 
+#ifndef NCHOLMOD
 /* Constructor */
 CholmodLLT::CholmodLLT(const MatrixType &matrix_) : Base(matrix_)
 {
@@ -73,6 +74,7 @@ void CholmodLLT::solveLT(const Eigen::VectorXd &b, Eigen::VectorXd &x) const
     cholmod_free_dense(&Px_cholmod, ctx);
     cholmod_free_dense(&x_cholmod, ctx);
 }
+#endif // NCHOLMOD
 
 /* Constructor */
 EigenSimplicialLLT::EigenSimplicialLLT(const MatrixType &matrix_) : Base(matrix_)

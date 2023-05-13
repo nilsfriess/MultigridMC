@@ -10,7 +10,7 @@ add_subdirectory(intergrid)
 add_subdirectory(auxilliary)
 add_subdirectory(qoi)
 
-link_libraries(${CHOLMOD_LIBRARY} Eigen3::Eigen)
+link_libraries(Eigen3::Eigen)
 
 # Main executable
 add_executable(driver driver.cc ${SOURCES})
@@ -18,14 +18,14 @@ target_link_libraries(driver libconfig::config ${CONFIG++_LIBRARY})
 set_target_properties(driver PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ../bin)
 
-# Tests
-option(USE_THOROUGH_TESTS "Use thorough tests?" ON)
-
 if(USE_THOROUGH_TESTS)
     set(THOROUGH_TESTING "true")
 endif()
 
 configure_file(config.h.in config.h)
+
+# Make sure we can include the generated config.h
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(test test.cc ${SOURCES})
 target_include_directories(test PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")

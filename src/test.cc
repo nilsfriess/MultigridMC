@@ -27,5 +27,12 @@ int main(int argc, char *argv[])
     std::cout << "+----------------------------+" << std::endl;
     std::cout << std::endl;
   }
+#ifdef NCHOLMOD
+  std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+  std::cout << "WARNING: Skipping tests of CholMod Cholesky factorisation." << std::endl;
+  std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+  std::cout << std::endl;
+#endif // NCHOLMOD
+
   return RUN_ALL_TESTS();
 }

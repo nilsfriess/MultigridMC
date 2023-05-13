@@ -9,7 +9,7 @@ CholeskySolver::CholeskySolver(std::shared_ptr<LinearOperator> linear_operator_)
 {
     // Compute Cholesky factorisation here
     const SparseMatrixType &A = linear_operator->get_sparse();
-    solver = std::make_shared<CholmodLLT>(A);
+    solver = std::make_shared<LLTType>(A);
     if (linear_operator->get_m_lowrank() > 0)
     {
         B = linear_operator->get_B();
