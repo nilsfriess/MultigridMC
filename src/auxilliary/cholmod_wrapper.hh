@@ -1,5 +1,5 @@
-#ifndef CHOLMOD_WRAPPER_HH
-#define CHOLMOD_WRAPPER_HH CHOLMOD_WRAPPER_HH
+#ifndef CHOLESKY_WRAPPER_HH
+#define CHOLESKY_WRAPPER_HH CHOLESKY_WRAPPER_HH
 #include <algorithm>
 #include "cholmod.h"
 #include "linear_operator/linear_operator.hh"
@@ -73,4 +73,4 @@ protected:
     /** @brief Cholmod factor */
     cholmod_factor *L_cholmod;
 };
-#endif // CHOLMOD_WRAPPER_HH
+#endif // CHOLESKY_WRAPPER_HH
