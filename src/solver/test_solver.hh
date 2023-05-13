@@ -168,6 +168,7 @@ TEST_F(SolverTest, TestMultigridLowRank)
     solver_params.rtol = 1.0E-13;
     solver_params.atol = 1.0E-11;
     solver_params.maxiter = 100;
+    solver_params.verbose = 0;
     LoopSolver solver(linear_operator_lowrank, prec, solver_params);
     solver.apply(b_lowrank, x);
     double tolerance = 1.E-10;
