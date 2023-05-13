@@ -55,6 +55,12 @@ public:
      */
     void solveLT(const Eigen::VectorXd &b, Eigen::VectorXd &x) const;
 
+    /** @brief is this using a supernodal decomposition? */
+    bool is_supernodal() const { return L_cholmod->is_super; }
+
+    /** @brief return size of matrix */
+    size_t get_n() const { return L_cholmod->n; }
+
 protected:
     /** @brief number of matrix rows */
     const unsigned int nrow;

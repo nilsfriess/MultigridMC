@@ -7,9 +7,11 @@
 
 /* Create a new instance */
 CholeskySampler::CholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
-                                 std::mt19937_64 &rng_) : Base(linear_operator_,
-                                                               rng_),
-                                                          xi(linear_operator_->get_ndof())
+                                 std::mt19937_64 &rng_,
+                                 const int verbose_) : Base(linear_operator_,
+                                                            rng_),
+                                                       xi(linear_operator_->get_ndof()),
+                                                       verbose(verbose_)
 {
     LinearOperator::SparseMatrixType A_sparse = linear_operator->get_sparse();
     if (linear_operator->get_m_lowrank() > 0)
@@ -23,6 +25,14 @@ CholeskySampler::CholeskySampler(const std::shared_ptr<LinearOperator> linear_op
     }
     LLT_of_A = std::make_shared<LLTType>(A_sparse);
     CholmodLLT_of_A = std::make_shared<CholmodLLT>(A_sparse);
+    if (verbose)
+    {
+        const int L_n = CholmodLLT_of_A->get_n();
+        std::cout << "Cholesky factorisation of ";
+        std::cout << L_n << " x " << L_n << " matrix,";
+        std::cout << " supernodal = " << CholmodLLT_of_A->is_supernodal();
+        std::cout << std::endl;
+    }
 }
 
 /* apply Sampler */

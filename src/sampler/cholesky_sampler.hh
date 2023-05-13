@@ -35,9 +35,11 @@ public:
      *
      * @param[in] linear_operator_ underlying linear operator
      * @param[in] rng_ random number generator
+     * @param[in] verbose_ verbosity level
      */
     CholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
-                    std::mt19937_64 &rng_);
+                    std::mt19937_64 &rng_,
+                    const int verbose = 0);
 
     /** @brief Draw a new sample x
      *
@@ -58,6 +60,8 @@ protected:
     std::shared_ptr<CholmodLLT> CholmodLLT_of_A;
     /** @brief vector with normal random variables */
     mutable Eigen::VectorXd xi;
+    /** @brief verbosity level */
+    const int verbose;
 };
 
 /* ******************** factory classes ****************************** */
