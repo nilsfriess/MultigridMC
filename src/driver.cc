@@ -72,6 +72,12 @@ struct MeasurementParameters
     Eigen::MatrixXd covariance;
     /** @brief sample location */
     Eigen::Vector2d sample_location;
+    /** @brief measure global average of field? */
+    bool measure_global;
+    /** @brief variance of global average */
+    double sigma_global;
+    /** @brief mean of global average */
+    double mean_global;
 };
 
 /** @brief read parameters from configuration file
@@ -115,7 +121,7 @@ int read_configuration_file(const std::string filename,
     }
     catch (const libconfig::SettingException &ex)
     {
-        std::cerr << "Error while reading general configuration from file" << filename << "." << std::endl;
+        std::cerr << "Error while reading general configuration from file " << filename << "." << std::endl;
         return (EXIT_FAILURE);
     }
     // Lattice parameters
@@ -128,7 +134,7 @@ int read_configuration_file(const std::string filename,
     }
     catch (const libconfig::SettingException &ex)
     {
-        std::cerr << "Error while reading lattice configuration from file" << filename << "." << std::endl;
+        std::cerr << "Error while reading lattice configuration from file " << filename << "." << std::endl;
         return (EXIT_FAILURE);
     }
     // Smoother parameters
@@ -140,7 +146,7 @@ int read_configuration_file(const std::string filename,
     }
     catch (const libconfig::SettingException &ex)
     {
-        std::cerr << "Error while reading smoother configuration from file" << filename << "." << std::endl;
+        std::cerr << "Error while reading smoother configuration from file " << filename << "." << std::endl;
         return (EXIT_FAILURE);
     }
     // Multigrid MC parameters
@@ -157,7 +163,7 @@ int read_configuration_file(const std::string filename,
     }
     catch (const libconfig::SettingException &ex)
     {
-        std::cerr << "Error while reading Multigrid MC configuration from file" << filename << "." << std::endl;
+        std::cerr << "Error while reading Multigrid MC configuration from file " << filename << "." << std::endl;
         return (EXIT_FAILURE);
     }
     // Sampling parameters
@@ -171,7 +177,7 @@ int read_configuration_file(const std::string filename,
     }
     catch (const libconfig::SettingException &ex)
     {
-        std::cerr << "Error while reading sampling configuration from file" << filename << "." << std::endl;
+        std::cerr << "Error while reading sampling configuration from file " << filename << "." << std::endl;
         return (EXIT_FAILURE);
     }
     // Measurement parameters
@@ -214,10 +220,25 @@ int read_configuration_file(const std::string filename,
         v(0) = double(s_point[0]);
         v(1) = double(s_point[1]);
         measurement_params.sample_location = v;
+        measurement_params.measure_global = measurements.lookup("measure_global");
+        measurement_params.sigma_global = measurements.lookup("sigma_global");
+        measurement_params.mean_global = measurements.lookup("mean_global");
+        std::cout << "  measure global average across domain? ";
+        if (measurement_params.measure_global)
+        {
+            std::cout << "yes" << std::endl;
+            std::cout << "  mean of global average = " << measurement_params.mean_global << std::endl;
+            std::cout << "  variance of global average = " << measurement_params.sigma_global << std::endl;
+        }
+        else
+        {
+            std::cout << "no" << std::endl;
+        }
+        std::cout << std::endl;
     }
     catch (const libconfig::SettingException &ex)
     {
-        std::cerr << "Error while reading measurement configuration from file" << filename << "." << std::endl;
+        std::cerr << "Error while reading measurement configuration from file " << filename << "." << std::endl;
         return (EXIT_FAILURE);
     }
     std::cout << std::endl;
@@ -238,13 +259,13 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
 {
     const std::shared_ptr<MeasuredDiffusionOperator2d> linear_operator = std::dynamic_pointer_cast<MeasuredDiffusionOperator2d>(sampler->get_linear_operator());
     unsigned int ndof = linear_operator->get_ndof();
-
     // prior mean (set to zero)
     Eigen::VectorXd xbar(ndof);
     xbar.setZero();
-    // posterior mean
-    Eigen::VectorXd x_post = linear_operator->posterior_mean(xbar,
-                                                             measurement_params.mean);
+    Eigen::VectorXd y(measurement_params.n + measurement_params.measure_global);
+    y(Eigen::seqN(0, measurement_params.n)) = measurement_params.mean;
+    y(measurement_params.n) = measurement_params.mean_global;
+    Eigen::VectorXd x_post = linear_operator->posterior_mean(xbar, y);
     std::shared_ptr<Lattice2d> lattice = std::dynamic_pointer_cast<Lattice2d>(linear_operator->get_lattice());
     Eigen::VectorXd x(ndof);
     Eigen::VectorXd f(ndof);
@@ -328,8 +349,10 @@ void posterior_statistics(std::shared_ptr<Sampler> sampler,
     // prior mean (set to zero)
     Eigen::VectorXd xbar(ndof);
     xbar.setZero();
-    Eigen::VectorXd x_post = linear_operator->posterior_mean(xbar,
-                                                             measurement_params.mean);
+    Eigen::VectorXd y(measurement_params.n + measurement_params.measure_global);
+    y(Eigen::seqN(0, measurement_params.n)) = measurement_params.mean;
+    y(measurement_params.n) = measurement_params.mean_global;
+    Eigen::VectorXd x_post = linear_operator->posterior_mean(xbar, y);
     std::shared_ptr<Lattice2d> lattice = std::dynamic_pointer_cast<Lattice2d>(linear_operator->get_lattice());
     Eigen::VectorXd x(ndof);
     Eigen::VectorXd f(ndof);
@@ -406,6 +429,8 @@ int main(int argc, char *argv[])
     std::shared_ptr<MeasuredDiffusionOperator2d> linear_operator = std::make_shared<MeasuredDiffusionOperator2d>(lattice,
                                                                                                                  measurement_params.measurement_locations,
                                                                                                                  measurement_params.covariance,
+                                                                                                                 measurement_params.measure_global,
+                                                                                                                 measurement_params.sigma_global,
                                                                                                                  alpha_K,
                                                                                                                  beta_K,
                                                                                                                  alpha_b,

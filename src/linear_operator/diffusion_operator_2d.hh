@@ -45,10 +45,10 @@ public:
      * @param[in] m_lowrank_ the dimension of the low rank correction
      */
     DiffusionOperator2d(const std::shared_ptr<Lattice2d> lattice_,
-                        const double alpha_K_ = 0.8,
-                        const double beta_K_ = 0.2,
-                        const double alpha_b_ = 0.9,
-                        const double beta_b_ = 0.1);
+                        const double alpha_K_,
+                        const double beta_K_,
+                        const double alpha_b_,
+                        const double beta_b_);
 
     /** @brief Diffusion coefficient
      *
@@ -102,20 +102,24 @@ public:
      *
      * @param[in] lattice_ underlying 2d lattice
      * @param[in] rng_ random number generator
+     * @param[in] measurement_locations_ coordinates of locations where the field is measured
+     * @param[in] Sigma_ covariance matrix of measurements
+     * @param[in] measure_global_ measure the average across the entire domain
+     * @param[in] sigma_global_ variance of global average measurement
      * @param[in] alpha_K first coefficient in diffusion function
      * @param[in] beta_K second coefficient in diffusion function
      * @param[in] alpha_b first coefficient in zero order term
      * @param[in] beta_b second coefficient in zero order term
-     * @param[in] measurement_locations_ coordinates of locations where the field is measured
-     * @param[in] Sigma_ covariance matrix of measurements
      */
     MeasuredDiffusionOperator2d(const std::shared_ptr<Lattice2d> lattice_,
                                 const std::vector<Eigen::Vector2d> measurement_locations_,
                                 const Eigen::MatrixXd Sigma_,
-                                const double alpha_K_ = 0.8,
-                                const double beta_K_ = 0.2,
-                                const double alpha_b_ = 0.9,
-                                const double beta_b_ = 0.1);
+                                const bool measure_average_,
+                                const double sigma_global_,
+                                const double alpha_K_,
+                                const double beta_K_,
+                                const double alpha_b_,
+                                const double beta_b_);
 
     /** @brief Compute posterior mean
      *

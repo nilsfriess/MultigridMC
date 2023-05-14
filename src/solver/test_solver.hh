@@ -56,9 +56,13 @@ protected:
         Eigen::HouseholderQR<Eigen::MatrixXd> qr(A);
         Q = qr.householderQ();
         Sigma = Q * Sigma * Q.transpose();
+        const bool measure_global = false;
+        const double sigma_global = 0.0;
         linear_operator_lowrank = std::make_shared<MeasuredDiffusionOperator2d>(lattice,
                                                                                 measurement_locations,
                                                                                 Sigma,
+                                                                                measure_global,
+                                                                                sigma_global,
                                                                                 alpha_K,
                                                                                 beta_K,
                                                                                 alpha_b,

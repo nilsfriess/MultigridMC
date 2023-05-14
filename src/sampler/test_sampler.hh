@@ -267,10 +267,14 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     Eigen::HouseholderQR<Eigen::MatrixXd> qr(A);
     Q = qr.householderQ();
     Sigma = Q * Sigma * Q.transpose();
+    const bool measure_average = false;
+    const double sigma_average = 0.0;
     std::shared_ptr<MeasuredDiffusionOperator2d>
         linear_operator = std::make_shared<MeasuredDiffusionOperator2d>(lattice,
                                                                         measurement_locations,
                                                                         Sigma,
+                                                                        measure_average,
+                                                                        sigma_average,
                                                                         alpha_K,
                                                                         beta_K,
                                                                         alpha_b,

@@ -70,11 +70,13 @@ double DiffusionOperator2d::b_zero(const double x, const double y) const
 MeasuredDiffusionOperator2d::MeasuredDiffusionOperator2d(const std::shared_ptr<Lattice2d> lattice_,
                                                          const std::vector<Eigen::Vector2d> measurement_locations_,
                                                          const Eigen::MatrixXd Sigma_,
+                                                         const bool measure_global_,
+                                                         const double sigma_average_,
                                                          const double alpha_K_,
                                                          const double beta_K_,
                                                          const double alpha_b_,
                                                          const double beta_b_) : LinearOperator(lattice_,
-                                                                                                measurement_locations_.size())
+                                                                                                measurement_locations_.size() + measure_global_)
 {
     DiffusionOperator2d diffusion_operator(lattice_,
                                            alpha_K_,
@@ -84,9 +86,11 @@ MeasuredDiffusionOperator2d::MeasuredDiffusionOperator2d(const std::shared_ptr<L
     A_sparse = diffusion_operator.get_sparse();
     unsigned int nx = lattice_->nx;
     unsigned int ny = lattice_->ny;
-    Sigma_inv = Sigma_.inverse();
     unsigned int nrow = lattice->M;
     unsigned int n_measurements = measurement_locations_.size();
+    Sigma_inv = Eigen::MatrixXd(n_measurements + measure_global_, n_measurements + measure_global_);
+    Sigma_inv.setZero();
+    Sigma_inv(Eigen::seqN(0, n_measurements), Eigen::seqN(0, n_measurements)) = Sigma_.inverse();
     B.setZero();
     for (int k = 0; k < n_measurements; ++k)
     {
@@ -95,6 +99,14 @@ MeasuredDiffusionOperator2d::MeasuredDiffusionOperator2d(const std::shared_ptr<L
         int j = int(round(x_loc[1] * ny));
         unsigned int ell = nx * j + i;
         B(ell, k) = 1.0;
+    }
+    if (measure_global_)
+    {
+        for (int j = 0; j < nrow; ++j)
+        {
+            B(n_measurements, j) = 1. / nrow;
+        }
+        Sigma_inv(n_measurements, n_measurements) = 1. / sigma_average_;
     }
     Sigma_inv_BT = Sigma_inv * B.transpose();
 }
