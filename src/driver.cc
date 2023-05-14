@@ -131,27 +131,26 @@ void posterior_statistics(std::shared_ptr<Sampler> sampler,
  * *********************************************************************** */
 int main(int argc, char *argv[])
 {
+    if (argc != 2)
+    {
+        std::cout << "Usage: " << argv[0] << " CONFIGURATIONFILE" << std::endl;
+        exit(-1);
+    }
+    std::string filename(argv[1]);
+    std::cout << "Reading parameters from file \'" << filename << "\'" << std::endl;
     GeneralParameters general_params;
     LatticeParameters lattice_params;
     SmootherParameters smoother_params;
     MultigridMCParameters multigridmc_params;
     SamplingParameters sampling_params;
     MeasurementParameters measurement_params;
-    if (argc == 2)
-    {
-        std::string filename(argv[1]);
-        general_params.read_from_file(filename);
-        lattice_params.read_from_file(filename);
-        smoother_params.read_from_file(filename);
-        multigridmc_params.read_from_file(filename);
-        sampling_params.read_from_file(filename);
-        measurement_params.read_from_file(filename);
-    }
-    else
-    {
-        std::cout << "Usage: " << argv[0] << " CONFIGURATIONFILE" << std::endl;
-        exit(-1);
-    }
+    general_params.read_from_file(filename);
+    lattice_params.read_from_file(filename);
+    smoother_params.read_from_file(filename);
+    multigridmc_params.read_from_file(filename);
+    sampling_params.read_from_file(filename);
+    measurement_params.read_from_file(filename);
+
 #ifndef NCHOLMOD
     std::cout << "Using Cholesky factorisation from CholMod." << std::endl;
 #else  // NCHOLMOD

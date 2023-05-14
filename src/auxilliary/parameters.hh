@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include <typeinfo>
 #include <Eigen/Dense>
 #include "libconfig.hh"
 
@@ -21,6 +22,7 @@ public:
      */
     int read_from_file(const std::string filename)
     {
+        std::string classname = typeid(*this).name();
         libconfig::Config cfg;
         // Read the file. If there is an error, report it and exit.
         try
@@ -29,7 +31,8 @@ public:
         }
         catch (const libconfig::FileIOException &fioex)
         {
-            std::cerr << "Error opening configuration file \'" << filename << "\'." << std::endl;
+            std::cerr << "Error in class \'" << classname << "\': "
+                      << "cannot open configuration file \'" << filename << "\'." << std::endl;
             return (EXIT_FAILURE);
         }
         const libconfig::Setting &root = cfg.getRoot();
@@ -37,9 +40,11 @@ public:
         {
             parse_config(root);
         }
+
         catch (const libconfig::SettingException &ex)
         {
-            std::cerr << "Error while reading configuration from file " << filename << "." << std::endl;
+            std::cerr << "Error in class \'" << classname << "\': "
+                      << "cannot read configuration from file \'" << filename << "\'." << std::endl;
             return (EXIT_FAILURE);
         }
         return (EXIT_SUCCESS);
@@ -47,6 +52,9 @@ public:
 
 protected:
     /** @brief parse configuration
+     *
+     * This virtual method has to be implemented by each derived class
+     * to actually parse the parameters in the libconfig configuration object.
      *
      * @param[in] root root of configuration object
      */
