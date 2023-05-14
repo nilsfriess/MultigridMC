@@ -5,25 +5,13 @@
 #include <Eigen/Dense>
 #include "linear_operator/linear_operator.hh"
 #include "intergrid/intergrid_operator.hh"
+#include "auxilliary/parameters.hh"
 #include "sampler.hh"
 
 /** @file multigridmc_sampler.hh
  *
  * @brief Multigrid Monte Carlo sampler
  */
-
-/** @struct Multigrid Monte Carlo parameters */
-struct MultigridMCParameters
-{
-    /** @brief Number of levels */
-    unsigned int nlevel;
-    /** @brief Number of presmoothing steps */
-    unsigned int npresample;
-    /** @brief number of postsmoothing steps */
-    unsigned int npostsample;
-    /** @brief verbosity level */
-    int verbose;
-};
 
 /** @class MultigridMCSampler
  *
