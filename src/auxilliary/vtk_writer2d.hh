@@ -41,4 +41,14 @@ protected:
     const std::shared_ptr<Lattice2d> lattice;
 };
 
+/** @brief write VTK file with circle around a point
+ *
+ * @param[in] centre centre of circle
+ * @param[in] radius radius of circle
+ * @param[in] filename name of vtk file to write
+ */
+void write_vtk_circle(const Eigen::Vector2d centre,
+                      const double radius,
+                      const std::string filename);
+
 #endif // VTK_WRITER2D_HH

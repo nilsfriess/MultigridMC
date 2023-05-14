@@ -58,3 +58,34 @@ void VTKWriter2d::write() const
     }
     out.close();
 }
+
+/* write VTK file with circle around a point */
+void write_vtk_circle(const Eigen::Vector2d centre,
+                      const double radius,
+                      const std::string filename)
+{
+    // Grid specification
+    std::ofstream out(filename.c_str());
+    out << "# vtk DataFile Version 2.0" << std::endl;
+    out << "Sample state" << std::endl;
+    out << "ASCII" << std::endl;
+    out << "DATASET POLYDATA" << std::endl;
+    out << std::endl;
+    // number of points used to discretise the circle
+    unsigned int npoints = 100;
+    double z_offset = 1.E-6;
+    out << "POINTS " << npoints << " double" << std::endl;
+    for (int j = 0; j < npoints; ++j)
+    {
+        double x = centre[0] + radius * cos(2 * M_PI * j / (1.0 * npoints)) - 0.5;
+        double y = centre[1] + radius * sin(2 * M_PI * j / (1.0 * npoints)) - 0.5;
+        out << x << " " << y << " " << z_offset << std::endl;
+    }
+    out << "POLYGONS 1 " << (npoints + 1) << std::endl;
+    out << npoints;
+    for (int j = 0; j < npoints; ++j)
+    {
+        out << " " << j;
+    }
+    out << std::endl;
+}
