@@ -104,7 +104,7 @@ MeasuredDiffusionOperator2d::MeasuredDiffusionOperator2d(const std::shared_ptr<L
     {
         for (int j = 0; j < nrow; ++j)
         {
-            B(n_measurements, j) = 1. / nrow;
+            B(j, n_measurements) = 1. / nrow;
         }
         Sigma_inv(n_measurements, n_measurements) = 1. / sigma_average_;
     }
