@@ -264,7 +264,8 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
     xbar.setZero();
     Eigen::VectorXd y(measurement_params.n + measurement_params.measure_global);
     y(Eigen::seqN(0, measurement_params.n)) = measurement_params.mean;
-    y(measurement_params.n) = measurement_params.mean_global;
+    if (measurement_params.measure_global)
+        y(measurement_params.n) = measurement_params.mean_global;
     Eigen::VectorXd x_post = linear_operator->posterior_mean(xbar, y);
     std::shared_ptr<Lattice2d> lattice = std::dynamic_pointer_cast<Lattice2d>(linear_operator->get_lattice());
     Eigen::VectorXd x(ndof);
@@ -351,7 +352,8 @@ void posterior_statistics(std::shared_ptr<Sampler> sampler,
     xbar.setZero();
     Eigen::VectorXd y(measurement_params.n + measurement_params.measure_global);
     y(Eigen::seqN(0, measurement_params.n)) = measurement_params.mean;
-    y(measurement_params.n) = measurement_params.mean_global;
+    if (measurement_params.measure_global)
+        y(measurement_params.n) = measurement_params.mean_global;
     Eigen::VectorXd x_post = linear_operator->posterior_mean(xbar, y);
     std::shared_ptr<Lattice2d> lattice = std::dynamic_pointer_cast<Lattice2d>(linear_operator->get_lattice());
     Eigen::VectorXd x(ndof);
