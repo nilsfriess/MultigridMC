@@ -31,10 +31,10 @@ To run the unit tests, use
 This can take quite long (several minutes to an hour), to build a simplified version of the tests (which essentially generated less samples when testing statistical properties) set the flag `USE_THOROUGH_TESTS` to `Off` when configuring CMake.
 
 ## Running the code
-The executable is `driver` in the `bin` subdirectory. To run the code, use
+The executable is `driver_mgmc` in the `bin` subdirectory. To run the code, use
 
 ```
-./bin/driver CONFIG_FILE
+./bin/driver_mgmc CONFIG_FILE
 ```
 
 where `CONFIG_FILE` is the name of the file that contains the runtime configuration; an example can be found in [parameters_template.cfg](parameters_template.cfg).

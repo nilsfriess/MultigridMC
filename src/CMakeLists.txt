@@ -13,8 +13,8 @@ add_subdirectory(qoi)
 link_libraries(Eigen3::Eigen)
 
 # Main executable
-add_executable(driver driver.cc ${SOURCES})
-set_target_properties(driver PROPERTIES
+add_executable(driver_mgmc driver_mgmc.cc ${SOURCES})
+set_target_properties(driver_mgmc PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ../bin)
 
 if(USE_THOROUGH_TESTS)
