@@ -2,6 +2,7 @@
 #define ITERATIVE_SOLVER_HH ITERATIVE_SOLVER_HH
 
 #include <Eigen/Dense>
+#include "auxilliary/parameters.hh"
 #include "linear_operator/linear_operator.hh"
 #include "linear_solver.hh"
 #include "preconditioner/preconditioner.hh"

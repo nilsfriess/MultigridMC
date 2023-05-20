@@ -37,22 +37,6 @@ protected:
     std::shared_ptr<LinearOperator> linear_operator;
 };
 
-/** @class IterativeSolverParameters
- *
- * @brief iterative linear solver parameters
- */
-struct IterativeSolverParameters
-{
-    /** @brief relative tolerance for solving */
-    double rtol;
-    /** @brief absolute tolerance for solving */
-    double atol;
-    /** @brief maximum number of iterations */
-    unsigned int maxiter;
-    /** @brief verbosity level */
-    int verbose;
-};
-
 /* ******************** factory classes ****************************** */
 
 /** @brief Linear solver factory base class */

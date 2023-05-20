@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <Eigen/Dense>
+#include "auxilliary/parameters.hh"
 #include "linear_operator/linear_operator.hh"
 #include "intergrid/intergrid_operator.hh"
 #include "solver/linear_solver.hh"
@@ -13,17 +14,6 @@
  *
  * @brief multigrid preconditioner
  */
-
-/** @struct multigrid parameters */
-struct MultigridParameters
-{
-    /** @brief Number of levels */
-    unsigned int nlevel;
-    /** @brief Number of presmoothing steps */
-    unsigned int npresmooth;
-    /** @brief number of postsmoothing steps */
-    unsigned int npostsmooth;
-};
 
 /** @class MultigridPreconditioner
  *

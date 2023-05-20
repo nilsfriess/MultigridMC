@@ -87,6 +87,45 @@ public:
     double omega;
 };
 
+/** @brief iterative linear solver parameters
+ */
+class IterativeSolverParameters : public Parameters
+{
+public:
+    /** @brief parse configuration
+     *
+     * @param[in] root root of configuration object
+     */
+    virtual void parse_config(const libconfig::Setting &root);
+
+    /** @brief relative tolerance for solving */
+    double rtol;
+    /** @brief absolute tolerance for solving */
+    double atol;
+    /** @brief maximum number of iterations */
+    unsigned int maxiter;
+    /** @brief verbosity level */
+    int verbose;
+};
+
+/** @struct multigrid parameters */
+class MultigridParameters : public Parameters
+{
+public:
+    /** @brief parse configuration
+     *
+     * @param[in] root root of configuration object
+     */
+    virtual void parse_config(const libconfig::Setting &root);
+
+    /** @brief Number of levels */
+    unsigned int nlevel;
+    /** @brief Number of presmoothing steps */
+    unsigned int npresmooth;
+    /** @brief number of postsmoothing steps */
+    unsigned int npostsmooth;
+};
+
 /** @struct Multigrid Monte Carlo parameters */
 class MultigridMCParameters : public Parameters
 {

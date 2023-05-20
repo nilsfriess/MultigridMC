@@ -12,9 +12,15 @@ add_subdirectory(qoi)
 
 link_libraries(Eigen3::Eigen)
 
-# Main executable
+# Main executables
+# sampling with multigrid Monte Carlo
 add_executable(driver_mgmc driver_mgmc.cc ${SOURCES})
 set_target_properties(driver_mgmc PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ../bin)
+
+# deterministic multigrid
+add_executable(driver_mg driver_mg.cc ${SOURCES})
+set_target_properties(driver_mg PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ../bin)
 
 if(USE_THOROUGH_TESTS)

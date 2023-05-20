@@ -74,6 +74,32 @@ void SmootherParameters::parse_config(const libconfig::Setting &root)
     std::cout << "  overrelaxation factor = " << omega << std::endl;
 }
 
+/* parse linear solver configuration */
+void IterativeSolverParameters::parse_config(const libconfig::Setting &root)
+{
+    const libconfig::Setting &iterative_solver = root["iterative_solver"];
+    rtol = iterative_solver.lookup("rtol");
+    atol = iterative_solver.lookup("atol");
+    maxiter = iterative_solver.lookup("maxiter");
+    verbose = iterative_solver.lookup("verbose");
+    std::cout << "   relative tolerance = " << rtol << std::endl;
+    std::cout << "   absolute tolerance = " << atol << std::endl;
+    std::cout << "   maxiter = " << maxiter << std::endl;
+}
+
+/* parse multigrid configuration */
+void MultigridParameters::parse_config(const libconfig::Setting &root)
+{
+    const libconfig::Setting &multigrid = root["multigrid"];
+    std::cout << "  IMPLEMENT ME!" << std::endl;
+    nlevel = multigrid.lookup("nlevel");
+    npresmooth = multigrid.lookup("npresmooth");
+    npostsmooth = multigrid.lookup("npostsmooth");
+    std::cout << "   multigrid levels = " << nlevel << std::endl;
+    std::cout << "   npresmooth = " << npresmooth << std::endl;
+    std::cout << "   npostsmooth = " << npostsmooth << std::endl;
+}
+
 /* parse multigrid Monte Carlo configuration */
 void MultigridMCParameters::parse_config(const libconfig::Setting &root)
 {
