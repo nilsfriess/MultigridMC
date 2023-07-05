@@ -73,6 +73,27 @@ public:
     unsigned int ny;
 };
 
+/** @brief type of Cholesky factorisation */
+enum cholesky_t
+{
+    SparseFactorisation = 0, // Sparse factorisation
+    DenseFactorisation = 1   // Dense factorisation
+};
+
+/** @struct Cholesky factorisation parameters */
+class CholeskyParameters : public Parameters
+{
+public:
+    /** @brief parse configuration
+     *
+     * @param[in] root root of configuration object
+     */
+    virtual void parse_config(const libconfig::Setting &root);
+
+    /** @brief Cholesky factorisation to use */
+    cholesky_t factorisation;
+};
+
 /** @brief structure for smoother parameters */
 class SmootherParameters : public Parameters
 {

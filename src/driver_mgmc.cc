@@ -140,19 +140,30 @@ int main(int argc, char *argv[])
     std::cout << "Reading parameters from file \'" << filename << "\'" << std::endl;
     GeneralParameters general_params;
     LatticeParameters lattice_params;
+    CholeskyParameters cholesky_params;
     SmootherParameters smoother_params;
     MultigridMCParameters multigridmc_params;
     SamplingParameters sampling_params;
     MeasurementParameters measurement_params;
     general_params.read_from_file(filename);
     lattice_params.read_from_file(filename);
+    cholesky_params.read_from_file(filename);
     smoother_params.read_from_file(filename);
     multigridmc_params.read_from_file(filename);
     sampling_params.read_from_file(filename);
     measurement_params.read_from_file(filename);
 
+#if (defined EIGEN_USE_BLAS && defined EIGEN_USE_LAPACKE)
+    std::cout << "Compiled with BLAS/LAPACK support for Eigen." << std::endl;
+#else  // EIGEN_USE_BLAS && EIGEN_USE_LAPACKE
+    std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+    std::cout << "WARNING: Compiled without BLAS/LAPACK support for Eigen." << std::endl;
+    std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+    std::cout << std::endl;
+#endif // EIGEN_USE_BLAS && EIGEN_USE_LAPACKE
+
 #ifndef NCHOLMOD
-    std::cout << "Using Cholesky factorisation from CholMod." << std::endl;
+    std::cout << "Using sparse Cholesky factorisation from CholMod." << std::endl;
 #else  // NCHOLMOD
     std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
     std::cout << "WARNING: Falling back on Eigen's SimplicalLLT Cholesky factorisation." << std::endl;
@@ -186,7 +197,15 @@ int main(int argc, char *argv[])
                                                                                               smoother_params.omega,
                                                                                               backward);
     std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory = std::make_shared<IntergridOperator2dLinearFactory>();
-    std::shared_ptr<SamplerFactory> coarse_sampler_factory = std::make_shared<SparseCholeskySamplerFactory>(rng);
+    std::shared_ptr<SamplerFactory> coarse_sampler_factory;
+    if (cholesky_params.factorisation == SparseFactorisation)
+    {
+        coarse_sampler_factory = std::make_shared<SparseCholeskySamplerFactory>(rng);
+    }
+    else if (cholesky_params.factorisation == DenseFactorisation)
+    {
+        coarse_sampler_factory = std::make_shared<DenseCholeskySamplerFactory>(rng);
+    }
     std::shared_ptr<Sampler> multigridmc_sampler = std::make_shared<MultigridMCSampler>(linear_operator,
                                                                                         rng,
                                                                                         multigridmc_params,
@@ -195,7 +214,16 @@ int main(int argc, char *argv[])
                                                                                         intergrid_operator_factory,
                                                                                         coarse_sampler_factory);
     std::shared_ptr<Sampler> ssor_sampler = std::make_shared<SSORSampler>(linear_operator, rng, smoother_params.omega);
-    std::shared_ptr<Sampler> cholesky_sampler = std::make_shared<SparseCholeskySampler>(linear_operator, rng);
+    std::shared_ptr<Sampler> cholesky_sampler;
+    if (cholesky_params.factorisation == SparseFactorisation)
+    {
+        cholesky_sampler = std::make_shared<SparseCholeskySampler>(linear_operator, rng);
+    }
+    else if (cholesky_params.factorisation == DenseFactorisation)
+    {
+        cholesky_sampler = std::make_shared<DenseCholeskySampler>(linear_operator, rng);
+    }
+
     std::cout << std::endl;
     // Run sampling experiments
     if (general_params.do_cholesky)
