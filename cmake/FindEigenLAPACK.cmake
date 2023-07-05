@@ -17,17 +17,15 @@ if(NOT LAPACK_FOUND)
 else()
 endif()
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-    # on MACOS we need to explicitly find the LAPACKE library
-    find_library(LAPACKE_LIBRARY lapacke)
+# on MACOS we need to explicitly find the LAPACKE library
+find_library(LAPACKE_LIBRARY lapacke)
 
-    if(LAPACKE_LIBRARY)
-        message(STATUS "Found LAPACKE: " ${LAPACKE_LIBRARY})
-        link_libraries(${LAPACKE_LIBRARY})
-    else()
-        message(ERROR "Cound not find LAPACKE library")
-        set(LAPACK_FOUND false)
-    endif()
+if(LAPACKE_LIBRARY)
+    message(STATUS "Found LAPACKE: " ${LAPACKE_LIBRARY})
+    link_libraries(${LAPACKE_LIBRARY})
+else()
+    message(ERROR "Cound not find LAPACKE library")
+    set(LAPACK_FOUND false)
 endif()
 
 # Set up Eigen with BLAS/LAPACK support
