@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.21)
 
 project(MultigridMC)
 
@@ -9,7 +9,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-undefined-var-template")
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
-cmake_policy(SET CMP0135 NEW)
+if ( (${CMAKE_MAJOR_VERSION} GREATER_EQUAL 3) AND (${CMAKE_MINOR_VERSION} GREATER_EQUAL 24) ) 
+  cmake_policy(SET CMP0135 NEW)
+endif()
 
 if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
