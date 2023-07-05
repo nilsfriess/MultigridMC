@@ -21,17 +21,43 @@ option(USE_CHOLMOD "Use Cholmod for Cholesky factorisation?" ON)
 # use thorough testing?
 option(USE_THOROUGH_TESTS "Use thorough tests?" ON)
 
-# Use LAPACK options
-option(USE_LAPACK "Use BLAS/LAPACK support for Eigen?" ON)
+# find BLAS
+find_package(BLAS REQUIRED)
 
-if(USE_LAPACK)
-  find_package(BLAS REQUIRED)
-  find_package(LAPACK REQUIRED)
+if(BLAS_FOUND)
+  message(STATUS "Found BLAS library")
+else(BLAS_FOUND)
+  message(ERROR "Could not find BLAS library!")
+endif(BLAS_FOUND)
+
+# find LAPACK
+find_package(LAPACK REQUIRED)
+
+if(LAPACK_FOUND)
+  message(STATUS "Found LAPACK library")
+else(LAPACK_FOUND)
+  message(ERROR "Could not find LAPACK library!")
+endif(LAPACK_FOUND)
+
+# Set up Eigen with BLAS/LAPACK support
+if(BLAS_FOUND AND LAPACK_FOUND)
+  message(STATUS "Using Eigen with BLAS/LAPACK support.")
   link_libraries(BLAS::BLAS)
   link_libraries(LAPACK::LAPACK)
   set(EIGEN_USE_BLAS "true")
   set(EIGEN_USE_LAPACKE "true")
-endif(USE_LAPACK)
+else()
+  message(WARNING "Falling back to Eigen without BLAS/LAPACK support.")
+endif()
+
+find_library(LAPACKE_LIBRARY lapacke)
+
+if(LAPACKE_LIBRARY)
+  message(STATUS "Found LAPACKE library at " ${LAPACKE_LIBRARY})
+  link_libraries(${LAPACKE_LIBRARY})
+else()
+  message(STATUS "Cound not find lapacke")
+endif()
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
