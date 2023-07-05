@@ -24,7 +24,7 @@ if(LAPACKE_LIBRARY)
     message(STATUS "Found LAPACKE: " ${LAPACKE_LIBRARY})
     link_libraries(${LAPACKE_LIBRARY})
 else()
-    message(ERROR "Cound not find LAPACKE library")
+    message(ERROR " Cound not find LAPACKE library")
     set(LAPACK_FOUND false)
 endif()
 
