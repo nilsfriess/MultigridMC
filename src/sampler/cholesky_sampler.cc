@@ -7,9 +7,7 @@
 
 /* Create a new instance */
 SparseCholeskySampler::SparseCholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
-                                 std::mt19937_64 &rng_) : Base(linear_operator_,
-                                                               rng_),
-                                                          xi(linear_operator_->get_ndof())
+                                             std::mt19937_64 &rng_) : Base(linear_operator_, rng_)
 {
     LinearOperator::SparseMatrixType A_sparse = linear_operator->get_sparse();
     if (linear_operator->get_m_lowrank() > 0)
@@ -21,20 +19,20 @@ SparseCholeskySampler::SparseCholeskySampler(const std::shared_ptr<LinearOperato
         const LinearOperator::SparseMatrixType B_tilde = Sigma_inv.sparseView() * B_sparse.transpose();
         A_sparse += B_sparse * B_tilde;
     }
-    LLT_of_A = std::make_shared<LLTType>(A_sparse);
+    LLT_of_A = std::make_shared<SparseLLTType>(A_sparse);
 }
 
-/* apply Sampler */
-void SparseCholeskySampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const
+/* Create a new instance */
+DenseCholeskySampler::DenseCholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
+                                           std::mt19937_64 &rng_) : Base(linear_operator_, rng_)
 {
-    /* step 1: draw sample xi from normal distribution with zero mean and unit covariance*/
-    for (unsigned int ell = 0; ell < xi.size(); ++ell)
+    LinearOperator::DenseMatrixType A_dense = LinearOperator::DenseMatrixType(linear_operator->get_sparse());
+    if (linear_operator->get_m_lowrank() > 0)
     {
-        xi[ell] = normal_dist(rng);
+        // Add contribution from low rank correction
+        const LinearOperator::DenseMatrixType &B = linear_operator->get_B();
+        const LinearOperator::DenseMatrixType &Sigma_inv = linear_operator->get_Sigma_inv();
+        A_dense += B * Sigma_inv * B.transpose();
     }
-    /* step 2: solve U^T g = f */
-    Eigen::VectorXd g(xi.size());
-    LLT_of_A->solveL(f, g);
-    /* step 3: solve U x = xi + g for x */
-    LLT_of_A->solveLT(xi + g, x);
+    LLT_of_A = std::make_shared<EigenDenseLLT>(A_dense);
 }

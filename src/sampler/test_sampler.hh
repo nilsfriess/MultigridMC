@@ -152,18 +152,37 @@ protected:
 protected:
 };
 
-/* Test Cholesky sampler without / with low rank correction
+/* Test sparse Cholesky sampler without / with low rank correction
  *
  * Draw a large number of samples and check that their covariance agrees with
  * the analytical value of the covariance.
  */
-TEST_F(SamplerTest, TestCholeskySampler1d)
+TEST_F(SamplerTest, TestSparseCholeskySampler1d)
 {
     for (bool lowrank_correction : {false, true})
     {
         std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
         std::mt19937_64 rng(31841287);
         std::shared_ptr<SparseCholeskySampler> sampler = std::make_shared<SparseCholeskySampler>(linear_operator, rng);
+        std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, 500000);
+        const double tolerance = 2.E-3;
+        EXPECT_NEAR(error.first, 0.0, tolerance);
+        EXPECT_NEAR(error.second, 0.0, tolerance);
+    }
+}
+
+/* Test dense Cholesky sampler without / with low rank correction
+ *
+ * Draw a large number of samples and check that their covariance agrees with
+ * the analytical value of the covariance.
+ */
+TEST_F(SamplerTest, TestDenseCholeskySampler1d)
+{
+    for (bool lowrank_correction : {false, true})
+    {
+        std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
+        std::mt19937_64 rng(31841287);
+        std::shared_ptr<DenseCholeskySampler> sampler = std::make_shared<DenseCholeskySampler>(linear_operator, rng);
         std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, 500000);
         const double tolerance = 2.E-3;
         EXPECT_NEAR(error.first, 0.0, tolerance);
