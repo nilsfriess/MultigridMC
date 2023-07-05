@@ -10,4 +10,6 @@
 #endif // THOROUGH_TESTING
 // Define NCHOLMOD if Cholmod is NOT used
 #cmakedefine NCHOLMOD
+#cmakedefine EIGEN_USE_BLAS
+#cmakedefine EIGEN_USE_LAPACKE
 #endif
