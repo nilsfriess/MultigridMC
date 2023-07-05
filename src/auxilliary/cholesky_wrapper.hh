@@ -20,11 +20,10 @@
  * Given the Cholesky factorisation A=LL^T of a matrix, this class provides methods for
  * solving Lx = b and L^Tx = b as well as LL^Tx = b.
  */
+template <typename MatrixType>
 class CholeskyLLT
 {
 public:
-    typedef LinearOperator::SparseMatrixType MatrixType;
-
     /** @brief Constructor
      *
      * @param[in] matrix_ Matrix A to be Cholesky-factorised
@@ -65,16 +64,15 @@ protected:
 
 /** @brief Wrapper around Cholmod's Cholesky factorisation */
 #ifndef NCHOLMOD
-class CholmodLLT : public CholeskyLLT
+class CholmodLLT : public CholeskyLLT<LinearOperator::SparseMatrixType>
 {
 public:
-    typedef CholeskyLLT Base;
-    using Base::MatrixType;
+    typedef CholeskyLLT<LinearOperator::SparseMatrixType> Base;
     /** @brief Constructor
      *
      * @param[in] matrix_ Matrix A to be Cholesky-factorised
      */
-    CholmodLLT(const MatrixType &matrix_);
+    CholmodLLT(const LinearOperator::SparseMatrixType &matrix_);
 
     /** @brief Destructor*/
     ~CholmodLLT()
@@ -125,21 +123,19 @@ protected:
 /** @brief Wrapper around Eigen's simplical Cholesky factorisation
  *
  */
-class EigenSimplicialLLT : public CholeskyLLT
+class EigenSimplicialLLT : public CholeskyLLT<LinearOperator::SparseMatrixType>
 {
 public:
-    typedef CholeskyLLT Base;
-    using Base::MatrixType;
+    typedef CholeskyLLT<LinearOperator::SparseMatrixType> Base;
     typedef Eigen::SimplicialLLT<LinearOperator::SparseMatrixType,
                                  Eigen::Lower,
                                  Eigen::AMDOrdering<int>>
         SimplicialLLTType;
-    typedef typename Eigen::SimplicialCholeskyBase<SimplicialLLTType> EigenSimplicialCholeskyBase;
     /** @brief Constructor
      *
      * @param[in] matrix_ Matrix A to be Cholesky-factorised
      */
-    EigenSimplicialLLT(const MatrixType &matrix_);
+    EigenSimplicialLLT(const LinearOperator::SparseMatrixType &matrix_);
 
     /** @brief Destructor*/
     ~EigenSimplicialLLT() {}
@@ -168,6 +164,52 @@ public:
 protected:
     /** @brief Cholesky factorisation */
     std::shared_ptr<SimplicialLLTType> simplicial_LLT;
+};
+
+/** @brief Wrapper around Eigen's dense Cholesky factorisation
+ *
+ */
+class EigenDenseLLT : public CholeskyLLT<Eigen::MatrixXd>
+{
+public:
+    typedef CholeskyLLT<Eigen::MatrixXd> Base;
+    typedef Eigen::MatrixXd MatrixType;
+    typedef Eigen::LLT<Eigen::MatrixXd,
+                       Eigen::Lower>
+        DenseLLTType;
+    /** @brief Constructor
+     *
+     * @param[in] matrix_ Matrix A to be Cholesky-factorised
+     */
+    EigenDenseLLT(const Eigen::MatrixXd &matrix_);
+
+    /** @brief Destructor*/
+    ~EigenDenseLLT() {}
+
+    /** @brief Solve the full linear system LL^T x = b for x
+     *
+     * @param[in] b right hand side b
+     * @param[out] x result x
+     */
+    virtual void solve(const Eigen::VectorXd &b, Eigen::VectorXd &x) const;
+
+    /** @brief Solve the lower triangular system L x = b for x
+     *
+     * @param[in] b right hand side b
+     * @param[out] x result x
+     */
+    virtual void solveL(const Eigen::VectorXd &b, Eigen::VectorXd &x) const;
+
+    /** @brief Solve the upper triangular system L^T x = b for x
+     *
+     * @param[in] b right hand side b
+     * @param[out] x result x
+     */
+    virtual void solveLT(const Eigen::VectorXd &b, Eigen::VectorXd &x) const;
+
+protected:
+    /** @brief Cholesky factorisation */
+    std::shared_ptr<DenseLLTType> dense_LLT;
 };
 
 #endif // CHOLESKY_WRAPPER_HH

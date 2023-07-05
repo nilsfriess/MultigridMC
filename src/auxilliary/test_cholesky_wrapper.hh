@@ -35,6 +35,7 @@ protected:
             }
         }
         A_sparse.setFromTriplets(triplet_list.begin(), triplet_list.end());
+        A_dense = Eigen::MatrixXd(A_sparse);
         // Construct solution, RHS and numerical solution
         int seed = 1212957;
         std::mt19937 rng(seed);
@@ -51,6 +52,8 @@ protected:
 protected:
     /** @brief Sparse matrix that will be Cholesky factorised */
     Eigen::SparseMatrix<double> A_sparse;
+    /** @brief Dense representation of matrix that will be Cholesky factorised */
+    Eigen::MatrixXd A_dense;
     /** @brief Numerical solution*/
     Eigen::VectorXd x;
     /** @brief Exact solution*/
@@ -111,6 +114,29 @@ TEST_F(CholeskyWrapperTest, TestCholmodSolveLLT)
 #else
     GTEST_SKIP();
 #endif // NCHOLMOD
+}
+
+/* Test dense Cholesky solver using a monolithic solve */
+TEST_F(CholeskyWrapperTest, TestEigenDenseSolve)
+{
+    const double tolerance = 1.E-12;
+    EigenDenseLLT llt(A_dense);
+    llt.solve(b, x);
+    double error = (x - x_exact).norm();
+
+    EXPECT_NEAR(error, 0.0, tolerance);
+}
+
+/* Test dense Cholesky solver using two subsequent solves */
+TEST_F(CholeskyWrapperTest, TestEigenDenseSolveLLT)
+{
+    const double tolerance = 1.E-12;
+    Eigen::VectorXd y(x.size());
+    EigenDenseLLT llt(A_dense);
+    llt.solveL(b, y);
+    llt.solveLT(y, x);
+    double error = (x - x_exact).norm();
+    EXPECT_NEAR(error, 0.0, tolerance);
 }
 
 #endif // TEST_CHOLMOD_WRAPPER_HH
