@@ -21,6 +21,18 @@ option(USE_CHOLMOD "Use Cholmod for Cholesky factorisation?" ON)
 # use thorough testing?
 option(USE_THOROUGH_TESTS "Use thorough tests?" ON)
 
+# Use LAPACK options
+option(USE_LAPACK "Use BLAS/LAPACK support for Eigen?" ON)
+
+if(USE_LAPACK)
+  find_package(BLAS REQUIRED)
+  find_package(LAPACK REQUIRED)
+  link_libraries(BLAS::BLAS)
+  link_libraries(LAPACK::LAPACK)
+  set(EIGEN_USE_BLAS "true")
+  set(EIGEN_USE_LAPACKE "true")
+endif(USE_LAPACK)
+
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 # Find Cholmod
