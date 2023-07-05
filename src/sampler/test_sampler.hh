@@ -163,7 +163,7 @@ TEST_F(SamplerTest, TestCholeskySampler1d)
     {
         std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
         std::mt19937_64 rng(31841287);
-        std::shared_ptr<CholeskySampler> sampler = std::make_shared<CholeskySampler>(linear_operator, rng);
+        std::shared_ptr<SparseCholeskySampler> sampler = std::make_shared<SparseCholeskySampler>(linear_operator, rng);
         std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, 500000);
         const double tolerance = 2.E-3;
         EXPECT_NEAR(error.first, 0.0, tolerance);
@@ -215,7 +215,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler1d)
         std::shared_ptr<SSORSamplerFactory> postsampler_factory = std::make_shared<SSORSamplerFactory>(rng,
                                                                                                        omega);
         std::shared_ptr<IntergridOperator1dLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperator1dLinearFactory>();
-        std::shared_ptr<CholeskySamplerFactory> coarse_sampler_factory = std::make_shared<CholeskySamplerFactory>(rng);
+        std::shared_ptr<SparseCholeskySamplerFactory> coarse_sampler_factory = std::make_shared<SparseCholeskySamplerFactory>(rng);
         std::shared_ptr<MultigridMCSampler> sampler = std::make_shared<MultigridMCSampler>(linear_operator,
                                                                                            rng,
                                                                                            multigridmc_params,
@@ -291,7 +291,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     std::shared_ptr<SSORSamplerFactory> postsampler_factory = std::make_shared<SSORSamplerFactory>(rng,
                                                                                                    omega);
     std::shared_ptr<IntergridOperator2dLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperator2dLinearFactory>();
-    std::shared_ptr<CholeskySamplerFactory> coarse_sampler_factory = std::make_shared<CholeskySamplerFactory>(rng);
+    std::shared_ptr<SparseCholeskySamplerFactory> coarse_sampler_factory = std::make_shared<SparseCholeskySamplerFactory>(rng);
     std::shared_ptr<Sampler> sampler = std::make_shared<MultigridMCSampler>(linear_operator,
                                                                             rng,
                                                                             multigridmc_params,

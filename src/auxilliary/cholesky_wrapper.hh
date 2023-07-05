@@ -169,19 +169,18 @@ protected:
 /** @brief Wrapper around Eigen's dense Cholesky factorisation
  *
  */
-class EigenDenseLLT : public CholeskyLLT<Eigen::MatrixXd>
+class EigenDenseLLT : public CholeskyLLT<LinearOperator::DenseMatrixType>
 {
 public:
-    typedef CholeskyLLT<Eigen::MatrixXd> Base;
-    typedef Eigen::MatrixXd MatrixType;
-    typedef Eigen::LLT<Eigen::MatrixXd,
+    typedef CholeskyLLT<LinearOperator::DenseMatrixType> Base;
+    typedef Eigen::LLT<LinearOperator::DenseMatrixType,
                        Eigen::Lower>
         DenseLLTType;
     /** @brief Constructor
      *
      * @param[in] matrix_ Matrix A to be Cholesky-factorised
      */
-    EigenDenseLLT(const Eigen::MatrixXd &matrix_);
+    EigenDenseLLT(const LinearOperator::DenseMatrixType &matrix_);
 
     /** @brief Destructor*/
     ~EigenDenseLLT() {}

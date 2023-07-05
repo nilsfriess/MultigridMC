@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
                                                                                               smoother_params.omega,
                                                                                               backward);
     std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory = std::make_shared<IntergridOperator2dLinearFactory>();
-    std::shared_ptr<SamplerFactory> coarse_sampler_factory = std::make_shared<CholeskySamplerFactory>(rng);
+    std::shared_ptr<SamplerFactory> coarse_sampler_factory = std::make_shared<SparseCholeskySamplerFactory>(rng);
     std::shared_ptr<Sampler> multigridmc_sampler = std::make_shared<MultigridMCSampler>(linear_operator,
                                                                                         rng,
                                                                                         multigridmc_params,
@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
                                                                                         intergrid_operator_factory,
                                                                                         coarse_sampler_factory);
     std::shared_ptr<Sampler> ssor_sampler = std::make_shared<SSORSampler>(linear_operator, rng, smoother_params.omega);
-    std::shared_ptr<Sampler> cholesky_sampler = std::make_shared<CholeskySampler>(linear_operator, rng);
+    std::shared_ptr<Sampler> cholesky_sampler = std::make_shared<SparseCholeskySampler>(linear_operator, rng);
     std::cout << std::endl;
     // Run sampling experiments
     if (general_params.do_cholesky)

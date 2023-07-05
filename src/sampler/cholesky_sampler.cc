@@ -6,7 +6,7 @@
 #include "cholesky_sampler.hh"
 
 /* Create a new instance */
-CholeskySampler::CholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
+SparseCholeskySampler::SparseCholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
                                  std::mt19937_64 &rng_) : Base(linear_operator_,
                                                                rng_),
                                                           xi(linear_operator_->get_ndof())
@@ -25,7 +25,7 @@ CholeskySampler::CholeskySampler(const std::shared_ptr<LinearOperator> linear_op
 }
 
 /* apply Sampler */
-void CholeskySampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const
+void SparseCholeskySampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const
 {
     /* step 1: draw sample xi from normal distribution with zero mean and unit covariance*/
     for (unsigned int ell = 0; ell < xi.size(); ++ell)

@@ -26,7 +26,7 @@
  *
  */
 
-class CholeskySampler : public Sampler
+class SparseCholeskySampler : public Sampler
 {
 public:
     /** @brief Base type*/
@@ -36,8 +36,8 @@ public:
      * @param[in] linear_operator_ underlying linear operator
      * @param[in] rng_ random number generator
      */
-    CholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
-                    std::mt19937_64 &rng_);
+    SparseCholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
+                          std::mt19937_64 &rng_);
 
     /** @brief Draw a new sample x
      *
@@ -63,14 +63,14 @@ protected:
 /* ******************** factory classes ****************************** */
 
 /** @brief Cholesky sampler factory */
-class CholeskySamplerFactory : public SamplerFactory
+class SparseCholeskySamplerFactory : public SamplerFactory
 {
 public:
     /** @brief create a new instance
      *
      * @param[in] rng_ random number generator
      */
-    CholeskySamplerFactory(std::mt19937_64 &rng_) : rng(rng_) {}
+    SparseCholeskySamplerFactory(std::mt19937_64 &rng_) : rng(rng_) {}
 
     /** @brief extract a sampler for a given linear operator
      *
@@ -78,7 +78,7 @@ public:
      */
     virtual std::shared_ptr<Sampler> get(std::shared_ptr<LinearOperator> linear_operator)
     {
-        return std::make_shared<CholeskySampler>(linear_operator, rng);
+        return std::make_shared<SparseCholeskySampler>(linear_operator, rng);
     };
 
 protected:
