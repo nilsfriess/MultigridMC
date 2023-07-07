@@ -12,3 +12,5 @@ cmake_install.cmake
 notes/low_rank_smoother.pdf
 notes/results.pdf
 *~
+build
+*__pycache__*
