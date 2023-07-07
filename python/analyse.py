@@ -21,9 +21,15 @@ specs = {
     "Cholesky": {"extension": "cholesky", "color": "green"},
 }
 
+if len(sys.argv) != 2:
+    print("usage: python " + sys.argv[0] + " DIRECTORY")
+    sys.exit(1)
+
+directory = sys.argv[1]
+
 #### Plot timeseries
 plt.clf()
-gridsizes = (32, 64, 128, 256)
+gridsizes = (32, 64, 32, 64)
 linestyles = {32: "-", 64: "--", 128: "-.", 256: ":"}
 n_timeseries = 64
 max_lag = 16
@@ -34,7 +40,9 @@ for nx in gridsizes:
     print("nx = ", nx)
     ax_timeseries = axs_timeseries[j // 2, j % 2]
     for key, val in specs.items():
-        data = read_timeseries(f"timeseries{nx:d}x{nx:d}_" + val["extension"] + ".txt")
+        data = read_timeseries(
+            f"{directory}/timeseries{nx:d}x{nx:d}_" + val["extension"] + ".txt"
+        )
         axs_timeseries[j // 2, j % 2].plot(
             data[:n_timeseries],
             linewidth=2,
