@@ -18,6 +18,7 @@ else()
 endif()
 
 # Try to compile lapacke code
+set(CMAKE_REQUIRED_LINK_OPTIONS ${LAPACK_LINKER_FLAGS})
 check_c_source_compiles("
 #include <lapacke.h> 
 int main(int argc, char **argv) {}
