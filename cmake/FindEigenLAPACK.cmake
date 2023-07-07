@@ -18,15 +18,23 @@ else()
 endif()
 
 # Try to compile lapacke code
-set(CMAKE_REQUIRED_LINK_OPTIONS ${LAPACK_LINKER_FLAGS})
+set(CMAKE_REQUIRED_LINK_OPTIONS ${LAPACK_LINKER_FLAGS} ${LAPACK_LIBRARIES})
 check_c_source_compiles("
 #include <lapacke.h> 
-int main(int argc, char **argv) {}
+int main(int argc, char **argv) {
+  lapack_int m, n, lda, info;
+  double *a, *tau;
+  info = LAPACKE_dgeqrf( LAPACK_COL_MAJOR, m, n, a, lda, tau );
+}
 " LAPACKE_COMPILES)
 
 check_c_source_compiles("
 #include <mkl_lapacke.h> 
-int main(int argc, char **argv) {}
+int main(int argc, char **argv) {
+  lapack_int m, n, lda, info;
+  double *a, *tau;
+  info = LAPACKE_dgeqrf( LAPACK_COL_MAJOR, m, n, a, lda, tau );
+}
 " MKL_LAPACKE_COMPILES)
 
 if(NOT(LAPACKE_COMPILES OR MKL_LAPACKE_COMPILES))
