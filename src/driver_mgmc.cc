@@ -215,13 +215,16 @@ int main(int argc, char *argv[])
                                                                                         coarse_sampler_factory);
     std::shared_ptr<Sampler> ssor_sampler = std::make_shared<SSORSampler>(linear_operator, rng, smoother_params.omega);
     std::shared_ptr<Sampler> cholesky_sampler;
-    if (cholesky_params.factorisation == SparseFactorisation)
+    if (general_params.do_cholesky)
     {
-        cholesky_sampler = std::make_shared<SparseCholeskySampler>(linear_operator, rng);
-    }
-    else if (cholesky_params.factorisation == DenseFactorisation)
-    {
-        cholesky_sampler = std::make_shared<DenseCholeskySampler>(linear_operator, rng);
+        if (cholesky_params.factorisation == SparseFactorisation)
+        {
+            cholesky_sampler = std::make_shared<SparseCholeskySampler>(linear_operator, rng);
+        }
+        else if (cholesky_params.factorisation == DenseFactorisation)
+        {
+            cholesky_sampler = std::make_shared<DenseCholeskySampler>(linear_operator, rng);
+        }
     }
 
     std::cout << std::endl;
