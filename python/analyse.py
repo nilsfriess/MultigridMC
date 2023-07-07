@@ -29,7 +29,7 @@ directory = sys.argv[1]
 
 #### Plot timeseries
 plt.clf()
-gridsizes = (32, 64, 32, 64)
+gridsizes = (32, 64, 128, 256)
 linestyles = {32: "-", 64: "--", 128: "-.", 256: ":"}
 n_timeseries = 64
 max_lag = 16
