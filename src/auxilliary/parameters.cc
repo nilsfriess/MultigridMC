@@ -25,7 +25,7 @@ int Parameters::read_from_file(const std::string filename)
     // Read the file. If there is an error, report it and exit.
     try
     {
-        cfg.readFile(filename);
+        cfg.readFile(filename.c_str());
     }
     catch (const libconfig::FileIOException &fioex)
     {
