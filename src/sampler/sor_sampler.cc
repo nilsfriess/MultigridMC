@@ -45,7 +45,7 @@ void SORSampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const
     // low-rank correction to covariance matrix
     if (linear_operator->get_m_lowrank() > 0)
     {
-        const LinearOperator::DenseMatrixType B = linear_operator->get_B();
+        const LinearOperator::SparseMatrixType B = linear_operator->get_B();
         for (unsigned int ell = 0; ell < xi.size(); ++ell)
         {
             xi[ell] = normal_dist(rng);

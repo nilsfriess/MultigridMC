@@ -91,24 +91,26 @@ MeasuredDiffusionOperator2d::MeasuredDiffusionOperator2d(const std::shared_ptr<L
     Sigma_inv = Eigen::MatrixXd(n_measurements + measure_global_, n_measurements + measure_global_);
     Sigma_inv.setZero();
     Sigma_inv(Eigen::seqN(0, n_measurements), Eigen::seqN(0, n_measurements)) = Sigma_.inverse();
-    B.setZero();
+    typedef Eigen::Triplet<double> T;
+    std::vector<T> triplet_list;
     for (int k = 0; k < n_measurements; ++k)
     {
         Eigen::Vector2d x_loc = measurement_locations_[k];
         int i = int(round(x_loc[0] * nx));
         int j = int(round(x_loc[1] * ny));
         unsigned int ell = nx * j + i;
-        B(ell, k) = 1.0;
+        triplet_list.push_back(T(ell, k, 1.0));
     }
     if (measure_global_)
     {
         for (int j = 0; j < nrow; ++j)
         {
-            B(j, n_measurements) = 1. / nrow;
+            triplet_list.push_back(T(j, n_measurements, 1. / nrow));
         }
         Sigma_inv(n_measurements, n_measurements) = 1. / sigma_average_;
     }
-    Sigma_inv_BT = Sigma_inv * B.transpose();
+    B.setFromTriplets(triplet_list.begin(), triplet_list.end());
+    Sigma_inv_BT = Sigma_inv.sparseView() * B.transpose();
 }
 
 /* Compute posterior mean */

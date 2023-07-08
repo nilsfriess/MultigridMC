@@ -13,15 +13,16 @@ CholeskySolver::CholeskySolver(std::shared_ptr<LinearOperator> linear_operator_)
     if (linear_operator->get_m_lowrank() > 0)
     {
         B = linear_operator->get_B();
+        LinearOperator::DenseMatrixType B_dense = B.toDense();
         const DenseMatrixType Sigma_inv = linear_operator->get_Sigma_inv();
-        DenseMatrixType Ainv_B(B.rows(), B.cols());
-        Eigen::VectorXd y(B.rows());
-        for (int j = 0; j < B.cols(); ++j)
+        DenseMatrixType Ainv_B(B_dense.rows(), B_dense.cols());
+        Eigen::VectorXd y(B_dense.rows());
+        for (int j = 0; j < B_dense.cols(); ++j)
         {
-            solver->solve(B(Eigen::seq(0, B.rows() - 1), j), y);
-            Ainv_B(Eigen::seq(0, B.rows() - 1), j) = y;
+            solver->solve(B_dense(Eigen::seq(0, B_dense.rows() - 1), j), y);
+            Ainv_B(Eigen::seq(0, B_dense.rows() - 1), j) = y;
         }
-        B_bar = Ainv_B * (Sigma_inv.inverse() + B.transpose() * Ainv_B).inverse();
+        B_bar = Ainv_B * (Sigma_inv.inverse() + B_dense.transpose() * Ainv_B).inverse();
     }
 }
 

@@ -76,7 +76,7 @@ protected:
     /** @brief Sweep direction */
     const Direction direction;
     /** @brief the matrix B that arises in the low-rank update of the linear operator */
-    LinearOperator::DenseMatrixType B;
+    LinearOperator::SparseMatrixType B;
     /** @brief the matrix bar(B)_{FW} or bar(B)_{BW} used on the forward/backward sweeps */
     std::shared_ptr<LinearOperator::DenseMatrixType> B_bar;
 };

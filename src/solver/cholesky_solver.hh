@@ -45,8 +45,8 @@ protected:
 #endif // NCHOLMOD
     /** @brief Underlying Cholesky solver */
     std::shared_ptr<LLTType> solver;
-    /** @brief Dense low-rank matrix B */
-    DenseMatrixType B;
+    /** @brief Sparse low-rank matrix B */
+    SparseMatrixType B;
     /** @brief dense low rank matrix A^{-1} B bar(Sigma)^{-1} */
     DenseMatrixType B_bar;
 };

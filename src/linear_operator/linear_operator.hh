@@ -42,6 +42,7 @@ public:
                                                         m_lowrank(m_lowrank_),
                                                         A_sparse(lattice_->M, lattice_->M),
                                                         B(lattice_->M, m_lowrank_),
+                                                        Sigma_inv_BT(m_lowrank_, lattice_->M),
                                                         Sigma_inv(m_lowrank_, m_lowrank_)
     {
     }
@@ -69,7 +70,7 @@ public:
         // Add low-rank correction, if necessary
         if (m_lowrank > 0)
         {
-            auto Sigma_BT_x = Sigma_inv_BT * x;
+            Eigen::VectorXd Sigma_BT_x = Sigma_inv_BT * x;
             y += B * Sigma_BT_x;
         }
     }
@@ -91,10 +92,10 @@ public:
     /** @brief Convert to sparse storage format */
     const SparseMatrixType &get_sparse() const { return A_sparse; };
 
-    /** @brief Convert B to dense storage format */
-    const DenseMatrixType &get_B() const { return B; };
+    /** @brief Return B (in sparse storage format) */
+    const SparseMatrixType &get_B() const { return B; };
 
-    /** @brief Convert Sigma^{-1} to dense storage format */
+    /** @brief Return Sigma^{-1} (in dense storage format) */
     const DenseMatrixType &get_Sigma_inv() const { return Sigma_inv; };
 
     /** @brief compute (dense) precision matrix */
@@ -114,9 +115,9 @@ protected:
     /** @brief sparse representation of matrix A_0*/
     SparseMatrixType A_sparse;
     /** @brief matrix B */
-    DenseMatrixType B;
-    /** @brief matrix Sigma_inv_BT */
-    DenseMatrixType Sigma_inv_BT;
+    SparseMatrixType B;
+    /** @brief matrix Sigma^{-1}.B^T */
+    SparseMatrixType Sigma_inv_BT;
     /** @brief dense representation of m x m matrix Sigma^{-1} */
     DenseMatrixType Sigma_inv;
 };

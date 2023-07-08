@@ -69,14 +69,13 @@ public:
             }
         }
         A_sparse.setFromTriplets(triplet_list.begin(), triplet_list.end());
-        B = DenseMatrixType(nrow, 2);
-        B.setZero();
-        B(3, 0) = 10.0;
-        B(4, 1) = 10.0;
+        B = SparseMatrixType(nrow, 2);
+        B.insert(3, 0) = 10.0;
+        B.insert(4, 1) = 10.0;
         DenseMatrixType Sigma(2, 2);
         Sigma << 4.2, -1.1, -1.1, 9.3;
         Sigma_inv = Sigma.inverse();
-        Sigma_inv_BT = Sigma_inv * B.transpose();
+        Sigma_inv_BT = Sigma_inv.sparseView() * B.transpose();
     }
 
 protected:

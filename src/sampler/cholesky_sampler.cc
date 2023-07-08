@@ -15,9 +15,8 @@ CholeskySampler::CholeskySampler(const std::shared_ptr<LinearOperator> linear_op
     if (linear_operator->get_m_lowrank() > 0)
     {
         // Add contribution from low rank correction
-        const LinearOperator::DenseMatrixType &B = linear_operator->get_B();
+        const LinearOperator::SparseMatrixType &B_sparse = linear_operator->get_B();
         const LinearOperator::DenseMatrixType &Sigma_inv = linear_operator->get_Sigma_inv();
-        const LinearOperator::SparseMatrixType B_sparse = B.sparseView();
         const LinearOperator::SparseMatrixType B_tilde = Sigma_inv.sparseView() * B_sparse.transpose();
         A_sparse += B_sparse * B_tilde;
     }
