@@ -80,6 +80,14 @@ void CholmodLLT::solveLT(const Eigen::VectorXd &b, Eigen::VectorXd &x) const
 EigenSimplicialLLT::EigenSimplicialLLT(const LinearOperator::SparseMatrixType &matrix_) : Base(matrix_)
 {
     simplicial_LLT = std::make_shared<SimplicialLLTType>(matrix);
+    LinearOperator::SparseMatrixType L_triangular = simplicial_LLT->matrixL();
+    std::cout << "==== EigenSimplicialLLT ====" << std::endl;
+    unsigned long nnz = L_triangular.nonZeros();
+    unsigned int nrow = L_triangular.rows();
+    unsigned long long ntotal = ((unsigned long long)nrow / 2) * ((unsigned long long)(nrow + 1));
+    std::cout << "  matrix size = " << nrow << " x " << nrow << std::endl;
+    std::cout << "  number of non-zero entries in L = nnz(L) = " << nnz << " of " << ntotal << " [ " << 100.0 * nnz / (1.0 * ntotal) << "% ]" << std::endl;
+    std::cout << "  nnz(L)/nnz(A) = " << 1.0 * nnz / matrix.nonZeros() << std::endl;
 }
 
 /* Solve full system LL^T x = b */
