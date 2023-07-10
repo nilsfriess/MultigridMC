@@ -7,9 +7,9 @@
 
 #ifndef NCHOLMOD
 /* Constructor */
-CholmodLLT::CholmodLLT(const MatrixType &matrix_) : Base(matrix_)
+CholmodLLT::CholmodLLT(const LinearOperator::SparseMatrixType &matrix_) : Base(matrix_)
 {
-    const MatrixType A_lower = MatrixType(matrix.triangularView<Eigen::Lower>());
+    const LinearOperator::SparseMatrixType A_lower = LinearOperator::SparseMatrixType(matrix.triangularView<Eigen::Lower>());
     unsigned int nnz = A_lower.nonZeros();
     ctx = new cholmod_common;
     cholmod_start(ctx);
@@ -77,7 +77,7 @@ void CholmodLLT::solveLT(const Eigen::VectorXd &b, Eigen::VectorXd &x) const
 #endif // NCHOLMOD
 
 /* Constructor */
-EigenSimplicialLLT::EigenSimplicialLLT(const MatrixType &matrix_) : Base(matrix_)
+EigenSimplicialLLT::EigenSimplicialLLT(const LinearOperator::SparseMatrixType &matrix_) : Base(matrix_)
 {
     simplicial_LLT = std::make_shared<SimplicialLLTType>(matrix);
 }
@@ -112,4 +112,34 @@ void EigenSimplicialLLT::solveLT(const Eigen::VectorXd &b, Eigen::VectorXd &x) c
     const auto &Pinv = simplicial_LLT->permutationPinv();
     Eigen::VectorXd Px = LT_triangular.solve(b);
     x = Pinv * Px;
+}
+
+/* Constructor */
+EigenDenseLLT::EigenDenseLLT(const LinearOperator::DenseMatrixType &matrix_) : Base(matrix_)
+{
+    dense_LLT = std::make_shared<DenseLLTType>(matrix);
+}
+
+/* Solve full system LL^T x = b */
+void EigenDenseLLT::solve(const Eigen::VectorXd &b, Eigen::VectorXd &x) const
+{
+    auto L_triangular = dense_LLT->matrixL();
+    auto LT_triangular = dense_LLT->matrixU();
+    Eigen::VectorXd y = L_triangular.solve(b);
+    x = LT_triangular.solve(y);
+}
+
+/* Solve lower triangular system L x = b */
+void EigenDenseLLT::solveL(const Eigen::VectorXd &b, Eigen::VectorXd &x) const
+{
+    auto L_triangular = dense_LLT->matrixL();
+    // permute RHS
+    x = L_triangular.solve(b);
+}
+
+/* Solve upper triangular system L^T x = b */
+void EigenDenseLLT::solveLT(const Eigen::VectorXd &b, Eigen::VectorXd &x) const
+{
+    auto LT_triangular = dense_LLT->matrixU();
+    x = LT_triangular.solve(b);
 }

@@ -1,0 +1,41 @@
+==========================================
+BURSTBUFFER=/burstbuffer/t/67132045
+==========================================
+Reading parameters from file 'parameters.cfg'
+  lattice size = 32 x 32
+  Cholesky factorisation = dense
+  overrelaxation factor = 1
+  MultigridMC levels      = 5
+  MultigridMC npresample  = 1
+  MultigridMC npostsample  = 1
+  number of samples        = 10000
+  number of warmup samples = 1000
+  number of measurement points = 8
+  measure global average across domain? yes
+  mean of global average = 1
+  variance of global average = 1
+
+Compiled with BLAS/LAPACK support for Eigen.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+WARNING: Falling back on Eigen's SimplicalLLT Cholesky factorisation.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+Setting up Multilevel MC sampler 
+  level 0 lattice : 2d lattice,   32 x   32 points, 1024 unknowns
+  level 1 lattice : 2d lattice,   16 x   16 points,  256 unknowns
+  level 2 lattice : 2d lattice,    8 x    8 points,   64 unknowns
+  level 3 lattice : 2d lattice,    4 x    4 points,   16 unknowns
+  level 4 lattice : 2d lattice,    2 x    2 points,    4 unknowns
+
+Cholesky
+  time per sample = 0.3855 ms
+
+SSOR
+  time per sample = 0.2001 ms
+
+Multigrid MC
+  time per sample = 0.3046 ms
+Writing mean
+Writing variance
+Writing x_post
+

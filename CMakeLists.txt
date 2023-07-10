@@ -24,6 +24,7 @@ option(USE_CHOLMOD "Use Cholmod for Cholesky factorisation?" ON)
 option(USE_THOROUGH_TESTS "Use thorough tests?" ON)
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+include(FindEigenLAPACK)
 
 # Find Cholmod
 set(NCHOLMOD "true")

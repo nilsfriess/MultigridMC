@@ -66,6 +66,27 @@ void LatticeParameters::parse_config(const libconfig::Setting &root)
     std::cout << "  lattice size = " << nx << " x " << ny << std::endl;
 }
 
+/* parse cholesky configuration */
+void CholeskyParameters::parse_config(const libconfig::Setting &root)
+{
+    const libconfig::Setting &cholesky = root["cholesky"];
+    std::string fac_str = cholesky.lookup("factorisation");
+    if (fac_str == "sparse")
+    {
+        factorisation = SparseFactorisation;
+    }
+    else if (fac_str == "dense")
+    {
+        factorisation = DenseFactorisation;
+    }
+    else
+    {
+        std::cout << "ERROR: Unknown Cholesky factorisation: \'" << fac_str << "\'" << std::endl;
+        exit(-1);
+    }
+    std::cout << "  Cholesky factorisation = " << fac_str << std::endl;
+}
+
 /* parse smoother configuration */
 void SmootherParameters::parse_config(const libconfig::Setting &root)
 {
@@ -91,7 +112,6 @@ void IterativeSolverParameters::parse_config(const libconfig::Setting &root)
 void MultigridParameters::parse_config(const libconfig::Setting &root)
 {
     const libconfig::Setting &multigrid = root["multigrid"];
-    std::cout << "  IMPLEMENT ME!" << std::endl;
     nlevel = multigrid.lookup("nlevel");
     npresmooth = multigrid.lookup("npresmooth");
     npostsmooth = multigrid.lookup("npostsmooth");
@@ -110,7 +130,7 @@ void MultigridMCParameters::parse_config(const libconfig::Setting &root)
     verbose = multigrid.lookup("verbose");
     std::cout << "  MultigridMC levels      = " << nlevel << std::endl;
     std::cout << "  MultigridMC npresample  = " << npresample << std::endl;
-    std::cout << "  MultigridMC nostsample  = " << npostsample << std::endl;
+    std::cout << "  MultigridMC npostsample  = " << npostsample << std::endl;
 }
 
 /* parse sampling configuration */

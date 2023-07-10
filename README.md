@@ -1,8 +1,10 @@
 # Multigrid Monte Carlo
-C++ implementation of multigrid Monte Carlo algorithm
+C++ implementation of multigrid Monte Carlo (MGMC) algorithm. In addition to MGMC, the code also implements sampling based on different Cholesky factorisations as an alternative algorithm.
 
 ## Dependencies
 The code requires the [Eigen library](https://eigen.tuxfamily.org/index.php?title=Main_Page) for linear algebra as well as [libconfig](https://hyperrealm.github.io/libconfig/) for parsing configuration files. To install libconfig, clone the [libconfig repository](https://github.com/hyperrealm/libconfig) and build/install it with CMake.
+
+If possible, Eigen will use [BLAS/LAPACK support](https://eigen.tuxfamily.org/dox/TopicUsingBlasLapack.html) for dense linear algebra, but it will fall back to the non-BLAS/LAPACK version if these libraries are not installed.
 
 CholMod is an optional dependency, if it is not found the code falls back to using the Simplicial Cholesky factorisation in Eigen, which is not necessarily slower. Cholmod is available as part of [SuiteSparse](https://people.engr.tamu.edu/davis/suitesparse.html). To prevent the use of CholMod even if it has been installed, set the `USE_CHOLMOD` flag to `Off` during the CMake configure stage.
 
@@ -38,3 +40,9 @@ The executables are called `driver_mg` (for the deterministic multigrid solve) a
 ```
 
 where `DRIVER` is `driver_mg` or `driver_mgmc` and `CONFIG_FILE` is the name of the file that contains the runtime configuration; an example can be found in [parameters_template.cfg](parameters_template.cfg).
+
+## References
+
+* **Goodman, J. and Sokal, A.D.**, 1989. [*Multigrid Monte Carlo Method. Conceptual Foundations.*](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.40.2035) Physical Review D, 40(6), p.2035.
+* **Fox, C. and Parker, A.**, 2017. [*Accelerated Gibbs sampling of normal distributions using matrix splittings and polynomials.*](https://projecteuclid.org/journals/bernoulli/volume-23/issue-4B/Accelerated-Gibbs-sampling-of-normal-distributions-using-matrix-splittings-and/10.3150/16-BEJ863.pdf)
+* **Harbrecht, H., Peters, M. and Schneider, R.**, 2012. [*On the low-rank approximation by the pivoted Cholesky decomposition.*](http://dfg-spp1324.de/download/preprints/preprint076.pdf) Applied numerical mathematics, 62(4), pp.428-440.

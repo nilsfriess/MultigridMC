@@ -31,7 +31,7 @@ where
     \alpha_b &= 1.2, &
     \beta_b &= 0.1.
 \end{xalignat}
-The field $u$ is measured at $N=8$ locations, i.e. we assume that we can have measured the field $u$ to be $y_1,y_2,\dots,y_N$ at these locations and the covariance of the measurements is given by the (not necessarily diagonal) $N\times N$ matrix $\Sigma$. Write $X\in\mathbb{R}^n$ for the prior RV, which encodes the values of the field $u(z_1,z_2)$ in the grid cells. We have that
+The field $u$ is measured at $N=8$ locations, i.e. we assume that we can have measured the field $u$ to be $y_1,y_2,\dots,y_N$ at these locations and the covariance of the measurements is given by the (not necessarily diagonal) $N\times N$ matrix $\Sigma$. In some of the numerical experiments we further assume that we measure the \textit{global average}, this measurement has a mean 1 and standard deviation 1. Write $X\in\mathbb{R}^n$ for the prior RV, which encodes the values of the field $u(z_1,z_2)$ in the grid cells. We have that
 \begin{equation}
     Y = B^TX + E
 \end{equation}
@@ -46,7 +46,7 @@ where $E\sim \mathcal{N}(0,\Sigma)$ and the tall, skinny $n\times N$ matrix $B$ 
             \includegraphics[width=\linewidth]{variance.png}
         \end{minipage}
     \end{center}
-    \caption{Sample mean (left) and sample variance (right) of the posterior distribution for a $64\times 64$ lattice. The location where the quantity of interest is measured is marked by a circle. The data was generated with the Multigrid Monte Carlo sampler}
+    \caption{Sample mean (left) and sample variance (right) of the posterior distribution for a $64\times 64$ lattice; the numerical experiment was carried out with local measurements only. The location where the quantity of interest is measured is marked by a circle. The data was generated with the Multigrid Monte Carlo sampler}
     \label{fig:mean_variance}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -69,7 +69,7 @@ Fig. \ref{fig:timeseries} shows the first steps of this timeseries for different
 \begin{figure}
     \begin{center}
         \includegraphics[width=0.7\linewidth]{timeseries.pdf}
-        \caption{Sequence of first 64 samples (after warmup) in the Markov chain for different samplers and lattice sizes.}
+        \caption{Sequence of first 64 samples (after warmup) in the Markov chain for different samplers and lattice sizes. Results are shown for local measurements only.}
         \label{fig:timeseries}
     \end{center}
 \end{figure}
@@ -81,24 +81,25 @@ The normalised autocorrelation functions $C(k)/C(0)$ are shown for the different
 \begin{figure}
     \begin{center}
         \includegraphics[width=0.7\linewidth]{autocorrelation.pdf}
-        \caption{Normalised autocorrelation function for different samplers and lattice sizes.}
+        \caption{Normalised autocorrelation function for different samplers and lattice sizes. Results are shown for local measurements only.}
         \label{fig:autocorrelation}
     \end{center}
 \end{figure}
 As this figure shows, the Cholesky sampler generates independent samples. The samples obtained with the SSOR method are strongly correlated, in particular for larger lattice sizes (the autocorrelation function for the $256\times 256$ lattice appears to decay slower than for the $128\times 128$ lattice, but this could be due to the fact that it is estimated with a finite number of samples). For the MultigridMC sampler we show the integrated autocorrelation time (IACT) $\tau_{\text{int}}$ in Tab. \ref{tab:tau_int}
 \begin{table}
     \begin{center}
-        \begin{tabular}{cc}
+        \begin{tabular}{cccc}
             \hline
-            lattice         & $\tau_{\text{int}}$ \\
+                     & \multicolumn{2}{c}{integrated autocorr. time $\tau_{\text{int}}$} \\
+                     lattice& local & local+global\\
             \hline\hline
-            $32 \times 32$  & $1.21 \pm  0.02$    \\
-            $64\times 64$   & $1.26 \pm 0.02$     \\
-            $128\times 128$ & $1.28 \pm  0.02$    \\
-            $256\times256$  & $1.23 \pm  0.02$    \\
+            $32 \times 32$  & $1.21 \pm  0.02$ & $1.23 \pm  0.02$   \\
+            $64\times 64$   & $1.26 \pm 0.02$ & $1.23 \pm  0.02$    \\
+            $128\times 128$ & $1.28 \pm  0.02$ &  $1.24 \pm  0.02$  \\
+            $256\times256$  & $1.23 \pm  0.02$ & $1.20 \pm  0.02$   \\
             \hline
         \end{tabular}
-        \caption{Integrated autocorrelation time for the Multigrid Monte Carlo sampler on different lattices.}
+        \caption{Integrated autocorrelation time for the Multigrid Monte Carlo sampler on different lattices. Results are shown both for local measurements only and for local and global measurements.}
         \label{tab:tau_int}
     \end{center}
 \end{table}
@@ -108,19 +109,20 @@ Crucially, the IACT does not increase with resolution. Based on the measured val
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{table}
     \begin{center}
-        \begin{tabular}{crrr}
+        \begin{tabular}{crrrrrr}
             \hline
-            lattice         & \multicolumn{1}{c}{Cholesky} & \multicolumn{1}{c}{SSOR} & \multicolumn{1}{c}{Multigrid MC} \\
+            & \multicolumn{3}{c}{local} & \multicolumn{3}{c}{local+global}\\
+            lattice         & \multicolumn{1}{c}{Cholesky} & \multicolumn{1}{c}{SSOR} & \multicolumn{1}{c}{Multigrid MC} & \multicolumn{1}{c}{Cholesky} & \multicolumn{1}{c}{SSOR} & \multicolumn{1}{c}{Multigrid MC} \\
             \hline\hline
-            $32\times 32$   & $0.0974$                     & $0.1891$                 & $0.2922$                         \\
-            $64\times 64$   & $0.4019$                     & $0.8241$                 & $1.2234$                         \\
-            $128\times 128$ & $1.7782$                    & $3.4240$                 & $5.2937$                         \\
-            $256\times 256$ & $9.9352$                   & $15.8145$                 & $24.3284$                        \\
+            $32\times 32$   & $0.0974$                     & $0.1891$                 & $0.2922$ & $0.3855$ & $0.2001$ & $0.3046$                        \\
+            $64\times 64$   & $0.4019$                     & $0.8241$                 & $1.2234$ & $8.3715$ & $0.8851$ & $1.3196$                         \\
+            $128\times 128$ & $1.7782$                    & $3.4240$                 & $5.2937$ & --- & $3.5098$ & $5.3057$                        \\
+            $256\times 256$ & $9.9352$                   & $15.8145$                 & $24.3284$ & --- & $15.5784$ & $24.1654$                       \\
             \hline
         \end{tabular}
         \caption{Measured time per sample for different samplers and lattice sizes. All times are given in milliseconds.}
         \label{tab:runtimes}
     \end{center}
 \end{table}
-Note that in two dimensions we expect the time for the Cholesky sampler to grow like $\mathcal{O}(N^{3/2})$, whereas the growth is $\mathcal{O}(N)$ for the SSOR and Multigrid MC samplers. When the resolution is double in both dimensions, the runtime for the latter two samplers should increase by a factor four, whereas it should grow by a factor eight for the Cholesky sampler. More generally, in $d$ spatial dimensions the Cholesky solver should cost $\mathcal{O}(N^{2-1/d})$ per sample, whereas the cost is $\mathcal{O}(N)$ independent of $d$ for SSOR and Multigrid MC.
+Tab. \ref{tab:runtimes} shows the measured runtime. In the numerical experiments with global measurements we use a dense Cholesky factorisation and Eigen was compiled with BLAS/LAPACK support. In this case the program runs out of memory for the $128\times 128$ lattice, for which the covariance matrix would be of size $16384\times 16384$.
 \end{document}
