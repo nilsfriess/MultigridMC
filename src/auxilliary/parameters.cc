@@ -179,6 +179,15 @@ void MeasurementParameters::parse_config(const libconfig::Setting &root)
     }
     // Ignore cross-correlations in measurements?
     ignore_measurement_cross_correlations = measurements.lookup("ignore_measurement_cross_correlations");
+    std::cout << "  ignore correlations between measurements? ";
+    if (ignore_measurement_cross_correlations)
+    {
+        std::cout << "yes" << std::endl;
+    }
+    else
+    {
+        std::cout << "no" << std::endl;
+    }
     // Sample location
     const libconfig::Setting &s_point = measurements.lookup("sample_location");
     Eigen::Vector2d v;
