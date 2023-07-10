@@ -144,6 +144,7 @@ int main(int argc, char *argv[])
     SmootherParameters smoother_params;
     MultigridMCParameters multigridmc_params;
     SamplingParameters sampling_params;
+    Diffusion2dParameters diffusion2d_params;
     MeasurementParameters measurement_params;
     general_params.read_from_file(filename);
     lattice_params.read_from_file(filename);
@@ -151,6 +152,7 @@ int main(int argc, char *argv[])
     smoother_params.read_from_file(filename);
     multigridmc_params.read_from_file(filename);
     sampling_params.read_from_file(filename);
+    diffusion2d_params.read_from_file(filename);
     measurement_params.read_from_file(filename);
 
 #if (defined EIGEN_USE_BLAS && defined EIGEN_USE_LAPACKE)
@@ -173,20 +175,16 @@ int main(int argc, char *argv[])
     // Construct lattice and linear operator
     std::shared_ptr<Lattice2d> lattice = std::make_shared<Lattice2d>(lattice_params.nx,
                                                                      lattice_params.ny);
-    double alpha_K = 1.5;
-    double beta_K = 0.3;
-    double alpha_b = 1.2;
-    double beta_b = 0.1;
     std::shared_ptr<MeasuredDiffusionOperator2d> linear_operator = std::make_shared<MeasuredDiffusionOperator2d>(lattice,
                                                                                                                  measurement_params.measurement_locations,
                                                                                                                  measurement_params.covariance,
                                                                                                                  measurement_params.ignore_measurement_cross_correlations,
                                                                                                                  measurement_params.measure_global,
                                                                                                                  measurement_params.sigma_global,
-                                                                                                                 alpha_K,
-                                                                                                                 beta_K,
-                                                                                                                 alpha_b,
-                                                                                                                 beta_b);
+                                                                                                                 diffusion2d_params.alpha_K,
+                                                                                                                 diffusion2d_params.beta_K,
+                                                                                                                 diffusion2d_params.alpha_b,
+                                                                                                                 diffusion2d_params.beta_b);
     //   Construct samplers
     /* prepare measurements */
     unsigned int seed = 5418513;

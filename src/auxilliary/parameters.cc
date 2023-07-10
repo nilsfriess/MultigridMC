@@ -143,6 +143,23 @@ void SamplingParameters::parse_config(const libconfig::Setting &root)
     std::cout << "  number of warmup samples = " << nwarmup << std::endl;
 }
 
+/* parse 2d diffusion configuration */
+void Diffusion2dParameters::parse_config(const libconfig::Setting &root)
+{
+    const libconfig::Setting &sampling = root["diffusion2d"];
+    alpha_K = sampling["alpha_K"];
+    beta_K = sampling["beta_K"];
+    alpha_b = sampling["alpha_b"];
+    beta_b = sampling["beta_b"];
+    std::cout << "  diffusion operator" << std::endl;
+    std::cout << "    parameters of diffusion coefficient K(x,y)" << std::endl;
+    std::cout << "      alpha_K = " << alpha_K << std::endl;
+    std::cout << "      beta_K  = " << beta_K << std::endl;
+    std::cout << "    parameters of zero order coefficient b(x,y)" << std::endl;
+    std::cout << "      alpha_b = " << alpha_b << std::endl;
+    std::cout << "      beta_b  = " << beta_b << std::endl;
+}
+
 /* parse measurement configuration */
 void MeasurementParameters::parse_config(const libconfig::Setting &root)
 {
