@@ -180,6 +180,9 @@ public:
     Eigen::VectorXd mean;
     /** @brief covariance matrix of measurements */
     Eigen::MatrixXd covariance;
+    /** @brief ignore cross-correlations in masurements (i.e. use only the diagonal
+     *  of the covariance matrix)? */
+    bool ignore_measurement_cross_correlations;
     /** @brief sample location */
     Eigen::Vector2d sample_location;
     /** @brief measure global average of field? */

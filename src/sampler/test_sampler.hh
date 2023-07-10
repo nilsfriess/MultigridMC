@@ -272,6 +272,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
         linear_operator = std::make_shared<MeasuredDiffusionOperator2d>(lattice,
                                                                         measurement_locations,
                                                                         Sigma,
+                                                                        false,
                                                                         measure_average,
                                                                         sigma_average,
                                                                         alpha_K,

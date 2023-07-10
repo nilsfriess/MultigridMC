@@ -56,6 +56,7 @@ protected:
         linear_operator_lowrank = std::make_shared<MeasuredDiffusionOperator2d>(lattice,
                                                                                 measurement_locations,
                                                                                 Sigma,
+                                                                                false,
                                                                                 measure_global,
                                                                                 sigma_global,
                                                                                 alpha_K,

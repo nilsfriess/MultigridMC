@@ -157,6 +157,8 @@ void MeasurementParameters::parse_config(const libconfig::Setting &root)
             covariance(j, k) = Sigma[j + n_meas * k];
         }
     }
+    // Ignore cross-correlations in measurements?
+    ignore_measurement_cross_correlations = measurements.lookup("ignore_measurement_cross_correlations");
     // Sample location
     const libconfig::Setting &s_point = measurements.lookup("sample_location");
     Eigen::Vector2d v;

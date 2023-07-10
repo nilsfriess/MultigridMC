@@ -70,6 +70,7 @@ double DiffusionOperator2d::b_zero(const double x, const double y) const
 MeasuredDiffusionOperator2d::MeasuredDiffusionOperator2d(const std::shared_ptr<Lattice2d> lattice_,
                                                          const std::vector<Eigen::Vector2d> measurement_locations_,
                                                          const Eigen::MatrixXd Sigma_,
+                                                         const bool ignore_measurement_cross_correlations_,
                                                          const bool measure_global_,
                                                          const double sigma_average_,
                                                          const double alpha_K_,
@@ -90,7 +91,16 @@ MeasuredDiffusionOperator2d::MeasuredDiffusionOperator2d(const std::shared_ptr<L
     unsigned int n_measurements = measurement_locations_.size();
     Sigma_inv = Eigen::MatrixXd(n_measurements + measure_global_, n_measurements + measure_global_);
     Sigma_inv.setZero();
-    Sigma_inv(Eigen::seqN(0, n_measurements), Eigen::seqN(0, n_measurements)) = Sigma_.inverse();
+    DenseMatrixType Sigma_local;
+    if (ignore_measurement_cross_correlations_)
+    {
+        Sigma_local = Sigma_.diagonal().asDiagonal();
+    }
+    else
+    {
+        Sigma_local = Sigma_;
+    }
+    Sigma_inv(Eigen::seqN(0, n_measurements), Eigen::seqN(0, n_measurements)) = Sigma_local.inverse();
     typedef Eigen::Triplet<double> T;
     std::vector<T> triplet_list;
     for (int k = 0; k < n_measurements; ++k)

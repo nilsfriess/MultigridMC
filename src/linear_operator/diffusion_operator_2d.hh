@@ -104,6 +104,8 @@ public:
      * @param[in] rng_ random number generator
      * @param[in] measurement_locations_ coordinates of locations where the field is measured
      * @param[in] Sigma_ covariance matrix of measurements
+     * @param[in] ignore_measurement_cross_correlations_ ignore all off-diagonal entries in the
+     *            covariance matrix Sigma
      * @param[in] measure_global_ measure the average across the entire domain
      * @param[in] sigma_global_ variance of global average measurement
      * @param[in] alpha_K first coefficient in diffusion function
@@ -114,6 +116,7 @@ public:
     MeasuredDiffusionOperator2d(const std::shared_ptr<Lattice2d> lattice_,
                                 const std::vector<Eigen::Vector2d> measurement_locations_,
                                 const Eigen::MatrixXd Sigma_,
+                                const bool ignore_measurement_cross_correlations_,
                                 const bool measure_average_,
                                 const double sigma_global_,
                                 const double alpha_K_,

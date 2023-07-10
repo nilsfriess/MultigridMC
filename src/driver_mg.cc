@@ -51,6 +51,7 @@ int main(int argc, char *argv[])
     std::shared_ptr<MeasuredDiffusionOperator2d> linear_operator = std::make_shared<MeasuredDiffusionOperator2d>(lattice,
                                                                                                                  measurement_params.measurement_locations,
                                                                                                                  measurement_params.covariance,
+                                                                                                                 measurement_params.ignore_measurement_cross_correlations,
                                                                                                                  measurement_params.measure_global,
                                                                                                                  measurement_params.sigma_global,
                                                                                                                  alpha_K,
