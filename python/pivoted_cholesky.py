@@ -43,6 +43,9 @@ def create_2d_matrix(n, Lambda, sigma):
         A[j, (j - n) % n**2] = -1
     v = np.ones(n**2) / n**2
     A += 1 / sigma * np.outer(v, v)
+    v = np.zeros(n**2)
+    v[7] = 1.0
+    A += 1 / sigma * np.outer(v, v)
     return A
 
 
@@ -129,20 +132,30 @@ def pivoted_cholesky(A, tolerance):
     return L, rel_error
 
 
-n = 32
+def truncated_svd(A, tolerance):
+    """Compute truncated SVD"""
+    U, S, VT = np.linalg.svd(A, full_matrices=True, hermitian=True)
+    rel_error = []
+    for j in range(A.shape[0]):
+        rel_error.append(np.linalg.norm(A - U[:, :j] @ np.diag(S[:j]) @ VT[:j, :]))
+    rel_error = np.asarray(rel_error)
+    return rel_error / rel_error[0]
+
+
+n = 16
 
 sigma = 1.0e-4
-
+tolerance = 1.0e-15
 plt.clf()
 ax = plt.gca()
 ax.set_yscale("log")
 for j, Lambda in enumerate([0.1, 0.2, 0.4, 0.8]):
     precision = create_2d_matrix(n, Lambda, sigma)
     cov = np.linalg.inv(precision)
-    # cov = create_2d_correlation(n, Lambda)
 
-    tolerance = 1.0e-15
+    # cov = create_2d_correlation(n, Lambda)
     L, rel_error = pivoted_cholesky(cov, tolerance)
+    # rel_error = truncated_svd(cov, tolerance)
 
     plt.plot(rel_error, linewidth=2, label=r"$\Lambda=" + f"{Lambda:3.1f}" + r"$")
 plt.legend(loc="upper right")
