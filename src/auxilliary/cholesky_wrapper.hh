@@ -71,8 +71,10 @@ public:
     /** @brief Constructor
      *
      * @param[in] matrix_ Matrix A to be Cholesky-factorised
+     * @param[in] verbose_ Print out additional information (ignored for this class)
      */
-    CholmodLLT(const LinearOperator::SparseMatrixType &matrix_);
+    CholmodLLT(const LinearOperator::SparseMatrixType &matrix_,
+               const bool verbose_ = false);
 
     /** @brief Destructor*/
     ~CholmodLLT()
@@ -134,8 +136,10 @@ public:
     /** @brief Constructor
      *
      * @param[in] matrix_ Matrix A to be Cholesky-factorised
+     * @param[in] verbose_ Print out information on sparsity structure
      */
-    EigenSimplicialLLT(const LinearOperator::SparseMatrixType &matrix_);
+    EigenSimplicialLLT(const LinearOperator::SparseMatrixType &matrix_,
+                       const bool verbose_ = false);
 
     /** @brief Destructor*/
     ~EigenSimplicialLLT() {}
