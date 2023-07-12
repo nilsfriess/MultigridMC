@@ -74,7 +74,7 @@ dim = 2
 dmin = 0.1
 p = np.asarray(sample_points(nmeas + 1, dim, dmin))
 mean = average(nmeas, 1.0, 4.0)
-Sigma = covariance_matrix(nmeas, 1.0, 2.0)
+Sigma = covariance_matrix(nmeas, 0.01, 0.02)
 
 # Print results in a format that can be used in the configuration file
 print("n = ", nmeas, ";")
