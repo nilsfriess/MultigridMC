@@ -83,9 +83,11 @@ public:
      *
      * @param[in] linear_operator_ underlying linear operator
      * @param[in] rng_ random number generator
+     * @param[in] verbose_ print out additional information?
      */
     SparseCholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
-                          std::mt19937_64 &rng_);
+                          std::mt19937_64 &rng_,
+                          const bool verbose_ = false);
 
 protected:
     using Base::xi;

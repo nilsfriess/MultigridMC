@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
     {
         if (cholesky_params.factorisation == SparseFactorisation)
         {
-            cholesky_sampler = std::make_shared<SparseCholeskySampler>(linear_operator, rng);
+            cholesky_sampler = std::make_shared<SparseCholeskySampler>(linear_operator, rng, true);
         }
         else if (cholesky_params.factorisation == DenseFactorisation)
         {
