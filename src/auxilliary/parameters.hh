@@ -226,7 +226,7 @@ public:
     /** @brief number of measurements */
     unsigned int n;
     /** @brief measurement locations */
-    std::vector<Eigen::Vector2d> measurement_locations;
+    std::vector<Eigen::VectorXd> measurement_locations;
     /** @brief measured averages */
     Eigen::VectorXd mean;
     /** @brief covariance matrix of measurements */

@@ -10,6 +10,7 @@
 #include "lattice/lattice1d.hh"
 #include "linear_operator/linear_operator.hh"
 #include "linear_operator/diffusion_operator_2d.hh"
+#include "linear_operator/measured_diffusion_operator.hh"
 #include "intergrid/intergrid_operator_1dlinear.hh"
 #include "intergrid/intergrid_operator_2dlinear.hh"
 #include "sampler/sampler.hh"
@@ -268,7 +269,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     double alpha_b = 1.2;
     double beta_b = 0.1;
     unsigned int n_meas = 4;
-    std::vector<Eigen::Vector2d> measurement_locations(n_meas);
+    std::vector<Eigen::VectorXd> measurement_locations(n_meas);
     Eigen::MatrixXd Sigma(n_meas, n_meas);
     Sigma.setZero();
     measurement_locations[0] = Eigen::Vector2d({0.25, 0.25});
@@ -287,17 +288,17 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     Sigma = Q * Sigma * Q.transpose();
     const bool measure_average = false;
     const double sigma_average = 0.0;
-    std::shared_ptr<MeasuredDiffusionOperator2d>
-        linear_operator = std::make_shared<MeasuredDiffusionOperator2d>(lattice,
-                                                                        measurement_locations,
-                                                                        Sigma,
-                                                                        false,
-                                                                        measure_average,
-                                                                        sigma_average,
-                                                                        alpha_K,
-                                                                        beta_K,
-                                                                        alpha_b,
-                                                                        beta_b);
+    typedef MeasuredDiffusionOperator<DiffusionOperator2d> OperatorType;
+    std::shared_ptr<OperatorType> linear_operator = std::make_shared<OperatorType>(lattice,
+                                                                                   measurement_locations,
+                                                                                   Sigma,
+                                                                                   false,
+                                                                                   measure_average,
+                                                                                   sigma_average,
+                                                                                   alpha_K,
+                                                                                   beta_K,
+                                                                                   alpha_b,
+                                                                                   beta_b);
 
     MultigridMCParameters multigridmc_params;
     multigridmc_params.nlevel = 3;

@@ -13,6 +13,7 @@
 #include "solver/cholesky_solver.hh"
 #include "solver/loop_solver.hh"
 #include "linear_operator/diffusion_operator_2d.hh"
+#include "linear_operator/measured_diffusion_operator.hh"
 
 /** @brief fixture class for solver tests */
 class SolverTest : public ::testing::Test
@@ -42,7 +43,7 @@ protected:
                                                                 alpha_b,
                                                                 beta_b);
         unsigned int n_meas = 10;
-        std::vector<Eigen::Vector2d> measurement_locations(n_meas);
+        std::vector<Eigen::VectorXd> measurement_locations(n_meas);
         Eigen::MatrixXd Sigma(n_meas, n_meas);
         Sigma.setZero();
         for (int k = 0; k < n_meas; ++k)
@@ -58,16 +59,16 @@ protected:
         Sigma = Q * Sigma * Q.transpose();
         const bool measure_global = false;
         const double sigma_global = 0.0;
-        linear_operator_lowrank = std::make_shared<MeasuredDiffusionOperator2d>(lattice,
-                                                                                measurement_locations,
-                                                                                Sigma,
-                                                                                false,
-                                                                                measure_global,
-                                                                                sigma_global,
-                                                                                alpha_K,
-                                                                                beta_K,
-                                                                                alpha_b,
-                                                                                beta_b);
+        linear_operator_lowrank = std::make_shared<MeasuredDiffusionOperator<DiffusionOperator2d>>(lattice,
+                                                                                                   measurement_locations,
+                                                                                                   Sigma,
+                                                                                                   false,
+                                                                                                   measure_global,
+                                                                                                   sigma_global,
+                                                                                                   alpha_K,
+                                                                                                   beta_K,
+                                                                                                   alpha_b,
+                                                                                                   beta_b);
         // Create states
         x_exact = Eigen::VectorXd(ndof);
         x = Eigen::VectorXd(ndof);
@@ -86,7 +87,7 @@ protected:
     /** @brief linear operator */
     std::shared_ptr<DiffusionOperator2d> linear_operator;
     /** @brief linear operator */
-    std::shared_ptr<MeasuredDiffusionOperator2d> linear_operator_lowrank;
+    std::shared_ptr<MeasuredDiffusionOperator<DiffusionOperator2d>> linear_operator_lowrank;
     /** @brief exact solution */
     Eigen::VectorXd x_exact;
     /** @brief numerical solution */

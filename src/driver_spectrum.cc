@@ -8,6 +8,7 @@
 #include "lattice/lattice2d.hh"
 #include "linear_operator/linear_operator.hh"
 #include "linear_operator/diffusion_operator_2d.hh"
+#include "linear_operator/measured_diffusion_operator.hh"
 #include "auxilliary/parameters.hh"
 
 /* *********************************************************************** *
@@ -32,16 +33,16 @@ int main(int argc, char *argv[])
     // Construct lattice and linear operator
     std::shared_ptr<Lattice2d> lattice = std::make_shared<Lattice2d>(lattice_params.nx,
                                                                      lattice_params.ny);
-    MeasuredDiffusionOperator2d linear_operator(lattice,
-                                                measurement_params.measurement_locations,
-                                                measurement_params.covariance,
-                                                measurement_params.ignore_measurement_cross_correlations,
-                                                measurement_params.measure_global,
-                                                measurement_params.sigma_global,
-                                                diffusion2d_params.alpha_K,
-                                                diffusion2d_params.beta_K,
-                                                diffusion2d_params.alpha_b,
-                                                diffusion2d_params.beta_b);
+    MeasuredDiffusionOperator<DiffusionOperator2d> linear_operator(lattice,
+                                                                   measurement_params.measurement_locations,
+                                                                   measurement_params.covariance,
+                                                                   measurement_params.ignore_measurement_cross_correlations,
+                                                                   measurement_params.measure_global,
+                                                                   measurement_params.sigma_global,
+                                                                   diffusion2d_params.alpha_K,
+                                                                   diffusion2d_params.beta_K,
+                                                                   diffusion2d_params.alpha_b,
+                                                                   diffusion2d_params.beta_b);
     LinearOperator::DenseMatrixType covariance = linear_operator.covariance();
     typedef Eigen::EigenSolver<LinearOperator::DenseMatrixType> EigenSolver;
     EigenSolver eigen_solver(covariance, false);

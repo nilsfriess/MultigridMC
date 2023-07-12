@@ -2,6 +2,7 @@
 #define DIFFUSION_OPERATOR_3D_HH DIFFUSION_OPERATOR_3D_HH
 
 #include <vector>
+#include <Eigen/Dense>
 #include "linear_operator.hh"
 #include "lattice/lattice3d.hh"
 
@@ -44,7 +45,7 @@ public:
      * @param[in] beta_b second coefficient in zero order term
      * @param[in] m_lowrank_ the dimension of the low rank correction
      */
-    DiffusionOperator3d(const std::shared_ptr<Lattice3d> lattice_,
+    DiffusionOperator3d(const std::shared_ptr<Lattice> lattice_,
                         const double alpha_K_,
                         const double beta_K_,
                         const double alpha_b_,
@@ -79,60 +80,6 @@ protected:
     const double alpha_b;
     /** @brief Second coefficient in zero order term */
     const double beta_b;
-};
-
-/** @brief diffusion operator with measurements
- *
- * Assume that we measured data as Y = B^T X + E, where X is drawn from a prior
- * distribution N(xbar,Q^{-1}) and E is draw from an (independent) multivariate normal
- * distribution N(0,Sigma) with covariance Sigma. The conditional distribution of X given y
- * is then a multivariate normal distribution with mean
- *
- *   x_{X|y} = xbar + Q^{-1} B (Sigma + B^T Q^{-1} B)^{-1} (y - B^T xbar)
- *
- * and precision matrix
- *
- *   Q_{X|y} = Q + B Sigma^{-1} B^T.
- *
- */
-class MeasuredDiffusionOperator3d : public LinearOperator
-{
-public:
-    /** @brief Create a new instance
-     *
-     * Populates matrix entries across the grid
-     *
-     * @param[in] lattice_ underlying 2d lattice
-     * @param[in] rng_ random number generator
-     * @param[in] measurement_locations_ coordinates of locations where the field is measured
-     * @param[in] Sigma_ covariance matrix of measurements
-     * @param[in] ignore_measurement_cross_correlations_ ignore all off-diagonal entries in the
-     *            covariance matrix Sigma
-     * @param[in] measure_global_ measure the average across the entire domain
-     * @param[in] sigma_global_ variance of global average measurement
-     * @param[in] alpha_K first coefficient in diffusion function
-     * @param[in] beta_K second coefficient in diffusion function
-     * @param[in] alpha_b first coefficient in zero order term
-     * @param[in] beta_b second coefficient in zero order term
-     */
-    MeasuredDiffusionOperator3d(const std::shared_ptr<Lattice3d> lattice_,
-                                const std::vector<Eigen::Vector3d> measurement_locations_,
-                                const Eigen::MatrixXd Sigma_,
-                                const bool ignore_measurement_cross_correlations_,
-                                const bool measure_average_,
-                                const double sigma_global_,
-                                const double alpha_K_,
-                                const double beta_K_,
-                                const double alpha_b_,
-                                const double beta_b_);
-
-    /** @brief Compute posterior mean
-     *
-     * @param[in] xbar prior mean
-     * @param[in] y measured values
-     */
-    Eigen::VectorXd posterior_mean(const Eigen::VectorXd &xbar,
-                                   const Eigen::VectorXd &y);
 };
 
 #endif // DIFFUSION_OPERATOR_3D_HH

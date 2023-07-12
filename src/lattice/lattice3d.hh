@@ -93,6 +93,16 @@ public:
   /** @brief get info string */
   virtual std::string get_info() const;
 
+  /** @brief return lattice shape */
+  inline virtual Eigen::VectorXi shape() const
+  {
+    Eigen::VectorXi s(3);
+    s[0] = nx;
+    s[1] = ny;
+    s[2] = nz;
+    return s;
+  }
+
   /** @brief extent in x-direction */
   const unsigned int nx;
   /** @brief extent in y-direction */

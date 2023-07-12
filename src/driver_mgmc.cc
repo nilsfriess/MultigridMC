@@ -13,6 +13,7 @@
 #include "smoother/ssor_smoother.hh"
 #include "linear_operator/linear_operator.hh"
 #include "linear_operator/diffusion_operator_2d.hh"
+#include "linear_operator/measured_diffusion_operator.hh"
 #include "intergrid/intergrid_operator_2dlinear.hh"
 #include "sampler/cholesky_sampler.hh"
 #include "sampler/ssor_sampler.hh"
@@ -35,7 +36,8 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
                            const MeasurementParameters &measurement_params,
                            const std::string filename)
 {
-    const std::shared_ptr<MeasuredDiffusionOperator2d> linear_operator = std::dynamic_pointer_cast<MeasuredDiffusionOperator2d>(sampler->get_linear_operator());
+    typedef MeasuredDiffusionOperator<DiffusionOperator2d> OperatorType;
+    const std::shared_ptr<OperatorType> linear_operator = std::dynamic_pointer_cast<OperatorType>(sampler->get_linear_operator());
     unsigned int ndof = linear_operator->get_ndof();
     // prior mean (set to zero)
     Eigen::VectorXd xbar(ndof);
@@ -86,7 +88,8 @@ void posterior_statistics(std::shared_ptr<Sampler> sampler,
                           const SamplingParameters &sampling_params,
                           const MeasurementParameters &measurement_params)
 {
-    const std::shared_ptr<MeasuredDiffusionOperator2d> linear_operator = std::dynamic_pointer_cast<MeasuredDiffusionOperator2d>(sampler->get_linear_operator());
+    typedef MeasuredDiffusionOperator<DiffusionOperator2d> OperatorType;
+    const std::shared_ptr<OperatorType> linear_operator = std::dynamic_pointer_cast<OperatorType>(sampler->get_linear_operator());
     unsigned int ndof = linear_operator->get_ndof();
 
     // prior mean (set to zero)
@@ -175,16 +178,17 @@ int main(int argc, char *argv[])
     // Construct lattice and linear operator
     std::shared_ptr<Lattice2d> lattice = std::make_shared<Lattice2d>(lattice_params.nx,
                                                                      lattice_params.ny);
-    std::shared_ptr<MeasuredDiffusionOperator2d> linear_operator = std::make_shared<MeasuredDiffusionOperator2d>(lattice,
-                                                                                                                 measurement_params.measurement_locations,
-                                                                                                                 measurement_params.covariance,
-                                                                                                                 measurement_params.ignore_measurement_cross_correlations,
-                                                                                                                 measurement_params.measure_global,
-                                                                                                                 measurement_params.sigma_global,
-                                                                                                                 diffusion2d_params.alpha_K,
-                                                                                                                 diffusion2d_params.beta_K,
-                                                                                                                 diffusion2d_params.alpha_b,
-                                                                                                                 diffusion2d_params.beta_b);
+    typedef MeasuredDiffusionOperator<DiffusionOperator2d> OperatorType;
+    std::shared_ptr<OperatorType> linear_operator = std::make_shared<OperatorType>(lattice,
+                                                                                   measurement_params.measurement_locations,
+                                                                                   measurement_params.covariance,
+                                                                                   measurement_params.ignore_measurement_cross_correlations,
+                                                                                   measurement_params.measure_global,
+                                                                                   measurement_params.sigma_global,
+                                                                                   diffusion2d_params.alpha_K,
+                                                                                   diffusion2d_params.beta_K,
+                                                                                   diffusion2d_params.alpha_b,
+                                                                                   diffusion2d_params.beta_b);
     //   Construct samplers
     /* prepare measurements */
     unsigned int seed = 5418513;

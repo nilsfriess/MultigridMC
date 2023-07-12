@@ -6,7 +6,7 @@
  */
 
 /** @brief Create a new instance */
-DiffusionOperator2d::DiffusionOperator2d(const std::shared_ptr<Lattice2d> lattice_,
+DiffusionOperator2d::DiffusionOperator2d(const std::shared_ptr<Lattice> lattice_,
                                          const double alpha_K_,
                                          const double beta_K_,
                                          const double alpha_b_,
@@ -16,8 +16,9 @@ DiffusionOperator2d::DiffusionOperator2d(const std::shared_ptr<Lattice2d> lattic
                                                                  alpha_b(alpha_b_),
                                                                  beta_b(beta_b_)
 {
-    unsigned int nx = lattice_->nx;
-    unsigned int ny = lattice_->ny;
+    Eigen::VectorXi shape = lattice_->shape();
+    unsigned int nx = shape[0];
+    unsigned int ny = shape[1];
     double hx = 1. / nx;
     double hy = 1. / ny;
     typedef Eigen::Triplet<double> T;
@@ -64,73 +65,4 @@ double DiffusionOperator2d::K_diff(const double x, const double y) const
 double DiffusionOperator2d::b_zero(const double x, const double y) const
 {
     return alpha_b + beta_b * cos(2 * M_PI * x) * cos(2 * M_PI * y);
-}
-
-/** @brief Create a new instance */
-MeasuredDiffusionOperator2d::MeasuredDiffusionOperator2d(const std::shared_ptr<Lattice2d> lattice_,
-                                                         const std::vector<Eigen::Vector2d> measurement_locations_,
-                                                         const Eigen::MatrixXd Sigma_,
-                                                         const bool ignore_measurement_cross_correlations_,
-                                                         const bool measure_global_,
-                                                         const double sigma_average_,
-                                                         const double alpha_K_,
-                                                         const double beta_K_,
-                                                         const double alpha_b_,
-                                                         const double beta_b_) : LinearOperator(lattice_,
-                                                                                                measurement_locations_.size() + measure_global_)
-{
-    DiffusionOperator2d diffusion_operator(lattice_,
-                                           alpha_K_,
-                                           beta_K_,
-                                           alpha_b_,
-                                           beta_b_);
-    A_sparse = diffusion_operator.get_sparse();
-    unsigned int nx = lattice_->nx;
-    unsigned int ny = lattice_->ny;
-    unsigned int nrow = lattice->M;
-    unsigned int n_measurements = measurement_locations_.size();
-    Sigma_inv = Eigen::MatrixXd(n_measurements + measure_global_, n_measurements + measure_global_);
-    Sigma_inv.setZero();
-    DenseMatrixType Sigma_local;
-    if (ignore_measurement_cross_correlations_)
-    {
-        Sigma_local = Sigma_.diagonal().asDiagonal();
-    }
-    else
-    {
-        Sigma_local = Sigma_;
-    }
-    Sigma_inv(Eigen::seqN(0, n_measurements), Eigen::seqN(0, n_measurements)) = Sigma_local.inverse();
-    typedef Eigen::Triplet<double> T;
-    std::vector<T> triplet_list;
-    for (int k = 0; k < n_measurements; ++k)
-    {
-        Eigen::Vector2d x_loc = measurement_locations_[k];
-        int i = int(round(x_loc[0] * nx));
-        int j = int(round(x_loc[1] * ny));
-        unsigned int ell = nx * j + i;
-        triplet_list.push_back(T(ell, k, 1.0));
-    }
-    if (measure_global_)
-    {
-        for (int j = 0; j < nrow; ++j)
-        {
-            triplet_list.push_back(T(j, n_measurements, 1. / nrow));
-        }
-        Sigma_inv(n_measurements, n_measurements) = 1. / sigma_average_;
-    }
-    B.setFromTriplets(triplet_list.begin(), triplet_list.end());
-    Sigma_inv_BT = Sigma_inv.sparseView() * B.transpose();
-}
-
-/* Compute posterior mean */
-Eigen::VectorXd MeasuredDiffusionOperator2d::posterior_mean(const Eigen::VectorXd &xbar,
-                                                            const Eigen::VectorXd &y)
-{
-    Eigen::SimplicialLLT<SparseMatrixType> solver;
-    solver.compute(A_sparse);
-    // Compute Bbar = Q^{-1} B
-    Eigen::MatrixXd Bbar = solver.solve(B);
-    Eigen::VectorXd x_post = xbar + Bbar * (Sigma_inv.inverse() + B.transpose() * Bbar).inverse() * (y - B.transpose() * xbar);
-    return x_post;
 }
