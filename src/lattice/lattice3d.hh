@@ -78,7 +78,6 @@ public:
     int i = (ell % (nx * ny)) % nx + shift[0];
     int j = (ell % (nx * ny)) / nx + shift[1];
     int k = ell / (nx * ny) + shift[2];
-    std::cout << i << " " << j << " " << k << std::endl;
     return ((k + nz) % nz) * nx * ny + ((j + ny) % ny) * nx + ((i + nx) % nx);
   };
 
