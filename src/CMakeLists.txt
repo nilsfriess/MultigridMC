@@ -23,6 +23,12 @@ add_executable(driver_mg driver_mg.cc ${SOURCES})
 set_target_properties(driver_mg PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ../bin)
 
+# compute spectrum
+add_executable(driver_spectrum driver_spectrum.cc ${SOURCES})
+set_target_properties(driver_spectrum PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ../bin)
+
+
 if(USE_THOROUGH_TESTS)
     set(THOROUGH_TESTING "true")
 endif()
