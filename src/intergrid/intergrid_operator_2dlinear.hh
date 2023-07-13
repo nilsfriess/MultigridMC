@@ -29,7 +29,14 @@ public:
      *
      * @param[in] lattice_ underlying lattice object
      */
-    IntergridOperator2dLinear(const std::shared_ptr<Lattice2d> lattice_);
+    IntergridOperator2dLinear(const std::shared_ptr<Lattice> lattice_);
+
+protected:
+    /** @brief Compute column indices on entire lattice
+     *
+     * @param[in] shift vector with shift indices
+     */
+    void compute_colidx(const std::vector<Eigen::VectorXi> shift);
 };
 
 /* ******************** factory classes ****************************** */
@@ -41,7 +48,7 @@ public:
     /** @brief extract a smoother for a given action */
     virtual std::shared_ptr<IntergridOperator> get(std::shared_ptr<Lattice> lattice)
     {
-        return std::make_shared<IntergridOperator2dLinear>(std::dynamic_pointer_cast<Lattice2d>(lattice));
+        return std::make_shared<IntergridOperator2dLinear>(lattice);
     };
 };
 
