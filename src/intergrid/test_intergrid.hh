@@ -8,7 +8,7 @@
 #include "lattice/lattice2d.hh"
 #include "intergrid/intergrid_operator_avg.hh"
 #include "intergrid/intergrid_operator_linear.hh"
-#include "linear_operator/diffusion_operator_2d.hh"
+#include "linear_operator/diffusion_operator.hh"
 
 /** @brief fixture class for intergrid tests */
 class IntergridTest : public ::testing::Test

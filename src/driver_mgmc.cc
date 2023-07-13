@@ -12,7 +12,7 @@
 #include "lattice/lattice2d.hh"
 #include "smoother/ssor_smoother.hh"
 #include "linear_operator/linear_operator.hh"
-#include "linear_operator/diffusion_operator_2d.hh"
+#include "linear_operator/diffusion_operator.hh"
 #include "linear_operator/measured_diffusion_operator.hh"
 #include "intergrid/intergrid_operator_linear.hh"
 #include "sampler/cholesky_sampler.hh"
