@@ -1,5 +1,5 @@
-#ifndef INTERGRID_OPERATOR_1DLINEAR_HH
-#define INTERGRID_OPERATOR_1DLINEAR_HH INTERGRID_OPERATOR_1DLINEAR_HH
+#ifndef INTERGRID_OPERATOR_LINEAR_HH
+#define INTERGRID_OPERATOR_LINEAR_HH INTERGRID_OPERATOR_LINEAR_HH
 #include <memory>
 #include <cmath>
 #include <map>
@@ -9,17 +9,17 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include "intergrid_operator.hh"
-#include "lattice/lattice1d.hh"
+#include "lattice/lattice.hh"
 
-/** @file intergrid_operator_1dlinear.hh
- * @brief Header file for 1d linear interpolation intergrid operator
+/** @file intergrid_operator_linear.hh
+ * @brief Header file for linear interpolation intergrid operator
  */
 
-/** @class IntergridOperator1dLinear
+/** @class IntergridOperatorLinear
  * IntergridOperator which implements linear averaging interpolation
  *
  */
-class IntergridOperator1dLinear : public IntergridOperator
+class IntergridOperatorLinear : public IntergridOperator
 {
 public:
     /** @brief Base type */
@@ -29,20 +29,20 @@ public:
      *
      * @param[in] lattice_ underlying lattice object
      */
-    IntergridOperator1dLinear(const std::shared_ptr<Lattice1d> lattice_);
+    IntergridOperatorLinear(const std::shared_ptr<Lattice> lattice_);
 };
 
 /* ******************** factory classes ****************************** */
 
-/** @brief Factory for 1d linear intergrid operators */
-class IntergridOperator1dLinearFactory : public IntergridOperatorFactory
+/** @brief Factory for linear intergrid operators */
+class IntergridOperatorLinearFactory : public IntergridOperatorFactory
 {
 public:
     /** @brief extract a smoother for a given action */
     virtual std::shared_ptr<IntergridOperator> get(std::shared_ptr<Lattice> lattice)
     {
-        return std::make_shared<IntergridOperator1dLinear>(std::dynamic_pointer_cast<Lattice1d>(lattice));
+        return std::make_shared<IntergridOperatorLinear>(lattice);
     };
 };
 
-#endif // INTERGRID_OPERATOR_1DLINEAR_HH
+#endif // INTERGRID_OPERATOR_LINEAR_HH

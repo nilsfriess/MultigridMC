@@ -14,7 +14,7 @@
 #include "linear_operator/linear_operator.hh"
 #include "linear_operator/diffusion_operator_2d.hh"
 #include "linear_operator/measured_diffusion_operator.hh"
-#include "intergrid/intergrid_operator_2dlinear.hh"
+#include "intergrid/intergrid_operator_linear.hh"
 #include "sampler/cholesky_sampler.hh"
 #include "sampler/ssor_sampler.hh"
 #include "sampler/multigridmc_sampler.hh"
@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
     std::shared_ptr<SamplerFactory> postsampler_factory = std::make_shared<SORSamplerFactory>(rng,
                                                                                               smoother_params.omega,
                                                                                               backward);
-    std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory = std::make_shared<IntergridOperator2dLinearFactory>();
+    std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
     std::shared_ptr<SamplerFactory> coarse_sampler_factory;
     if (cholesky_params.factorisation == SparseFactorisation)
     {

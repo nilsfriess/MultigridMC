@@ -9,7 +9,7 @@
 #include "linear_operator/linear_operator.hh"
 #include "linear_operator/diffusion_operator_2d.hh"
 #include "linear_operator/measured_diffusion_operator.hh"
-#include "intergrid/intergrid_operator_2dlinear.hh"
+#include "intergrid/intergrid_operator_linear.hh"
 #include "solver/linear_solver.hh"
 #include "solver/loop_solver.hh"
 #include "solver/cholesky_solver.hh"
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
                                                                                                 forward);
     std::shared_ptr<SmootherFactory> postsmoother_factory = std::make_shared<SORSmootherFactory>(smoother_params.omega,
                                                                                                  backward);
-    std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory = std::make_shared<IntergridOperator2dLinearFactory>();
+    std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
     std::shared_ptr<LinearSolverFactory> coarse_solver_factory = std::make_shared<CholeskySolverFactory>();
     std::shared_ptr<Preconditioner> multigrid_preconditioner = std::make_shared<MultigridPreconditioner>(linear_operator,
                                                                                                          multigrid_params,

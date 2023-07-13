@@ -1,12 +1,12 @@
-#include "intergrid_operator_2dlinear.hh"
+#include "intergrid_operator_linear.hh"
 
-/** @file intergrid_operator_2dlinear.cc
- * @brief Implementation of intergrid_operator-2dlinear.hh
+/** @file intergrid_operator_linear.cc
+ * @brief Implementation of intergrid_operator_linear.hh
  */
 
 /** @brief Create a new instance */
-IntergridOperator2dLinear::IntergridOperator2dLinear(const std::shared_ptr<Lattice> lattice_) : Base(lattice_,
-                                                                                                     int(pow(3, lattice_->dim())))
+IntergridOperatorLinear::IntergridOperatorLinear(const std::shared_ptr<Lattice> lattice_) : Base(lattice_,
+                                                                                                 int(pow(3, lattice_->dim())))
 {
     int dim = lattice->dim();
     // 1d stencil and shift vector

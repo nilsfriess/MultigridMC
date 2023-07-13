@@ -11,8 +11,7 @@
 #include "linear_operator/linear_operator.hh"
 #include "linear_operator/diffusion_operator_2d.hh"
 #include "linear_operator/measured_diffusion_operator.hh"
-#include "intergrid/intergrid_operator_1dlinear.hh"
-#include "intergrid/intergrid_operator_2dlinear.hh"
+#include "intergrid/intergrid_operator_linear.hh"
 #include "sampler/sampler.hh"
 #include "sampler/cholesky_sampler.hh"
 #include "sampler/ssor_sampler.hh"
@@ -233,7 +232,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler1d)
                                                                                                       omega);
         std::shared_ptr<SSORSamplerFactory> postsampler_factory = std::make_shared<SSORSamplerFactory>(rng,
                                                                                                        omega);
-        std::shared_ptr<IntergridOperator1dLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperator1dLinearFactory>();
+        std::shared_ptr<IntergridOperatorLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
         std::shared_ptr<SparseCholeskySamplerFactory> coarse_sampler_factory = std::make_shared<SparseCholeskySamplerFactory>(rng);
         std::shared_ptr<MultigridMCSampler> sampler = std::make_shared<MultigridMCSampler>(linear_operator,
                                                                                            rng,
@@ -310,7 +309,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
                                                                                                   omega);
     std::shared_ptr<SSORSamplerFactory> postsampler_factory = std::make_shared<SSORSamplerFactory>(rng,
                                                                                                    omega);
-    std::shared_ptr<IntergridOperator2dLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperator2dLinearFactory>();
+    std::shared_ptr<IntergridOperatorLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
     std::shared_ptr<SparseCholeskySamplerFactory> coarse_sampler_factory = std::make_shared<SparseCholeskySamplerFactory>(rng);
     std::shared_ptr<Sampler> sampler = std::make_shared<MultigridMCSampler>(linear_operator,
                                                                             rng,
