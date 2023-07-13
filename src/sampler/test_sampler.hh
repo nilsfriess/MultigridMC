@@ -8,9 +8,10 @@
 #include <Eigen/QR>
 #include "config.h"
 #include "lattice/lattice1d.hh"
+#include "lattice/lattice2d.hh"
 #include "linear_operator/linear_operator.hh"
 #include "linear_operator/diffusion_operator.hh"
-#include "linear_operator/measured_diffusion_operator.hh"
+#include "linear_operator/measured_operator.hh"
 #include "intergrid/intergrid_operator_linear.hh"
 #include "sampler/sampler.hh"
 #include "sampler/cholesky_sampler.hh"
@@ -287,17 +288,17 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     Sigma = Q * Sigma * Q.transpose();
     const bool measure_average = false;
     const double sigma_average = 0.0;
-    typedef MeasuredDiffusionOperator<DiffusionOperator2d> OperatorType;
-    std::shared_ptr<OperatorType> linear_operator = std::make_shared<OperatorType>(lattice,
-                                                                                   measurement_locations,
-                                                                                   Sigma,
-                                                                                   false,
-                                                                                   measure_average,
-                                                                                   sigma_average,
-                                                                                   alpha_K,
-                                                                                   beta_K,
-                                                                                   alpha_b,
-                                                                                   beta_b);
+    std::shared_ptr<DiffusionOperator2d> diffusion_operator = std::make_shared<DiffusionOperator2d>(lattice,
+                                                                                                    alpha_K,
+                                                                                                    beta_K,
+                                                                                                    alpha_b,
+                                                                                                    beta_b);
+    std::shared_ptr<MeasuredOperator> linear_operator = std::make_shared<MeasuredOperator>(diffusion_operator,
+                                                                                           measurement_locations,
+                                                                                           Sigma,
+                                                                                           false,
+                                                                                           measure_average,
+                                                                                           sigma_average);
 
     MultigridMCParameters multigridmc_params;
     multigridmc_params.nlevel = 3;

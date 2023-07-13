@@ -8,7 +8,7 @@
 
 /** @file diffusion_operator.hh
  *
- * @brief Contains class for diffusion operator in two and three dimensions
+ * @brief Contains classes for diffusion operator in two and three dimensions
  */
 
 /** @class DiffusionOperator2d

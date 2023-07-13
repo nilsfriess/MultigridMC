@@ -10,12 +10,13 @@ DiffusionOperator2d::DiffusionOperator2d(const std::shared_ptr<Lattice> lattice_
                                          const double alpha_K_,
                                          const double beta_K_,
                                          const double alpha_b_,
-                                         const double beta_b_) : DiffusionOperator(lattice_, alpha_K_,
+                                         const double beta_b_) : DiffusionOperator(lattice_,
+                                                                                   alpha_K_,
                                                                                    beta_K_,
                                                                                    alpha_b_,
                                                                                    beta_b_)
 {
-    Eigen::VectorXi shape = lattice_->shape();
+    Eigen::VectorXi shape = lattice->shape();
     unsigned int nx = shape[0];
     unsigned int ny = shape[1];
     double hx = 1. / nx;
