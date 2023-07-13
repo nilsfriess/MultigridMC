@@ -1,10 +1,11 @@
-"""Generate measurements for 2d operator
+"""Generate measurements for 2d and 3d  operator
 
-randomly choose a number of sample points in the unit
-square. Construct a random covariance matrix for these
+randomly choose a number of sample points in the unit square
+or unit cube. Construct a random covariance matrix for these
 measurements.
 """
 import itertools
+import argparse
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -22,7 +23,7 @@ def dist_periodic(x, y):
 
 
 def sample_points(n, dim, dmin=0.1):
-    """Draw random points in unit square
+    """Draw random points in unit square or unit cube
 
     :arg n: number of sample points to draw
     :arg dim: dimension
@@ -72,20 +73,53 @@ def covariance_matrix(n, sigma_low, sigma_high):
 nmeas = 8
 dim = 2
 dmin = 0.1
-p = np.asarray(sample_points(nmeas + 1, dim, dmin))
-mean = average(nmeas, 1.0, 4.0)
-Sigma = covariance_matrix(nmeas, 0.01, 0.02)
+
+parser = argparse.ArgumentParser("Specifications")
+parser.add_argument(
+    "--dim",
+    metavar="dim",
+    type=int,
+    action="store",
+    default=dim,
+    choices=[2, 3],
+    help="dimension",
+)
+
+parser.add_argument(
+    "--nmeas",
+    metavar="nmeas",
+    type=int,
+    action="store",
+    default=nmeas,
+    help="number of measurements",
+)
+
+args = parser.parse_args()
+
+p = np.asarray(sample_points(args.nmeas + 1, args.dim, dmin))
+mean = average(args.nmeas, 1.0, 4.0)
+Sigma = covariance_matrix(args.nmeas, 0.01, 0.02)
 
 # Print results in a format that can be used in the configuration file
-print("n = ", nmeas, ";")
+print("n = ", args.nmeas, ";")
 print("measurement_locations = ", repr(list(p[:-1, :].flatten())), ";")
 print("sample_location = ", repr(list(p[-1, :].flatten())), ";")
 print("mean = ", repr(list(mean.flatten())), ";")
 print("covariance = ", repr(list(Sigma.flatten())), ";")
 
 plt.clf()
-plt.plot(p[:, 0], p[:, 1], linewidth=0, markersize=4, marker="o")
-ax = plt.gca()
-ax.set_xlim(0, 1)
-ax.set_ylim(0, 1)
+fig = plt.figure()
+if args.dim == 2:
+    ax = fig.add_subplot()
+    ax.set_aspect("equal")
+    ax.plot(p[:, 0], p[:, 1], linewidth=0, markersize=4, marker="o")
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+else:
+    ax = fig.add_subplot(projection="3d")
+    ax.scatter(p[:, 0], p[:, 1], p[:, 2])
+    ax = plt.gca()
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.set_zlim(0, 1)
 plt.savefig("points.pdf", bbox_inches="tight")
