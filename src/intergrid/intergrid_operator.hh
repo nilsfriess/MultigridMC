@@ -140,6 +140,13 @@ public:
         return A_sparse;
     }
 
+protected:
+    /** @brief Compute column indices on entire lattice
+     *
+     * @param[in] shift vector with shift indices
+     */
+    void compute_colidx(const std::vector<Eigen::VectorXi> shift);
+
     /** @brief underlying lattice */
     const std::shared_ptr<Lattice> lattice;
     /** @brief size of stencil */

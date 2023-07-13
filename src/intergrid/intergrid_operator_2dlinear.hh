@@ -30,13 +30,6 @@ public:
      * @param[in] lattice_ underlying lattice object
      */
     IntergridOperator2dLinear(const std::shared_ptr<Lattice> lattice_);
-
-protected:
-    /** @brief Compute column indices on entire lattice
-     *
-     * @param[in] shift vector with shift indices
-     */
-    void compute_colidx(const std::vector<Eigen::VectorXi> shift);
 };
 
 /* ******************** factory classes ****************************** */
