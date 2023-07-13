@@ -59,7 +59,7 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
     std::vector<double> data(sampling_params.nsamples);
     Eigen::Vector2i idx;
     idx[0] = int(measurement_params.sample_location[0] * lattice->nx);
-    idx[1] = int(measurement_params.sample_location[1] * lattice->nx);
+    idx[1] = int(measurement_params.sample_location[1] * lattice->ny);
     int j_sample = lattice->idx_euclidean2linear(idx);
     auto t_start = std::chrono::high_resolution_clock::now();
     for (int k = 0; k < sampling_params.nsamples; ++k)
