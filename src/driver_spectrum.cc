@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     std::string filename(argv[1]);
     std::cout << "Reading parameters from file \'" << filename << "\'" << std::endl;
     LatticeParameters lattice_params;
-    Diffusion2dParameters diffusion2d_params;
+    DiffusionParameters diffusion2d_params;
     MeasurementParameters measurement_params;
     lattice_params.read_from_file(filename);
     diffusion2d_params.read_from_file(filename);

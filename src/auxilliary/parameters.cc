@@ -52,6 +52,8 @@ int Parameters::read_from_file(const std::string filename)
 void GeneralParameters::parse_config(const libconfig::Setting &root)
 {
     const libconfig::Setting &general = root["general"];
+    dim = general["dim"];
+    std::cout << "  dimension = " << dim << std::endl;
     do_cholesky = general["do_cholesky"];
     do_ssor = general["do_ssor"];
     do_multigridmc = general["do_multigridmc"];
@@ -63,7 +65,8 @@ void LatticeParameters::parse_config(const libconfig::Setting &root)
     const libconfig::Setting &lattice = root["lattice"];
     nx = lattice.lookup("nx");
     ny = lattice.lookup("ny");
-    std::cout << "  lattice size = " << nx << " x " << ny << std::endl;
+    nz = lattice.lookup("nz");
+    std::cout << "  lattice size = " << nx << " x " << ny << " x " << nz << std::endl;
 }
 
 /* parse cholesky configuration */
@@ -144,9 +147,9 @@ void SamplingParameters::parse_config(const libconfig::Setting &root)
 }
 
 /* parse 2d diffusion configuration */
-void Diffusion2dParameters::parse_config(const libconfig::Setting &root)
+void DiffusionParameters::parse_config(const libconfig::Setting &root)
 {
-    const libconfig::Setting &sampling = root["diffusion2d"];
+    const libconfig::Setting &sampling = root["diffusion"];
     alpha_K = sampling["alpha_K"];
     beta_K = sampling["beta_K"];
     alpha_b = sampling["alpha_b"];

@@ -49,6 +49,8 @@ public:
      */
     virtual void parse_config(const libconfig::Setting &root);
 
+    /** @brief spatial dimension */
+    int dim;
     /** @brief Run the Cholesky sampler? */
     bool do_cholesky;
     /** @brief Run the SSOR sampler? */
@@ -71,6 +73,8 @@ public:
     unsigned int nx;
     /** @brief extent in y-direction */
     unsigned int ny;
+    /** @brief extent in z-direction */
+    unsigned int nz;
 };
 
 /** @brief type of Cholesky factorisation */
@@ -183,18 +187,22 @@ public:
     unsigned int nwarmup;
 };
 
-/** @brief structure for 2d diffusion
+/** @brief structure for diffusion
  *
- * The diffusion coefficient is assumed to be of the form
+ * The coefficient is assumed to be of the form
  *
- *    K(x,y) = alpha_K + beta_K * sin(2 pi x) * sin(2 pi y)
+ *    K(x,y) = alpha_K + beta_K * sin(2 pi x) * sin(2 pi y)                 [in 2d]
+ * or
+ *    K(x,y) = alpha_K + beta_K * sin(2 pi x) * sin(2 pi y) * sin(2 pi z)   [in 3d]
  *
  * and the zero order term is assumed to be
  *
- *    b(x,y) = alpha_b + beta_b * cos(2 pi x) * cos(2 pi y)
+ *    b(x,y) = alpha_b + beta_b * cos(2 pi x) * cos(2 pi y)                 [in 2d]
+ * or
+ *    b(x,y) = alpha_b + beta_b * cos(2 pi x) * cos(2 pi y) * cos(2 pi z)   [in 3d]
  *
  */
-class Diffusion2dParameters : public Parameters
+class DiffusionParameters : public Parameters
 {
 public:
     /** @brief parse configuration

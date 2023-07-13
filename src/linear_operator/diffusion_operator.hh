@@ -45,24 +45,6 @@ public:
                                               alpha_b(alpha_b_),
                                               beta_b(beta_b_) {}
 
-    /** @brief Diffusion coefficient
-     *
-     * Evaluates the diffusion coefficient at a given position (x,y) in the domain
-     *
-     * @param[in] x position in x-direction
-     * @param[in] y position in y-direction
-     */
-    virtual double K_diff(const double x, const double y) const = 0;
-
-    /** @brief Zero order term
-     *
-     * Evaluates the zero order term at a given position (x,y) in the domain
-     *
-     * @param[in] x position in x-direction
-     * @param[in] y position in y-direction
-     */
-    virtual double b_zero(const double x, const double y) const = 0;
-
 protected:
     /** @brief First coefficient in diffusion function */
     const double alpha_K;
@@ -114,6 +96,7 @@ public:
                         const double alpha_b_,
                         const double beta_b_);
 
+protected:
     /** @brief Diffusion coefficient
      *
      * Evaluates the diffusion coefficient at a given position (x,y) in the domain
@@ -121,7 +104,7 @@ public:
      * @param[in] x position in x-direction
      * @param[in] y position in y-direction
      */
-    virtual double K_diff(const double x, const double y) const;
+    double K_diff(const double x, const double y) const;
 
     /** @brief Zero order term
      *
@@ -130,7 +113,7 @@ public:
      * @param[in] x position in x-direction
      * @param[in] y position in y-direction
      */
-    virtual double b_zero(const double x, const double y) const;
+    double b_zero(const double x, const double y) const;
 };
 
 /** @class DiffusionOperator3d
@@ -173,6 +156,7 @@ public:
                         const double alpha_b_,
                         const double beta_b_);
 
+protected:
     /** @brief Diffusion coefficient
      *
      * Evaluates the diffusion coefficient at a given position (x,y) in the domain
@@ -181,7 +165,7 @@ public:
      * @param[in] y position in y-direction
      * @param[in] z position in z-direction
      */
-    virtual double K_diff(const double x, const double y, const double z) const;
+    double K_diff(const double x, const double y, const double z) const;
 
     /** @brief Zero order term
      *
@@ -191,7 +175,7 @@ public:
      * @param[in] y position in y-direction
      * @param[in] z position in z-direction
      */
-    virtual double b_zero(const double x, const double y, const double z) const;
+    double b_zero(const double x, const double y, const double z) const;
 };
 
 #endif // DIFFUSION_OPERATOR_HH

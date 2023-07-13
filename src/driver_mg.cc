@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     SmootherParameters smoother_params;
     IterativeSolverParameters iterative_solver_params;
     MultigridParameters multigrid_params;
-    Diffusion2dParameters diffusion2d_params;
+    DiffusionParameters diffusion2d_params;
     MeasurementParameters measurement_params;
     general_params.read_from_file(filename);
     lattice_params.read_from_file(filename);
