@@ -1,5 +1,5 @@
-#ifndef INTERGRID_OPERATOR_2DAVG_HH
-#define INTERGRID_OPERATOR_2DAVG_HH INTERGRID_OPERATOR_2DAVG_HH
+#ifndef INTERGRID_OPERATOR_AVG_HH
+#define INTERGRID_OPERATOR_AVG_HH INTERGRID_OPERATOR_AVG_HH
 #include <memory>
 #include <cmath>
 #include <map>
@@ -8,18 +8,18 @@
 #include <algorithm>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
-#include "lattice/lattice2d.hh"
+#include "lattice/lattice.hh"
 #include "intergrid_operator.hh"
 
-/** @file intergrid_operator_2davg.hh
- * @brief Header file for 2d averaging intergrid operator
+/** @file intergrid_operator_avg.hh
+ * @brief Header file for averaging intergrid operator
  */
 
-/** @class IntergridOperator2dAvg
+/** @class IntergridOperatorAvg
  * IntergridOperator which implements constant averaging
  *
  */
-class IntergridOperator2dAvg : public IntergridOperator
+class IntergridOperatorAvg : public IntergridOperator
 {
 public:
     /** @brief Base type */
@@ -29,19 +29,19 @@ public:
      *
      * @param[in] lattice_ underlying lattice object
      */
-    IntergridOperator2dAvg(const std::shared_ptr<Lattice2d> lattice_);
+    IntergridOperatorAvg(const std::shared_ptr<Lattice> lattice_);
 };
 /* ******************** factory classes ****************************** */
 
-/** @brief Factory for 2d averaging intergrid operators */
-class IntergridOperator2dAvgFactory : public IntergridOperatorFactory
+/** @brief Factory for averaging intergrid operators */
+class IntergridOperatorAvgFactory : public IntergridOperatorFactory
 {
 public:
     /** @brief extract a smoother for a given action */
     virtual std::shared_ptr<IntergridOperator> get(std::shared_ptr<Lattice> lattice)
     {
-        return std::make_shared<IntergridOperator2dAvg>(std::dynamic_pointer_cast<Lattice2d>(lattice));
+        return std::make_shared<IntergridOperatorAvg>(lattice);
     };
 };
 
-#endif // INTERGRID_OPERATOR_2DAVG_HH
+#endif // INTERGRID_OPERATOR_AVG_HH

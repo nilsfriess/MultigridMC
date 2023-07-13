@@ -6,7 +6,7 @@
 #include <Eigen/Dense>
 #include "lattice/lattice1d.hh"
 #include "lattice/lattice2d.hh"
-#include "intergrid/intergrid_operator_2davg.hh"
+#include "intergrid/intergrid_operator_avg.hh"
 #include "intergrid/intergrid_operator_1dlinear.hh"
 #include "intergrid/intergrid_operator_2dlinear.hh"
 #include "linear_operator/diffusion_operator_2d.hh"
@@ -26,7 +26,7 @@ protected:
         unsigned int ny = 4;
         lattice_2d = std::make_shared<Lattice2d>(nx, ny);
         coarse_lattice_2d = std::make_shared<Lattice2d>(nx / 2, ny / 2);
-        intergrid_operator_2davg = std::make_shared<IntergridOperator2dAvg>(lattice_2d);
+        intergrid_operator_2davg = std::make_shared<IntergridOperatorAvg>(lattice_2d);
         intergrid_operator_1dlinear = std::make_shared<IntergridOperator1dLinear>(lattice_1d);
         intergrid_operator_2dlinear = std::make_shared<IntergridOperator2dLinear>(lattice_2d);
     }
@@ -87,7 +87,7 @@ protected:
     /** @brief underlying 2d coarse lattice */
     std::shared_ptr<Lattice2d> coarse_lattice_2d;
     /** @brief intergrid operator for averaging */
-    std::shared_ptr<IntergridOperator2dAvg> intergrid_operator_2davg;
+    std::shared_ptr<IntergridOperatorAvg> intergrid_operator_2davg;
     /** @brief intergrid operator for linear interpolation in 1d*/
     std::shared_ptr<IntergridOperator1dLinear> intergrid_operator_1dlinear;
     /** @brief intergrid operator for linear interpolation in 2d */
