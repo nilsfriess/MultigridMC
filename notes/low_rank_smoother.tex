@@ -19,7 +19,7 @@ Here $x,b\in\mathbb{R}^n$, $A,A_0$ are symmetric positive definite $n\times n$ m
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Let $A_0 = M_0-N_0$, so that without the low-rank correction one can solve $A_0x=b$ with the iteration $x^{k+1} = M_0^{-1}(b + N_0x^k)$; for example, setting $M_0 = L_0 + D_0$ to the lower-triangular part of $A_0$ would lead to the familiar Gauss-Seidel iteration.
 
-To solve Eq. \eqref{eqn:linear_system}, we now consider the splitting $A=M-N$ with $M=M_0 + B^T \Sigma^{-1} B$, leading to the iteration
+To solve Eq. \eqref{eqn:linear_system}, we now consider the splitting $A=M-N$ with $M=M_0 + B \Sigma^{-1} B^T$, leading to the iteration
 \begin{equation}
     \left(M_0 + B \Sigma^{-1} B^T \right)x^{k+1} = b + N_0 x^k\label{eqn:low_rank_iteration}
 \end{equation}
