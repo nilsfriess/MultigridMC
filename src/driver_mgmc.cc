@@ -47,7 +47,7 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
     if (measurement_params.measure_global)
         y(measurement_params.n) = measurement_params.mean_global;
     Eigen::VectorXd x_post = linear_operator->posterior_mean(xbar, y);
-    std::shared_ptr<Lattice2d> lattice = std::dynamic_pointer_cast<Lattice2d>(linear_operator->get_lattice());
+    std::shared_ptr<Lattice> lattice = linear_operator->get_lattice();
     Eigen::VectorXd x(ndof);
     Eigen::VectorXd f(ndof);
     x.setZero();
@@ -57,9 +57,12 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
         sampler->apply(f, x);
     };
     std::vector<double> data(sampling_params.nsamples);
-    Eigen::Vector2i idx;
-    idx[0] = int(measurement_params.sample_location[0] * lattice->nx);
-    idx[1] = int(measurement_params.sample_location[1] * lattice->ny);
+    Eigen::VectorXi idx(lattice->dim());
+    Eigen::VectorXi shape = lattice->shape();
+    for (int d = 0; d < lattice->dim(); ++d)
+    {
+        idx[d] = int(measurement_params.sample_location[d] * shape[d]);
+    }
     int j_sample = lattice->idx_euclidean2linear(idx);
     auto t_start = std::chrono::high_resolution_clock::now();
     for (int k = 0; k < sampling_params.nsamples; ++k)
