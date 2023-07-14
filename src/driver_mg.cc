@@ -17,6 +17,7 @@
 #include "preconditioner/multigrid_preconditioner.hh"
 #include "auxilliary/parameters.hh"
 #include "auxilliary/vtk_writer2d.hh"
+#include "auxilliary/vtk_writer3d.hh"
 
 /* *********************************************************************** *
  *                                M A I N
@@ -120,9 +121,17 @@ int main(int argc, char *argv[])
     Eigen::VectorXd b(ndof);
     linear_operator->apply(x_exact, b);
     solver.apply(b, x);
-    VTKWriter2d vtk_writer("solution.vtk", Cells, std::dynamic_pointer_cast<Lattice2d>(lattice), 1);
-    vtk_writer.add_state(x_exact, "exact");
-    vtk_writer.add_state(x, "numerical");
-    vtk_writer.add_state(x - x_exact, "error");
-    vtk_writer.write();
+    std::shared_ptr<VTKWriter> vtk_writer;
+    if (general_params.dim == 2)
+    {
+        vtk_writer = std::make_shared<VTKWriter2d>("solution.vtk", Cells, lattice, 1);
+    }
+    else
+    {
+        vtk_writer = std::make_shared<VTKWriter3d>("solution.vtk", Cells, lattice, 1);
+    }
+    vtk_writer->add_state(x_exact, "exact");
+    vtk_writer->add_state(x, "numerical");
+    vtk_writer->add_state(x - x_exact, "error");
+    vtk_writer->write();
 }

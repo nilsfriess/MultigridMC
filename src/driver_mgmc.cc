@@ -23,6 +23,7 @@
 #include "preconditioner/multigrid_preconditioner.hh"
 #include "auxilliary/parameters.hh"
 #include "auxilliary/vtk_writer2d.hh"
+#include "auxilliary/vtk_writer3d.hh"
 #include "auxilliary/statistics.hh"
 
 /** @brief generate a number of samples, meaure runtime and write timeseries to disk
@@ -102,7 +103,7 @@ void posterior_statistics(std::shared_ptr<Sampler> sampler,
     if (measurement_params.measure_global)
         y(measurement_params.n) = measurement_params.mean_global;
     Eigen::VectorXd x_post = linear_operator->posterior_mean(xbar, y);
-    std::shared_ptr<Lattice2d> lattice = std::dynamic_pointer_cast<Lattice2d>(linear_operator->get_lattice());
+    std::shared_ptr<Lattice> lattice = linear_operator->get_lattice();
     Eigen::VectorXd x(ndof);
     Eigen::VectorXd f(ndof);
     x.setZero();
@@ -121,14 +122,25 @@ void posterior_statistics(std::shared_ptr<Sampler> sampler,
         mean += (x - mean) / (k + 1.0);
         variance += (x.cwiseProduct(x) - variance) / (k + 1.0);
     }
-    VTKWriter2d vtk_writer("posterior.vtk", Cells, lattice, 1);
-    vtk_writer.add_state(x_post, "x_post");
-    vtk_writer.add_state(mean, "mean");
-    vtk_writer.add_state(variance - mean.cwiseProduct(mean), "variance");
-    vtk_writer.write();
-    write_vtk_circle(measurement_params.sample_location,
-                     0.02,
-                     "sample_location.vtk");
+    std::shared_ptr<VTKWriter> vtk_writer;
+    if (measurement_params.dim == 2)
+    {
+        vtk_writer = std::make_shared<VTKWriter2d>("posterior.vtk", Cells, lattice, 1);
+    }
+    else
+    {
+        vtk_writer = std::make_shared<VTKWriter3d>("posterior.vtk", Cells, lattice, 1);
+    }
+    vtk_writer->add_state(x_post, "x_post");
+    vtk_writer->add_state(mean, "mean");
+    vtk_writer->add_state(variance - mean.cwiseProduct(mean), "variance");
+    vtk_writer->write();
+    if (measurement_params.dim == 2)
+    {
+        write_vtk_circle(measurement_params.sample_location,
+                         0.02,
+                         "sample_location.vtk");
+    }
 }
 
 /* *********************************************************************** *
