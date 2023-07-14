@@ -57,6 +57,8 @@ public:
     bool do_ssor;
     /** @brief Run the MultigridMC sampler? */
     bool do_multigridmc;
+    /** @brief save posterior statistics to disk? */
+    bool save_posterior_statistics;
 };
 
 /** @brief structure for lattice parameters */

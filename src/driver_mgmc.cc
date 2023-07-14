@@ -298,9 +298,12 @@ int main(int argc, char *argv[])
                               sampling_params,
                               measurement_params,
                               "timeseries_multigridmc.txt");
-        posterior_statistics(multigridmc_sampler,
-                             sampling_params,
-                             measurement_params);
+        if (general_params.save_posterior_statistics)
+        {
+            posterior_statistics(multigridmc_sampler,
+                                 sampling_params,
+                                 measurement_params);
+        }
         std::cout << std::endl;
     }
 }

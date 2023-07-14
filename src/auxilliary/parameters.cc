@@ -57,6 +57,7 @@ void GeneralParameters::parse_config(const libconfig::Setting &root)
     do_cholesky = general["do_cholesky"];
     do_ssor = general["do_ssor"];
     do_multigridmc = general["do_multigridmc"];
+    save_posterior_statistics = general["save_posterior_statistics"];
 }
 
 /* parse lattice configuration  */
