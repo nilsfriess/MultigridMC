@@ -118,6 +118,7 @@ void MultigridParameters::parse_config(const libconfig::Setting &root)
     nlevel = multigrid.lookup("nlevel");
     npresmooth = multigrid.lookup("npresmooth");
     npostsmooth = multigrid.lookup("npostsmooth");
+    verbose = multigrid.lookup("verbose");
     std::cout << "   multigrid levels = " << nlevel << std::endl;
     std::cout << "   npresmooth = " << npresmooth << std::endl;
     std::cout << "   npostsmooth = " << npostsmooth << std::endl;

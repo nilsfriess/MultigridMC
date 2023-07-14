@@ -23,6 +23,10 @@ MultigridPreconditioner::MultigridPreconditioner(std::shared_ptr<LinearOperator>
     std::shared_ptr<LinearOperator> lin_op = linear_operator;
     for (int level = 0; level < params.nlevel; ++level)
     {
+        if (params.verbose > 0)
+        {
+            std::cout << "  level " << level << " lattice : " << lattice->get_info() << std::endl;
+        }
         x_ell.push_back(Eigen::VectorXd(lattice->M));
         b_ell.push_back(Eigen::VectorXd(lattice->M));
         r_ell.push_back(Eigen::VectorXd(lattice->M));

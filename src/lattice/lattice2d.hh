@@ -79,6 +79,11 @@ public:
   {
     assert(nx % 2 == 0);
     assert(ny % 2 == 0);
+    if (not((nx % 2 == 0) and (ny % 2 == 0)))
+    {
+      std::cout << "ERROR: cannot coarsen lattice of size " << nx << " x " << ny << std::endl;
+      exit(-1);
+    }
     return std::make_shared<Lattice2d>(nx / 2, ny / 2);
   };
 

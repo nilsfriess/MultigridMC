@@ -149,6 +149,8 @@ public:
     unsigned int npresmooth;
     /** @brief number of postsmoothing steps */
     unsigned int npostsmooth;
+    /** @brief verbosity level */
+    int verbose;
 };
 
 /** @struct Multigrid Monte Carlo parameters */
