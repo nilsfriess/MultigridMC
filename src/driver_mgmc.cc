@@ -40,19 +40,11 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
 {
     const std::shared_ptr<MeasuredOperator> linear_operator = std::dynamic_pointer_cast<MeasuredOperator>(sampler->get_linear_operator());
     unsigned int ndof = linear_operator->get_ndof();
-    // prior mean (set to zero)
-    Eigen::VectorXd xbar(ndof);
-    xbar.setZero();
-    Eigen::VectorXd y(measurement_params.n + measurement_params.measure_global);
-    y(Eigen::seqN(0, measurement_params.n)) = measurement_params.mean;
-    if (measurement_params.measure_global)
-        y(measurement_params.n) = measurement_params.mean_global;
-    Eigen::VectorXd x_post = linear_operator->posterior_mean(xbar, y);
     std::shared_ptr<Lattice> lattice = linear_operator->get_lattice();
     Eigen::VectorXd x(ndof);
     Eigen::VectorXd f(ndof);
     x.setZero();
-    linear_operator->apply(x_post, f);
+    f.setRandom();
     for (int k = 0; k < sampling_params.nwarmup; ++k)
     {
         sampler->apply(f, x);
