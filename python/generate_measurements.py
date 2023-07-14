@@ -117,6 +117,7 @@ mean = average(args.nmeas, 1.0, 4.0)
 Sigma = covariance_matrix(args.nmeas, 0.01, 0.02)
 
 # Print results in a format that can be used in the configuration file
+print("dim = ", args.dim, ";")
 print("n = ", args.nmeas, ";")
 print("measurement_locations = ", repr(list(p[:-1, :].flatten())), ";")
 print("sample_location = ", repr(list(p[-1, :].flatten())), ";")
