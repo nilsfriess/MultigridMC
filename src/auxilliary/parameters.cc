@@ -167,17 +167,21 @@ void DiffusionParameters::parse_config(const libconfig::Setting &root)
 void MeasurementParameters::parse_config(const libconfig::Setting &root)
 {
     const libconfig::Setting &measurements = root["measurements"];
+    dim = measurements.lookup("dim");
     unsigned int n_meas = measurements.lookup("n");
     n = n_meas;
+    std::cout << "  dimension of measurement locations = " << dim << std::endl;
     std::cout << "  number of measurement points = " << n << std::endl;
     // Measurement locations
     const libconfig::Setting &m_points = measurements.lookup("measurement_locations");
     measurement_locations.clear();
     for (int j = 0; j < n_meas; ++j)
     {
-        Eigen::Vector2d v;
-        v(0) = double(m_points[2 * j]);
-        v(1) = double(m_points[2 * j + 1]);
+        Eigen::VectorXd v(dim);
+        for (int d = 0; d < dim; ++d)
+        {
+            v[d] = double(m_points[dim * j + d]);
+        }
         measurement_locations.push_back(v);
     }
     // Measured averages
@@ -210,9 +214,11 @@ void MeasurementParameters::parse_config(const libconfig::Setting &root)
     }
     // Sample location
     const libconfig::Setting &s_point = measurements.lookup("sample_location");
-    Eigen::Vector2d v;
-    v(0) = double(s_point[0]);
-    v(1) = double(s_point[1]);
+    Eigen::VectorXd v(dim);
+    for (int d = 0; d < dim; ++d)
+    {
+        v[d] = double(s_point[d]);
+    }
     sample_location = v;
     measure_global = measurements.lookup("measure_global");
     sigma_global = measurements.lookup("sigma_global");

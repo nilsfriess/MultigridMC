@@ -160,6 +160,12 @@ int main(int argc, char *argv[])
     diffusion_params.read_from_file(filename);
     measurement_params.read_from_file(filename);
 
+    if (measurement_params.dim != general_params.dim)
+    {
+        std::cout << "ERROR: dimension of measurement locations differs from problem dimension" << std::endl;
+        exit(-1);
+    }
+
 #if (defined EIGEN_USE_BLAS && defined EIGEN_USE_LAPACKE)
     std::cout << "Compiled with BLAS/LAPACK support for Eigen." << std::endl;
 #else  // EIGEN_USE_BLAS && EIGEN_USE_LAPACKE

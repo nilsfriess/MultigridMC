@@ -5,6 +5,7 @@
 
 #include "config.h"
 #include "lattice/lattice2d.hh"
+#include "lattice/lattice3d.hh"
 #include "smoother/ssor_smoother.hh"
 #include "linear_operator/linear_operator.hh"
 #include "linear_operator/diffusion_operator.hh"
@@ -34,24 +35,51 @@ int main(int argc, char *argv[])
     SmootherParameters smoother_params;
     IterativeSolverParameters iterative_solver_params;
     MultigridParameters multigrid_params;
-    DiffusionParameters diffusion2d_params;
+    DiffusionParameters diffusion_params;
     MeasurementParameters measurement_params;
     general_params.read_from_file(filename);
     lattice_params.read_from_file(filename);
     smoother_params.read_from_file(filename);
     multigrid_params.read_from_file(filename);
     iterative_solver_params.read_from_file(filename);
-    diffusion2d_params.read_from_file(filename);
+    diffusion_params.read_from_file(filename);
     measurement_params.read_from_file(filename);
 
+    if (measurement_params.dim != general_params.dim)
+    {
+        std::cout << "ERROR: dimension of measurement locations differs from problem dimension" << std::endl;
+        exit(-1);
+    }
+
     // Construct lattice and linear operator
-    std::shared_ptr<Lattice2d> lattice = std::make_shared<Lattice2d>(lattice_params.nx,
-                                                                     lattice_params.ny);
-    std::shared_ptr<DiffusionOperator2d> diffusion_operator = std::make_shared<DiffusionOperator2d>(lattice,
-                                                                                                    diffusion2d_params.alpha_K,
-                                                                                                    diffusion2d_params.beta_K,
-                                                                                                    diffusion2d_params.alpha_b,
-                                                                                                    diffusion2d_params.beta_b);
+    std::shared_ptr<Lattice> lattice;
+    std::shared_ptr<DiffusionOperator> diffusion_operator;
+    if (general_params.dim == 2)
+    {
+        lattice = std::make_shared<Lattice2d>(lattice_params.nx,
+                                              lattice_params.ny);
+        diffusion_operator = std::make_shared<DiffusionOperator2d>(lattice,
+                                                                   diffusion_params.alpha_K,
+                                                                   diffusion_params.beta_K,
+                                                                   diffusion_params.alpha_b,
+                                                                   diffusion_params.beta_b);
+    }
+    else if (general_params.dim == 3)
+    {
+        lattice = std::make_shared<Lattice3d>(lattice_params.nx,
+                                              lattice_params.ny,
+                                              lattice_params.nz);
+        diffusion_operator = std::make_shared<DiffusionOperator3d>(lattice,
+                                                                   diffusion_params.alpha_K,
+                                                                   diffusion_params.beta_K,
+                                                                   diffusion_params.alpha_b,
+                                                                   diffusion_params.beta_b);
+    }
+    else
+    {
+        std::cout << "ERROR: Invalid dimension : " << general_params.dim << std::endl;
+        exit(-1);
+    }
     std::shared_ptr<MeasuredOperator> linear_operator = std::make_shared<MeasuredOperator>(diffusion_operator,
                                                                                            measurement_params.measurement_locations,
                                                                                            measurement_params.covariance,
@@ -92,7 +120,7 @@ int main(int argc, char *argv[])
     Eigen::VectorXd b(ndof);
     linear_operator->apply(x_exact, b);
     solver.apply(b, x);
-    VTKWriter2d vtk_writer("solution.vtk", Cells, lattice, 1);
+    VTKWriter2d vtk_writer("solution.vtk", Cells, std::dynamic_pointer_cast<Lattice2d>(lattice), 1);
     vtk_writer.add_state(x_exact, "exact");
     vtk_writer.add_state(x, "numerical");
     vtk_writer.add_state(x - x_exact, "error");

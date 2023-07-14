@@ -231,6 +231,8 @@ public:
      */
     virtual void parse_config(const libconfig::Setting &root);
 
+    /** @brief dimension of measurements */
+    int dim;
     /** @brief number of measurements */
     unsigned int n;
     /** @brief measurement locations */
@@ -243,7 +245,7 @@ public:
      *  of the covariance matrix)? */
     bool ignore_measurement_cross_correlations;
     /** @brief sample location */
-    Eigen::Vector2d sample_location;
+    Eigen::VectorXd sample_location;
     /** @brief measure global average of field? */
     bool measure_global;
     /** @brief variance of global average */
