@@ -253,6 +253,7 @@ int main(int argc, char *argv[])
     std::shared_ptr<Sampler> cholesky_sampler;
     if (general_params.do_cholesky)
     {
+        auto t_start = std::chrono::high_resolution_clock::now();
         if (cholesky_params.factorisation == SparseFactorisation)
         {
             cholesky_sampler = std::make_shared<SparseCholeskySampler>(linear_operator, rng, true);
@@ -261,6 +262,10 @@ int main(int argc, char *argv[])
         {
             cholesky_sampler = std::make_shared<DenseCholeskySampler>(linear_operator, rng);
         }
+        auto t_finish = std::chrono::high_resolution_clock::now();
+        double t_elapsed = std::chrono::duration_cast<std::chrono::seconds>(t_finish - t_start).count();
+        std::cout << std::endl;
+        std::cout << "time for Cholesky factorisation = " << t_elapsed << " s" << std::endl;
     }
 
     std::cout << std::endl;
