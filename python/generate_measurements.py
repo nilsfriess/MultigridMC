@@ -7,7 +7,23 @@ measurements.
 import itertools
 import argparse
 import numpy as np
+import pandas as pd
 from matplotlib import pyplot as plt
+
+
+def visualise_3d(p):
+    """Visualise in 3 with plotly
+
+    :arg p: data points
+    """
+    import plotly.express as px
+
+    df = pd.DataFrame(p, columns=["x", "y", "z"])
+    df["type"] = np.asarray(args.nmeas * ["measurement"] + ["sample point"])
+    fig = px.scatter_3d(
+        df, x="x", y="y", z="z", color="type", color_discrete_sequence=["blue", "red"]
+    )
+    fig.show()
 
 
 def dist_periodic(x, y):
@@ -122,4 +138,8 @@ else:
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
     ax.set_zlim(0, 1)
+    try:
+        visualise_3d(p)
+    except Exception:
+        print("Need to install plotly for 3d visualisation...")
 plt.savefig("points.pdf", bbox_inches="tight")
