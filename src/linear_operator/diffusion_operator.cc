@@ -23,7 +23,7 @@ DiffusionOperator2d::DiffusionOperator2d(const std::shared_ptr<Lattice> lattice_
     double hy = 1. / ny;
     typedef Eigen::Triplet<double> T;
     std::vector<T> triplet_list;
-    unsigned int nrow = lattice->M;
+    unsigned int nrow = lattice->Ncell;
     triplet_list.reserve(5 * nrow);
     for (unsigned int j = 0; j < ny; ++j)
     {
@@ -87,7 +87,7 @@ DiffusionOperator3d::DiffusionOperator3d(const std::shared_ptr<Lattice> lattice_
     double hz = 1. / nz;
     typedef Eigen::Triplet<double> T;
     std::vector<T> triplet_list;
-    unsigned int nrow = lattice->M;
+    unsigned int nrow = lattice->Ncell;
     triplet_list.reserve(7 * nrow);
     for (unsigned int k = 0; k < nz; ++k)
     {

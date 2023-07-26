@@ -38,7 +38,7 @@ protected:
     Eigen::VectorXd get_state(const std::shared_ptr<Lattice> lattice,
                               const bool random = false)
     {
-        unsigned int ndof = lattice->M;
+        unsigned int ndof = lattice->Ncell;
         unsigned int seed = 1212417;
         std::mt19937 rng(seed);
         std::normal_distribution<double> dist(0.0, 1.0);
@@ -136,8 +136,8 @@ TEST_F(IntergridTest, TestProlongRestrict1dLinear)
         else
         {
             // horizontal facet
-            unsigned int ell_right = fine2coarse_idx_1d(lattice_1d->shift_index(ell, shift_right));
-            unsigned int ell_left = fine2coarse_idx_1d(lattice_1d->shift_index(ell, shift_left));
+            unsigned int ell_right = fine2coarse_idx_1d(lattice_1d->shift_cellidx(ell, shift_right));
+            unsigned int ell_left = fine2coarse_idx_1d(lattice_1d->shift_cellidx(ell, shift_left));
             X_linear[ell] = 0.5 * (X_coarse[ell_right] +
                                    X_coarse[ell_left]);
         }
@@ -182,10 +182,10 @@ TEST_F(IntergridTest, TestProlongRestrict2dLinear)
             if ((i % 2 == 1) && (j % 2 == 1))
             {
                 // centre point
-                unsigned int ell_ne = fine2coarse_idx_2d(lattice_2d->shift_index(ell, shift_north_east));
-                unsigned int ell_se = fine2coarse_idx_2d(lattice_2d->shift_index(ell, shift_south_east));
-                unsigned int ell_nw = fine2coarse_idx_2d(lattice_2d->shift_index(ell, shift_north_west));
-                unsigned int ell_sw = fine2coarse_idx_2d(lattice_2d->shift_index(ell, shift_south_west));
+                unsigned int ell_ne = fine2coarse_idx_2d(lattice_2d->shift_cellidx(ell, shift_north_east));
+                unsigned int ell_se = fine2coarse_idx_2d(lattice_2d->shift_cellidx(ell, shift_south_east));
+                unsigned int ell_nw = fine2coarse_idx_2d(lattice_2d->shift_cellidx(ell, shift_north_west));
+                unsigned int ell_sw = fine2coarse_idx_2d(lattice_2d->shift_cellidx(ell, shift_south_west));
                 X_linear[ell] = 0.25 * (X_coarse[ell_ne] +
                                         X_coarse[ell_se] +
                                         X_coarse[ell_nw] +
@@ -194,16 +194,16 @@ TEST_F(IntergridTest, TestProlongRestrict2dLinear)
             if ((i % 2 == 1) && (j % 2 == 0))
             {
                 // horizontal facet
-                unsigned int ell_e = fine2coarse_idx_2d(lattice_2d->shift_index(ell, shift_east));
-                unsigned int ell_w = fine2coarse_idx_2d(lattice_2d->shift_index(ell, shift_west));
+                unsigned int ell_e = fine2coarse_idx_2d(lattice_2d->shift_cellidx(ell, shift_east));
+                unsigned int ell_w = fine2coarse_idx_2d(lattice_2d->shift_cellidx(ell, shift_west));
                 X_linear[ell] = 0.5 * (X_coarse[ell_e] +
                                        X_coarse[ell_w]);
             }
             if ((i % 2 == 0) && (j % 2 == 1))
             {
                 // vertical facet
-                unsigned int ell_n = fine2coarse_idx_2d(lattice_2d->shift_index(ell, shift_north));
-                unsigned int ell_s = fine2coarse_idx_2d(lattice_2d->shift_index(ell, shift_south));
+                unsigned int ell_n = fine2coarse_idx_2d(lattice_2d->shift_cellidx(ell, shift_north));
+                unsigned int ell_s = fine2coarse_idx_2d(lattice_2d->shift_cellidx(ell, shift_south));
                 X_linear[ell] = 0.5 * (X_coarse[ell_n] +
                                        X_coarse[ell_s]);
             }

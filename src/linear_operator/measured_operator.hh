@@ -50,7 +50,7 @@ public:
                                                     base_operator(base_operator_)
     {
         A_sparse = base_operator->get_sparse();
-        unsigned int nrow = base_operator->get_lattice()->M;
+        unsigned int nrow = base_operator->get_lattice()->Ncell;
         unsigned int n_measurements = measurement_locations_.size();
         Sigma_inv = Eigen::MatrixXd(n_measurements + measure_average_, n_measurements + measure_average_);
         Sigma_inv.setZero();
@@ -75,7 +75,7 @@ public:
             {
                 x_loc_int[j] = int(round(x_loc[j] * shape[j]));
             }
-            unsigned int ell = lattice->idx_euclidean2linear(x_loc_int);
+            unsigned int ell = lattice->cellidx_euclidean2linear(x_loc_int);
             triplet_list.push_back(T(ell, k, 1.0));
         }
         if (measure_average_)

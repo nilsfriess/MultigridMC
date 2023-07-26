@@ -1,5 +1,6 @@
 #ifndef LATTICE_HH
 #define LATTICE_HH LATTICE_HH
+#include <vector>
 #include <memory>
 #include <string>
 #include <iostream>
@@ -19,28 +20,54 @@ class Lattice
 public:
   /** @brief Create a new instance
    *
-   * @param[in] M_ number of lattice sites
+   * @param[in] Ncell_ number of lattice cells
    */
-  Lattice(const unsigned int M_) : M(M_) {}
+  Lattice(const unsigned int Ncell_) : Ncell(Ncell_)
+  {
+    interior_vertex_idxs = std::make_shared<std::vector<unsigned int>>();
+    boundary_vertex_idxs = std::make_shared<std::vector<unsigned int>>();
+  }
 
-  /** @brief Convert linear index to Euclidean index
+  /** @brief Convert linear cell index to Euclidean index
    *
    * @param[in] ell linear index to be converted
    */
-  inline virtual Eigen::VectorXi idx_linear2euclidean(const unsigned int ell) const = 0;
+  inline virtual Eigen::VectorXi cellidx_linear2euclidean(const unsigned int ell) const = 0;
 
-  /** @brief Convert Euclidean index to linear index
+  /** @brief Convert Euclidean cell index to linear index
    *
    * @param[in] idx Euclidean index to be converted
    */
-  inline virtual unsigned int idx_euclidean2linear(const Eigen::VectorXi idx) const = 0;
+  inline virtual unsigned int cellidx_euclidean2linear(const Eigen::VectorXi idx) const = 0;
 
-  /** @brief Shift a linear index by an Euclideanvector
+  /** @brief Convert linear vertex index to Euclidean index
+   *
+   * @param[in] ell linear index to be converted
+   */
+  inline virtual Eigen::VectorXi vertexidx_linear2euclidean(const unsigned int ell) const = 0;
+
+  /** @brief Convert Euclidean vertex index to linear index
+   *
+   * @param[in] idx Euclidean index to be converted
+   */
+  inline virtual unsigned int vertexidx_euclidean2linear(const Eigen::VectorXi idx) const = 0;
+
+  /** @brief Shift a linear cell index by an Euclideanvector
    *
    * @param[in] idx Euclidean index to be shifted
    * @param[in] shift Euclidean shift vector
    */
-  inline virtual unsigned int shift_index(const unsigned int ell, const Eigen::VectorXi shift) const = 0;
+  inline virtual unsigned int shift_cellidx(const unsigned int ell, const Eigen::VectorXi shift) const = 0;
+
+  /** @brief Shift a linear vertex index by an Euclidean vector
+   *
+   * @param[in] idx Euclidean index to be shifted
+   * @param[in] shift Euclidean shift vector
+   */
+  inline virtual unsigned int shift_vertexidx(const unsigned int ell, const Eigen::VectorXi shift) const = 0;
+
+  /** @brief get equivalent index of vertex on next-finer lattice */
+  virtual unsigned int fine_vertex_idx(const unsigned int ell) const = 0;
 
   /** @brief return lattice shape */
   inline virtual Eigen::VectorXi shape() const = 0;
@@ -54,8 +81,26 @@ public:
   /** @brief get info string */
   virtual std::string get_info() const = 0;
 
-  /** @brief total number of lattice sites */
-  const unsigned int M;
+  /** @brief total number of cells in lattice */
+  const unsigned int Ncell;
+
+  /** @brief return pointer to interior vertex indices */
+  const std::shared_ptr<std::vector<unsigned int>> get_interior_vertices() const
+  {
+    return interior_vertex_idxs;
+  }
+
+  /** @brief return pointer to boundary vertex indices */
+  const std::shared_ptr<std::vector<unsigned int>> get_boundary_vertices() const
+  {
+    return boundary_vertex_idxs;
+  }
+
+protected:
+  /** @brief vector of interior vertex indices */
+  std::shared_ptr<std::vector<unsigned int>> interior_vertex_idxs;
+  /** @brief vector of boundary vertex indices */
+  std::shared_ptr<std::vector<unsigned int>> boundary_vertex_idxs;
 };
 
 #endif // LATTICE_HH

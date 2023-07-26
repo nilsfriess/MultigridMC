@@ -40,9 +40,9 @@ public:
     LinearOperator(const std::shared_ptr<Lattice> lattice_,
                    const unsigned int m_lowrank_ = 0) : lattice(lattice_),
                                                         m_lowrank(m_lowrank_),
-                                                        A_sparse(lattice_->M, lattice_->M),
-                                                        B(lattice_->M, m_lowrank_),
-                                                        Sigma_inv_BT(m_lowrank_, lattice_->M),
+                                                        A_sparse(lattice_->Ncell, lattice_->Ncell),
+                                                        B(lattice_->Ncell, m_lowrank_),
+                                                        Sigma_inv_BT(m_lowrank_, lattice_->Ncell),
                                                         Sigma_inv(m_lowrank_, m_lowrank_)
     {
     }

@@ -13,7 +13,7 @@ void LoopSolver::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x)
     {
         printf("Initial residual ||r_0|| =  %12.4f\n", r0_nrm);
     }
-    unsigned int ndof = linear_operator->get_lattice()->M;
+    unsigned int ndof = linear_operator->get_lattice()->Ncell;
     x.setZero();
     bool converged = false;
     double r_nrm;

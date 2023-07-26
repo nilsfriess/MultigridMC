@@ -9,6 +9,6 @@ std::string Lattice3d::get_info() const
 {
     const int buffersize = 80;
     char buffer[buffersize];
-    snprintf(buffer, buffersize, "3d lattice, %4d x %4d x %4d points, %4d unknowns", nx, ny, nz, M);
+    snprintf(buffer, buffersize, "3d lattice, %4d x %4d x %4d points, %4d unknowns", nx, ny, nz, Ncell);
     return std::string(buffer);
 }
