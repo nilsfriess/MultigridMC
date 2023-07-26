@@ -7,7 +7,8 @@
 #include <Eigen/QR>
 #include "lattice/lattice.hh"
 #include "smoother/ssor_smoother.hh"
-#include "linear_operator/diffusion_operator_2d.hh"
+#include "linear_operator/diffusion_operator.hh"
+#include "linear_operator/measured_operator.hh"
 
 /** @brief fixture class for smoother tests */
 class SmootherTest : public ::testing::Test
@@ -30,14 +31,13 @@ protected:
         double beta_K = 0.3;
         double alpha_b = 1.2;
         double beta_b = 0.1;
-
         linear_operator = std::make_shared<DiffusionOperator2d>(lattice,
                                                                 alpha_K,
                                                                 beta_K,
                                                                 alpha_b,
                                                                 beta_b);
         unsigned int n_meas = 10;
-        std::vector<Eigen::Vector2d> measurement_locations(n_meas);
+        std::vector<Eigen::VectorXd> measurement_locations(n_meas);
         Eigen::MatrixXd Sigma(n_meas, n_meas);
         Sigma.setZero();
         for (int k = 0; k < n_meas; ++k)
@@ -53,16 +53,17 @@ protected:
         Sigma = Q * Sigma * Q.transpose();
         const bool measure_global = false;
         const double sigma_global = 0.0;
-        linear_operator_lowrank = std::make_shared<MeasuredDiffusionOperator2d>(lattice,
-                                                                                measurement_locations,
-                                                                                Sigma,
-                                                                                false,
-                                                                                measure_global,
-                                                                                sigma_global,
-                                                                                alpha_K,
-                                                                                beta_K,
-                                                                                alpha_b,
-                                                                                beta_b);
+        std::shared_ptr<DiffusionOperator2d> diffusion_operator = std::make_shared<DiffusionOperator2d>(lattice,
+                                                                                                        alpha_K,
+                                                                                                        beta_K,
+                                                                                                        alpha_b,
+                                                                                                        beta_b);
+        linear_operator_lowrank = std::make_shared<MeasuredOperator>(diffusion_operator,
+                                                                     measurement_locations,
+                                                                     Sigma,
+                                                                     false,
+                                                                     measure_global,
+                                                                     sigma_global);
         // Create states
         x_exact = Eigen::VectorXd(ndof);
         x = Eigen::VectorXd(ndof);
@@ -81,7 +82,7 @@ protected:
     /** @brief linear operator */
     std::shared_ptr<DiffusionOperator2d> linear_operator;
     /** @brief linear operator */
-    std::shared_ptr<MeasuredDiffusionOperator2d> linear_operator_lowrank;
+    std::shared_ptr<MeasuredOperator> linear_operator_lowrank;
     /** @brief exact solution */
     Eigen::VectorXd x_exact;
     /** @brief numerical solution */

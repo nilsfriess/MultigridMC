@@ -1,23 +1,23 @@
-#ifndef VTK_WRITER2D_HH
-#define VTK_WRITER2D_HH VTK_WRITER2D_HH
+#ifndef VTK_WRITER3D_HH
+#define VTK_WRITER3D_HH VTK_WRITER3D_HH
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <map>
 #include <Eigen/Dense>
 #include "vtk_writer.hh"
-#include "lattice/lattice2d.hh"
+#include "lattice/lattice3d.hh"
 
-/** @file vtk_writer2d.hh
+/** @file vtk_writer3d.hh
  *
- * @brief class for writing 2d fields to a vtk files
+ * @brief class for writing 3d fields to a vtk files
  */
 
-/** @class VTKWriter2d
+/** @class VTKWriter3d
  *
  * @brief base class for writing fields to disk
  */
-class VTKWriter2d : public VTKWriter
+class VTKWriter3d : public VTKWriter
 {
 public:
     /** @brief Create a new instance
@@ -27,28 +27,18 @@ public:
      * @param[in] lattice_ lattice on which data is held
      * @param[in] verbose_ verbosity level
      */
-    VTKWriter2d(const std::string filename_,
+    VTKWriter3d(const std::string filename_,
                 const Entity entity_,
                 const std::shared_ptr<Lattice> lattice_,
                 const int verbose_ = 0) : VTKWriter(filename_, entity_, verbose_),
-                                          lattice(std::dynamic_pointer_cast<Lattice2d>(lattice_)) {}
+                                          lattice(std::dynamic_pointer_cast<Lattice3d>(lattice_)) {}
 
     /** @brief write all sample states to disk */
     virtual void write() const;
 
 protected:
     /** @brief lattice on which data is held */
-    const std::shared_ptr<Lattice2d> lattice;
+    const std::shared_ptr<Lattice3d> lattice;
 };
 
-/** @brief write VTK file with circle around a point
- *
- * @param[in] centre centre of circle
- * @param[in] radius radius of circle
- * @param[in] filename name of vtk file to write
- */
-void write_vtk_circle(const Eigen::Vector2d centre,
-                      const double radius,
-                      const std::string filename);
-
-#endif // VTK_WRITER2D_HH
+#endif // VTK_WRITER3D_HH

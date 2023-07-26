@@ -42,6 +42,12 @@ public:
    */
   inline virtual unsigned int shift_index(const unsigned int ell, const Eigen::VectorXi shift) const = 0;
 
+  /** @brief return lattice shape */
+  inline virtual Eigen::VectorXi shape() const = 0;
+
+  /** @brief return lattice dimension */
+  inline virtual int dim() const { return shape().size(); }
+
   /** @brief get coarsened version of lattice */
   virtual std::shared_ptr<Lattice> get_coarse_lattice() const = 0;
 

@@ -8,10 +8,11 @@
 #include <Eigen/QR>
 #include "config.h"
 #include "lattice/lattice1d.hh"
+#include "lattice/lattice2d.hh"
 #include "linear_operator/linear_operator.hh"
-#include "linear_operator/diffusion_operator_2d.hh"
-#include "intergrid/intergrid_operator_1dlinear.hh"
-#include "intergrid/intergrid_operator_2dlinear.hh"
+#include "linear_operator/diffusion_operator.hh"
+#include "linear_operator/measured_operator.hh"
+#include "intergrid/intergrid_operator_linear.hh"
 #include "sampler/sampler.hh"
 #include "sampler/cholesky_sampler.hh"
 #include "sampler/ssor_sampler.hh"
@@ -232,7 +233,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler1d)
                                                                                                       omega);
         std::shared_ptr<SSORSamplerFactory> postsampler_factory = std::make_shared<SSORSamplerFactory>(rng,
                                                                                                        omega);
-        std::shared_ptr<IntergridOperator1dLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperator1dLinearFactory>();
+        std::shared_ptr<IntergridOperatorLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
         std::shared_ptr<SparseCholeskySamplerFactory> coarse_sampler_factory = std::make_shared<SparseCholeskySamplerFactory>(rng);
         std::shared_ptr<MultigridMCSampler> sampler = std::make_shared<MultigridMCSampler>(linear_operator,
                                                                                            rng,
@@ -268,7 +269,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     double alpha_b = 1.2;
     double beta_b = 0.1;
     unsigned int n_meas = 4;
-    std::vector<Eigen::Vector2d> measurement_locations(n_meas);
+    std::vector<Eigen::VectorXd> measurement_locations(n_meas);
     Eigen::MatrixXd Sigma(n_meas, n_meas);
     Sigma.setZero();
     measurement_locations[0] = Eigen::Vector2d({0.25, 0.25});
@@ -287,17 +288,17 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     Sigma = Q * Sigma * Q.transpose();
     const bool measure_average = false;
     const double sigma_average = 0.0;
-    std::shared_ptr<MeasuredDiffusionOperator2d>
-        linear_operator = std::make_shared<MeasuredDiffusionOperator2d>(lattice,
-                                                                        measurement_locations,
-                                                                        Sigma,
-                                                                        false,
-                                                                        measure_average,
-                                                                        sigma_average,
-                                                                        alpha_K,
-                                                                        beta_K,
-                                                                        alpha_b,
-                                                                        beta_b);
+    std::shared_ptr<DiffusionOperator2d> diffusion_operator = std::make_shared<DiffusionOperator2d>(lattice,
+                                                                                                    alpha_K,
+                                                                                                    beta_K,
+                                                                                                    alpha_b,
+                                                                                                    beta_b);
+    std::shared_ptr<MeasuredOperator> linear_operator = std::make_shared<MeasuredOperator>(diffusion_operator,
+                                                                                           measurement_locations,
+                                                                                           Sigma,
+                                                                                           false,
+                                                                                           measure_average,
+                                                                                           sigma_average);
 
     MultigridMCParameters multigridmc_params;
     multigridmc_params.nlevel = 3;
@@ -309,7 +310,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
                                                                                                   omega);
     std::shared_ptr<SSORSamplerFactory> postsampler_factory = std::make_shared<SSORSamplerFactory>(rng,
                                                                                                    omega);
-    std::shared_ptr<IntergridOperator2dLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperator2dLinearFactory>();
+    std::shared_ptr<IntergridOperatorLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
     std::shared_ptr<SparseCholeskySamplerFactory> coarse_sampler_factory = std::make_shared<SparseCholeskySamplerFactory>(rng);
     std::shared_ptr<Sampler> sampler = std::make_shared<MultigridMCSampler>(linear_operator,
                                                                             rng,

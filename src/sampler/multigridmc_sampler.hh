@@ -29,7 +29,6 @@ public:
      * @param[in] postsampler_factory_ factory for postsampler on each level
      * @param[in] intergrid_operator_factory_ factory for intergrid operators on each level
      * @param[in] coarse_sampler_factory_ factory for coarse solver
-     * @param[in] verbose_ verbosity level
      */
     MultigridMCSampler(std::shared_ptr<LinearOperator> linear_operator_,
                        std::mt19937_64 &rng_,

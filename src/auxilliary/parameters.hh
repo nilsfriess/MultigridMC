@@ -49,12 +49,16 @@ public:
      */
     virtual void parse_config(const libconfig::Setting &root);
 
+    /** @brief spatial dimension */
+    int dim;
     /** @brief Run the Cholesky sampler? */
     bool do_cholesky;
     /** @brief Run the SSOR sampler? */
     bool do_ssor;
     /** @brief Run the MultigridMC sampler? */
     bool do_multigridmc;
+    /** @brief save posterior statistics to disk? */
+    bool save_posterior_statistics;
 };
 
 /** @brief structure for lattice parameters */
@@ -71,6 +75,8 @@ public:
     unsigned int nx;
     /** @brief extent in y-direction */
     unsigned int ny;
+    /** @brief extent in z-direction */
+    unsigned int nz;
 };
 
 /** @brief type of Cholesky factorisation */
@@ -145,6 +151,8 @@ public:
     unsigned int npresmooth;
     /** @brief number of postsmoothing steps */
     unsigned int npostsmooth;
+    /** @brief verbosity level */
+    int verbose;
 };
 
 /** @struct Multigrid Monte Carlo parameters */
@@ -183,18 +191,22 @@ public:
     unsigned int nwarmup;
 };
 
-/** @brief structure for 2d diffusion
+/** @brief structure for diffusion
  *
- * The diffusion coefficient is assumed to be of the form
+ * The coefficient is assumed to be of the form
  *
- *    K(x,y) = alpha_K + beta_K * sin(2 pi x) * sin(2 pi y)
+ *    K(x,y) = alpha_K + beta_K * sin(2 pi x) * sin(2 pi y)                 [in 2d]
+ * or
+ *    K(x,y) = alpha_K + beta_K * sin(2 pi x) * sin(2 pi y) * sin(2 pi z)   [in 3d]
  *
  * and the zero order term is assumed to be
  *
- *    b(x,y) = alpha_b + beta_b * cos(2 pi x) * cos(2 pi y)
+ *    b(x,y) = alpha_b + beta_b * cos(2 pi x) * cos(2 pi y)                 [in 2d]
+ * or
+ *    b(x,y) = alpha_b + beta_b * cos(2 pi x) * cos(2 pi y) * cos(2 pi z)   [in 3d]
  *
  */
-class Diffusion2dParameters : public Parameters
+class DiffusionParameters : public Parameters
 {
 public:
     /** @brief parse configuration
@@ -223,10 +235,12 @@ public:
      */
     virtual void parse_config(const libconfig::Setting &root);
 
+    /** @brief dimension of measurements */
+    int dim;
     /** @brief number of measurements */
     unsigned int n;
     /** @brief measurement locations */
-    std::vector<Eigen::Vector2d> measurement_locations;
+    std::vector<Eigen::VectorXd> measurement_locations;
     /** @brief measured averages */
     Eigen::VectorXd mean;
     /** @brief covariance matrix of measurements */
@@ -235,7 +249,7 @@ public:
      *  of the covariance matrix)? */
     bool ignore_measurement_cross_correlations;
     /** @brief sample location */
-    Eigen::Vector2d sample_location;
+    Eigen::VectorXd sample_location;
     /** @brief measure global average of field? */
     bool measure_global;
     /** @brief variance of global average */
