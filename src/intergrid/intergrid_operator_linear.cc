@@ -10,7 +10,7 @@ IntergridOperatorLinear::IntergridOperatorLinear(const std::shared_ptr<Lattice> 
 {
     int dim = lattice->dim();
     // 1d stencil and shift vector
-    const double stencil1d[3] = {0.25, 0.5, 0.25};
+    const double stencil1d[3] = {0.5, 1.0, 0.5};
     const int shift1d[3] = {-1, 0, +1};
     std::vector<Eigen::VectorXi> shift;
     // matrix entries and shifts

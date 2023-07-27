@@ -55,7 +55,7 @@ public:
                                                  stencil_size(stencil_size_)
     {
         matrix = new double[stencil_size];
-        colidx = new unsigned int[lattice->get_coarse_lattice()->Ncell * stencil_size];
+        colidx = new unsigned int[lattice->get_coarse_lattice()->Nvertex * stencil_size];
     }
 
     ~IntergridOperator()
@@ -75,7 +75,7 @@ public:
     {
         std::shared_ptr<Lattice> coarse_lattice = lattice->get_coarse_lattice();
 
-        for (unsigned int ell_coarse = 0; ell_coarse < coarse_lattice->Ncell; ++ell_coarse)
+        for (unsigned int ell_coarse = 0; ell_coarse < coarse_lattice->Nvertex; ++ell_coarse)
         {
             double result = 0;
             for (unsigned k = 0; k < stencil_size; ++k)
@@ -105,7 +105,7 @@ public:
     virtual void prolongate_add(const Eigen::VectorXd &x_coarse, Eigen::VectorXd &x)
     {
         std::shared_ptr<Lattice> coarse_lattice = lattice->get_coarse_lattice();
-        for (unsigned int ell_coarse = 0; ell_coarse < coarse_lattice->Ncell; ++ell_coarse)
+        for (unsigned int ell_coarse = 0; ell_coarse < coarse_lattice->Nvertex; ++ell_coarse)
         {
             double x_coarse_ell = x_coarse[ell_coarse];
             for (unsigned k = 0; k < stencil_size; ++k)
@@ -122,8 +122,8 @@ public:
         std::shared_ptr<Lattice> coarse_lattice = lattice->get_coarse_lattice();
         typedef Eigen::Triplet<double> T;
         std::vector<T> triplet_list;
-        unsigned int nrow = coarse_lattice->Ncell;
-        unsigned int ncol = lattice->Ncell;
+        unsigned int nrow = coarse_lattice->Nvertex;
+        unsigned int ncol = lattice->Nvertex;
         unsigned int nnz = stencil_size * nrow;
         triplet_list.reserve(nnz);
         for (unsigned int ell = 0; ell < nrow; ++ell)
