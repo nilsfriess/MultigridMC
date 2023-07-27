@@ -14,61 +14,46 @@
  *
  * @brief Three dimensional structured lattice with nx x ny x nz cells
  *
- *  Points are arranged ordered lexicographically, for example for nx = 4, ny = 3, nz = 2
+ *  Points are arranged ordered lexicographically, for example for nx = 4, ny = 3, nz = 3
  *  (cell indices are projected onto the facets below):
  *
- * layer z=0
  *
  *  ^ y
  *  !
- *  !
+ *  !             layer z=0                                             layer z=1
  *
- * 15 ----- 16 ----- 17 ----- 18 ----- 19
- *  !        !        !        !        !
- *  !    8   !    9   !   10   !   11   !
- *  !        !        !        !        !                  N
- * 10 ----- 11 ----- 12 ----- 13 ----- 14              W  +  E
- *  !        !        !        !        !                  S
- *  !    4   !    5   !    6   !    7   !
- *  !        !        !        !        !
- *  5 ------ 6 ------ 7 ------ 8 ------ 9
- *  !        !        !        !        !
- *  !    0   !    1   !    2   !    3   !
- *  !        !        !        !        !
- *  0 ------ 1 ------ 2 ------ 3 ------ 4  ---> x
+ *  + ------ + ------ + ------ + ------ +                   + ------ + ------ + ------ + ------ +
+ *  !        !        !        !        !                   !        !        !        !        !
+ *  !    8   !    9   !   10   !   11   !                   !   20   !   21   !   22   !   23   !
+ *  !        !        !        !        !          N        !        !        !        !        !
+ *  + ------ + ------ + ------ + ------ +       W  +  E     + ------ 3 ------ 4 ------ 5 ------ +
+ *  !        !        !        !        !          S        !        !        !        !        !
+ *  !    4   !    5   !    6   !    7   !                   !   16   !   17   !   18   !   19   !
+ *  !        !        !        !        !                   !        !        !        !        !
+ *  + ------ + ------ + ------ + ------ +                   + ------ 0 ------ 1 ------ 2 ------ +
+ *  !        !        !        !        !                   !        !        !        !        !
+ *  !    0   !    1   !    2   !    3   !                   !   12   !   13   !   14   !   15   !
+ *  !        !        !        !        !                   !        !        !        !        !
+ *  + ------ + ------ + ------ + ------ +  ---> x           + ------ + ------ + ------ + ------ +
  *
- *  layer z=1
+ *                layer z=2                                             layer z=3
  *
- * 35 ----- 36 ----- 37 ----- 38 ----- 39
- *  !        !        !        !        !
- *  !   20   !   21   !   22   !   23   !
- *  !        !        !        !        !
- * 30 ----- 31 ----- 32 ----- 33 ----- 34
- *  !        !        !        !        !
- *  !   16   !   17   !   18   !   19   !
- *  !        !        !        !        !
- * 25 ----- 26 ----- 27 ----- 28 ----- 29
- *  !        !        !        !        !
- *  !   12   !   13   !   14   !   15   !
- *  !        !        !        !        !
- * 20 ----- 21 ----- 22 ----- 23 ----- 24
+ *  + ------ + ------ + ------ + ------ +                   + ------ + ------ + ------ + ------ +
+ *  !        !        !        !        !                   !        !        !        !        !
+ *  !   32   !   33   !   34   !   35   !                   !        !        !        !        !
+ *  !        !        !        !        !                   !        !        !        !        !
+ *  + ------ 9 ----- 10 ----- 11 ------ +                   + ------ + ------ + ------ + ------ +
+ *  !        !        !        !        !                   !        !        !        !        !
+ *  !   28   !   29   !   30   !   31   !                   !        !        !        !        !
+ *  !        !        !        !        !                   !        !        !        !        !
+ *  + ------ 6 ------ 7 ------ 8 ------ +                   + ------ + ------ + ------ + ------ +
+ *  !        !        !        !        !                   !        !        !        !        !
+ *  !   24   !   25   !   26   !   27   !                   !        !        !        !        !
+ *  !        !        !        !        !                   !        !        !        !        !
+ *  + ------ + ------ + ------ + ------ +                   + ------ + ------ + ------ + ------ +
  *
- *  layer z=2
- *
- * 55 ----- 56 ----- 57 ----- 58 ----- 59
- *  !        !        !        !        !
- *  !        !        !        !        !
- *  !        !        !        !        !
- * 50 ----- 51 ----- 52 ----- 53 ----- 54
- *  !        !        !        !        !
- *  !        !        !        !        !
- *  !        !        !        !        !
- * 45 ----- 46 ----- 47 ----- 48 ----- 49
- *  !        !        !        !        !
- *  !        !        !        !        !
- *  !        !        !        !        !
- * 40 ----- 41 ----- 42 ----- 43 ----- 44
- *
+ * The cell with index 0 has Euclidean index (0,0,0)
+ * the vertex with index 0 has Euclidean index (1,1,1)
  */
 class Lattice3d : public Lattice
 {
@@ -84,21 +69,7 @@ public:
             const unsigned int nz_) : nx(nx_),
                                       ny(ny_),
                                       nz(nz_),
-                                      Lattice(nx_ * ny_ * nz_)
-  {
-    for (unsigned int ell = 0; ell < (nx + 1) * (ny + 1) * (nz + 1); ++ell)
-    {
-      Eigen::VectorXi idx = vertexidx_linear2euclidean(ell);
-      if ((idx[0] == 0) or (idx[0] == nx) or (idx[1] == 0) or (idx[1] == ny) or (idx[2] == 0) or (idx[2] == nz))
-      {
-        boundary_vertex_idxs->push_back(ell);
-      }
-      else
-      {
-        interior_vertex_idxs->push_back(ell);
-      }
-    }
-  }
+                                      Lattice(nx_ * ny_ * nz_, (nx_ - 1) * (ny_ - 1) * (nz_ - 1)) {}
 
   /** @brief Convert linear index to Euclidean index
    *
@@ -135,11 +106,11 @@ public:
    */
   inline virtual Eigen::VectorXi vertexidx_linear2euclidean(const unsigned int ell) const
   {
-    assert(ell < (nx + 1) * (ny + 1) * (nz + 1));
+    assert(ell < (nx - 1) * (ny - 1) * (nz - 1));
     Eigen::VectorXi idx(3);
-    idx[0] = (ell % ((nx + 1) * (ny + 1))) % (nx + 1);
-    idx[1] = (ell % ((nx + 1) * (ny + 1))) / (nx + 1);
-    idx[2] = ell / ((nx + 1) * (ny + 1));
+    idx[0] = (ell % ((nx - 1) * (ny - 1))) % (nx - 1) + 1;
+    idx[1] = (ell % ((nx - 1) * (ny - 1))) / (nx - 1) + 1;
+    idx[2] = ell / ((nx - 1) * (ny - 1)) + 1;
     return idx;
   }
 
@@ -149,13 +120,13 @@ public:
    */
   inline virtual unsigned int vertexidx_euclidean2linear(const Eigen::VectorXi idx) const
   {
-    assert(idx[0] >= 0);
-    assert(idx[0] < nx + 1);
-    assert(idx[1] >= 0);
-    assert(idx[1] < ny + 1);
-    assert(idx[2] >= 0);
-    assert(idx[2] < nz + 1);
-    return idx[2] * (nx + 1) * (ny + 1) + idx[1] * (nx + 1) + idx[0];
+    assert(idx[0] > 0);
+    assert(idx[0] < nx);
+    assert(idx[1] > 0);
+    assert(idx[1] < ny);
+    assert(idx[2] > 0);
+    assert(idx[2] < nz);
+    return (idx[2] - 1) * (nx - 1) * (ny - 1) + (idx[1] - 1) * (nx - 1) + (idx[0] - 1);
   }
 
   /** @brief Shift a linear index by an Euclideanvector
@@ -186,39 +157,42 @@ public:
    */
   inline virtual unsigned int shift_vertexidx(const unsigned int ell, const Eigen::VectorXi shift) const
   {
-    assert(ell >= 0);
-    assert(ell < (nx + 1) * (ny + 1) * (nz + 1));
-    int i = (ell % ((nx + 1) * (ny + 1))) % (nx + 1) + shift[0];
-    int j = (ell % ((nx + 1) * (ny + 1))) / (nx + 1) + shift[1];
-    int k = ell / ((nx + 1) * (ny + 1)) + shift[2];
-    assert(i >= 0);
-    assert(i < nx + 1);
-    assert(j >= 0);
-    assert(j < ny + 1);
-    assert(k >= 0);
-    assert(k < nz + 1);
-    return k * (nx + 1) * (ny + 1) + j * (nx + 1) + i;
+    assert(ell < (nx - 1) * (ny - 1) * (nz - 1));
+    int i = (ell % ((nx - 1) * (ny - 1))) % (nx - 1) + shift[0] + 1;
+    int j = (ell % ((nx - 1) * (ny - 1))) / (nx - 1) + shift[1] + 1;
+    int k = ell / ((nx - 1) * (ny - 1)) + shift[2] + 1;
+    assert(i > 0);
+    assert(i < nx);
+    assert(j > 0);
+    assert(j < ny);
+    assert(k > 0);
+    assert(k < nz);
+    return (k - 1) * (nx - 1) * (ny - 1) + (j - 1) * (nx - 1) + (i - 1);
   }
 
   /** @brief get equivalent index of vertex on next-finer lattice */
   virtual unsigned int fine_vertex_idx(const unsigned int ell) const
   {
-    assert(ell < (nx + 1) * (ny + 1) * (nz + 1));
-    int i = (ell % ((nx + 1) * (ny + 1))) % (nx + 1);
-    int j = (ell % ((nx + 1) * (ny + 1))) / (nx + 1);
-    int k = ell / ((nx + 1) * (ny + 1));
-    return 2 * k * (2 * nx + 1) * (2 * ny + 1) + 2 * j * (2 * nx + 1) + 2 * i;
+    assert(ell < (nx - 1) * (ny - 1) * (nz - 1));
+    int i = (ell % ((nx - 1) * (ny - 1))) % (nx - 1) + 1;
+    int j = (ell % ((nx - 1) * (ny - 1))) / (nx - 1) + 1;
+    int k = ell / ((nx - 1) * (ny - 1)) + 1;
+    return (2 * k - 1) * (2 * nx - 1) * (2 * ny - 1) + (2 * j - 1) * (2 * nx - 1) + 2 * i - 1;
   }
 
   /** @brief get coarsened version of lattice */
   virtual std::shared_ptr<Lattice> get_coarse_lattice() const
   {
-    assert(nx % 2 == 0);
-    assert(ny % 2 == 0);
-    assert(nz % 2 == 0);
     if (not((nx % 2 == 0) and (ny % 2 == 0) and (nz % 2 == 0)))
     {
-      std::cout << "ERROR: cannot coarsen lattice of size " << nx << " x " << ny << " x " << nz << std::endl;
+      std::cout << "ERROR: cannot coarsen lattice of size " << nx << " x " << ny << " x " << nz;
+      std::cout << " [one of the extents is odd]" << std::endl;
+      exit(-1);
+    }
+    if (not((nx / 2 > 1) and (ny / 2 > 1) and (nz / 2 > 1)))
+    {
+      std::cout << "ERROR: cannot coarsen lattice of size " << nx << " x " << ny << " x " << nz;
+      std::cout << " [resulting lattice would have no interior vertices]" << std::endl;
       exit(-1);
     }
     return std::make_shared<Lattice3d>(nx / 2, ny / 2, nz / 2);

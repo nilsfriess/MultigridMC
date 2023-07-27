@@ -16,9 +16,11 @@
  *
  * For example, if n = 4:
  *
- *     0       1       2       3      (cells)
- * 0 ----- 1 ----- 2 ----- 3 ----- 4  (vertices)
+ *        0       1       2       3        (cells)
+ *    + ----- 0 ----- 1 ----- 2 ----- x    (vertices)
  *
+ * The cell with index 0 has Euclidean index (0,)
+ * the vertex with index 0 has Euclidean index (1,)
  */
 class Lattice1d : public Lattice
 {
@@ -27,20 +29,7 @@ public:
    *
    * @param[in] n_ Extent of lattice (= number of cells)
    */
-  Lattice1d(const unsigned int n_) : n(n_), Lattice(n_)
-  {
-    for (int ell = 0; ell < n + 1; ++ell)
-    {
-      if ((ell == 0) or (ell == n))
-      {
-        boundary_vertex_idxs->push_back(ell);
-      }
-      else
-      {
-        interior_vertex_idxs->push_back(ell);
-      }
-    }
-  }
+  Lattice1d(const unsigned int n_) : n(n_), Lattice(n_, n_ - 1) {}
 
   /** @brief Convert linear cell index to Euclidean index
    *
@@ -54,7 +43,7 @@ public:
     return idx;
   }
 
-  /** @brief Convert Euclidean index to linear index
+  /** @brief Convert Euclidean cell index to linear index
    *
    * @param[in] idx Euclidean index to be converted
    */
@@ -72,9 +61,9 @@ public:
   inline virtual Eigen::VectorXi vertexidx_linear2euclidean(const unsigned int ell) const
   {
     assert(ell >= 0);
-    assert(ell < Ncell + 1);
+    assert(ell < Ncell - 1);
     Eigen::VectorXi idx(1);
-    idx[0] = ell;
+    idx[0] = ell + 1;
     return idx;
   }
 
@@ -84,9 +73,9 @@ public:
    */
   inline virtual unsigned int vertexidx_euclidean2linear(const Eigen::VectorXi idx) const
   {
-    assert(idx[0] >= 0);
-    assert(idx[0] < n + 1);
-    return idx[0];
+    assert(idx[0] > 0);
+    assert(idx[0] < n);
+    return idx[0] - 1;
   };
 
   /** @brief Shift a linear cell index by an Euclidean vector
@@ -111,20 +100,31 @@ public:
   {
     int i = ell + shift[0];
     assert(i >= 0);
-    assert(i < n + 1);
+    assert(i < n - 1);
     return i;
   };
 
   /** @brief get equivalent index of vertex on next-finer lattice */
   virtual unsigned int fine_vertex_idx(const unsigned int ell) const
   {
-    return 2 * ell;
+    return 2 * ell + 1;
   };
 
   /** @brief get coarsened version of lattice */
   virtual std::shared_ptr<Lattice> get_coarse_lattice() const
   {
-    assert(n % 2 == 0);
+    if (not(n % 2 == 0))
+    {
+      std::cout << "ERROR: cannot coarsen lattice of size " << n;
+      std::cout << " [extent is odd]" << std::endl;
+      exit(-1);
+    }
+    if (not(n / 2 > 1))
+    {
+      std::cout << "ERROR: cannot coarsen lattice of size " << n;
+      std::cout << " [resulting lattice would have no interior vertices]" << std::endl;
+      exit(-1);
+    }
     return std::make_shared<Lattice1d>(n / 2);
   };
 

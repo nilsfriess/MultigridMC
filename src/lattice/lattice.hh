@@ -21,12 +21,11 @@ public:
   /** @brief Create a new instance
    *
    * @param[in] Ncell_ number of lattice cells
+   * @param[in] Nvertex_ number of interior vertices
    */
-  Lattice(const unsigned int Ncell_) : Ncell(Ncell_)
-  {
-    interior_vertex_idxs = std::make_shared<std::vector<unsigned int>>();
-    boundary_vertex_idxs = std::make_shared<std::vector<unsigned int>>();
-  }
+  Lattice(const unsigned int Ncell_,
+          const unsigned int Nvertex_) : Ncell(Ncell_),
+                                         Nvertex(Nvertex_) {}
 
   /** @brief Convert linear cell index to Euclidean index
    *
@@ -84,23 +83,8 @@ public:
   /** @brief total number of cells in lattice */
   const unsigned int Ncell;
 
-  /** @brief return pointer to interior vertex indices */
-  const std::shared_ptr<std::vector<unsigned int>> get_interior_vertices() const
-  {
-    return interior_vertex_idxs;
-  }
-
-  /** @brief return pointer to boundary vertex indices */
-  const std::shared_ptr<std::vector<unsigned int>> get_boundary_vertices() const
-  {
-    return boundary_vertex_idxs;
-  }
-
-protected:
-  /** @brief vector of interior vertex indices */
-  std::shared_ptr<std::vector<unsigned int>> interior_vertex_idxs;
-  /** @brief vector of boundary vertex indices */
-  std::shared_ptr<std::vector<unsigned int>> boundary_vertex_idxs;
+  /** @brief total number of interior vertices of lattice */
+  const unsigned int Nvertex;
 };
 
 #endif // LATTICE_HH

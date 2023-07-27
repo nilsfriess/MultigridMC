@@ -21,20 +21,22 @@
  *  !
  *  !
  *
- * 15 ----- 16 ----- 17 ----- 18 ----- 19
+ *  + ------ + ------ + ------ + ------ +
  *  !        !        !        !        !
  *  !    8   !    9   !   10   !   11   !
  *  !        !        !        !        !                 N
- * 10 ----- 11 ----- 12 ----- 13 ----- 14              W  +  E
+ *  + ------ 3 ------ 4 ------ 5 ------ +              W  +  E
  *  !        !        !        !        !                 S
  *  !    4   !    5   !    6   !    7   !
  *  !        !        !        !        !
- *  5 ------ 6 ------ 7 ------ 8 ------ 9
+ *  + ------ 0 ------ 1 ------ 2 ------ +
  *  !        !        !        !        !
  *  !    0   !    1   !    2   !    3   !
  *  !        !        !        !        !
- *  0 ------ 1 ------ 2 ------ 3 ------ 4  ---> x
+ *  + ------ + ------ + ------ + ------ +  ---> x
  *
+ * The cell with index 0 has Euclidean index (0,0)
+ * the vertex with index 0 has Euclidean index (1,1)
  */
 class Lattice2d : public Lattice
 {
@@ -46,21 +48,7 @@ public:
    */
   Lattice2d(const unsigned int nx_, const unsigned int ny_) : nx(nx_),
                                                               ny(ny_),
-                                                              Lattice(nx_ * ny_)
-  {
-    for (unsigned int ell = 0; ell < (nx + 1) * (ny + 1); ++ell)
-    {
-      Eigen::VectorXi idx = vertexidx_linear2euclidean(ell);
-      if ((idx[0] == 0) or (idx[0] == nx) or (idx[1] == 0) or (idx[1] == ny))
-      {
-        boundary_vertex_idxs->push_back(ell);
-      }
-      else
-      {
-        interior_vertex_idxs->push_back(ell);
-      }
-    }
-  }
+                                                              Lattice(nx_ * ny_, (nx_ - 1) * (ny_ - 1)) {}
 
   /** @brief Convert linear index to Euclidean index
    *
@@ -90,10 +78,10 @@ public:
    */
   inline virtual Eigen::VectorXi vertexidx_linear2euclidean(const unsigned int ell) const
   {
-    assert(ell < (nx + 1) * (ny + 1));
+    assert(ell < (nx - 1) * (ny - 1));
     Eigen::VectorXi idx(2);
-    idx[0] = ell % (nx + 1);
-    idx[1] = ell / (nx + 1);
+    idx[0] = ell % (nx - 1) + 1;
+    idx[1] = ell / (nx - 1) + 1;
     return idx;
   }
 
@@ -103,11 +91,11 @@ public:
    */
   inline virtual unsigned int vertexidx_euclidean2linear(const Eigen::VectorXi idx) const
   {
-    assert(idx[0] >= 0);
+    assert(idx[0] > 0);
     assert(idx[0] < nx);
-    assert(idx[1] >= 0);
+    assert(idx[1] > 0);
     assert(idx[1] < ny);
-    return idx[1] * (nx + 1) + idx[0];
+    return (idx[1] - 1) * (nx - 1) + (idx[0] - 1);
   }
 
   /** @brief Shift a linear cell index by an Euclideanvector
@@ -130,32 +118,41 @@ public:
    */
   inline virtual unsigned int shift_vertexidx(const unsigned int ell, const Eigen::VectorXi shift) const
   {
-    assert(ell < (nx + 1) * (ny + 1));
-    int i = (ell % (nx + 1)) + shift[0];
-    int j = (ell / (nx + 1)) + shift[1];
-    return j * (nx + 1) + i;
+    assert(ell < (nx - 1) * (ny - 1));
+    int i = (ell % (nx - 1)) + shift[0] + 1;
+    int j = (ell / (nx - 1)) + shift[1] + 1;
+    assert(i > 0);
+    assert(i < nx);
+    assert(j > 0);
+    assert(j < ny);
+    return (j - 1) * (nx - 1) + (i - 1);
   }
 
   /** @brief get equivalent index of vertex on next-finer lattice */
   virtual unsigned int fine_vertex_idx(const unsigned int ell) const
   {
-    int i = (ell % (nx + 1));
-    int j = (ell / (nx + 1));
-    assert(i >= 0);
-    assert(i < nx + 1);
-    assert(j >= 0);
-    assert(j < ny + 1);
-    return 2 * j * (2 * nx + 1) + 2 * i;
+    int i = (ell % (nx - 1)) + 1;
+    int j = (ell / (nx - 1)) + 1;
+    assert(i > 0);
+    assert(i < nx);
+    assert(j > 0);
+    assert(j < ny);
+    return (2 * j - 1) * (2 * nx - 1) + (2 * i - 1);
   }
 
   /** @brief get coarsened version of lattice */
   virtual std::shared_ptr<Lattice> get_coarse_lattice() const
   {
-    assert(nx % 2 == 0);
-    assert(ny % 2 == 0);
     if (not((nx % 2 == 0) and (ny % 2 == 0)))
     {
-      std::cout << "ERROR: cannot coarsen lattice of size " << nx << " x " << ny << std::endl;
+      std::cout << "ERROR: cannot coarsen lattice of size " << nx << " x " << ny;
+      std::cout << " [one of the extents is odd]" << std::endl;
+      exit(-1);
+    }
+    if (not((nx / 2 > 1) and (ny / 2 > 1)))
+    {
+      std::cout << "ERROR: cannot coarsen lattice of size " << nx << " x " << ny;
+      std::cout << " [resulting lattice would have no interior vertices]" << std::endl;
       exit(-1);
     }
     return std::make_shared<Lattice2d>(nx / 2, ny / 2);
