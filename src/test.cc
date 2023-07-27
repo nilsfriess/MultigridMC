@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "config.h"
+#include "auxilliary/test_quadrature.hh"
 #include "auxilliary/test_cholesky_wrapper.hh"
 #include "auxilliary/test_statistics.hh"
 #include "lattice/test_lattice.hh"
