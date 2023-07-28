@@ -35,7 +35,9 @@ MeasuredOperator::MeasuredOperator(const std::shared_ptr<LinearOperator> base_op
         Eigen::VectorXd x_0 = params.measurement_locations[k];
         Eigen::SparseVector<double> r_meas = measurement_vector(x_0, params.radius);
         for (Eigen::SparseVector<double>::InnerIterator it(r_meas); it; ++it)
-            triplet_list.push_back(T(it.col(), k, it.value()));
+        {
+            triplet_list.push_back(T(it.row(), k, it.value()));
+        }
     }
     if (params.measure_global)
     {
@@ -90,7 +92,6 @@ Eigen::SparseVector<double> MeasuredOperator::measurement_vector(const Eigen::Ve
         }
         if (not overlap) // move on to next cell if there is no overlap
             continue;
-
         for (auto it = basis_idx.begin(); it != basis_idx.end(); ++it)
         { // now loop over the basis functions associated with the corners
           // of the cell
@@ -116,7 +117,7 @@ Eigen::SparseVector<double> MeasuredOperator::measurement_vector(const Eigen::Ve
                         local_entry += phihat * quad_weights[j] * cell_volume;
                     }
                 }
-                r_meas.coeffRef(ell) = local_entry;
+                r_meas.coeffRef(ell) += local_entry;
             }
         }
     }
