@@ -39,11 +39,7 @@ int main(int argc, char *argv[])
                                                                                                 diffusion2d_params.alpha_b,
                                                                                                 diffusion2d_params.beta_b);
     std::shared_ptr<MeasuredOperator> linear_operator = std::make_shared<MeasuredOperator>(diffusion_operator,
-                                                                                           measurement_params.measurement_locations,
-                                                                                           measurement_params.covariance,
-                                                                                           measurement_params.ignore_measurement_cross_correlations,
-                                                                                           measurement_params.measure_global,
-                                                                                           measurement_params.sigma_global);
+                                                                                           measurement_params);
     LinearOperator::DenseMatrixType covariance = linear_operator->covariance();
     typedef Eigen::EigenSolver<LinearOperator::DenseMatrixType> EigenSolver;
     EigenSolver eigen_solver(covariance, false);

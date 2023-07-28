@@ -78,11 +78,7 @@ int main(int argc, char *argv[])
                                                              diffusion_params.beta_b,
                                                              1);
     std::shared_ptr<MeasuredOperator> linear_operator = std::make_shared<MeasuredOperator>(diffusion_operator,
-                                                                                           measurement_params.measurement_locations,
-                                                                                           measurement_params.covariance,
-                                                                                           measurement_params.ignore_measurement_cross_correlations,
-                                                                                           measurement_params.measure_global,
-                                                                                           measurement_params.sigma_global);
+                                                                                           measurement_params);
     //   Construct smoothers
     /* prepare measurements */
     std::shared_ptr<SmootherFactory> presmoother_factory = std::make_shared<SORSmootherFactory>(smoother_params.omega,

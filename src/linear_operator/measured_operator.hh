@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <Eigen/Dense>
+#include "auxilliary/parameters.hh"
 #include "auxilliary/quadrature.hh"
 #include "lattice/lattice.hh"
 #include "linear_operator.hh"
@@ -34,19 +35,10 @@ public:
      * Populates matrix entries across the grid
      *
      * @param[in] base_operator_ underlying linear operator
-     * @param[in] measurement_locations_ coordinates of locations where the field is measured
-     * @param[in] Sigma_ covariance matrix of measurements
-     * @param[in] ignore_measurement_cross_correlations_ ignore all off-diagonal entries in the
-     *            covariance matrix Sigma
-     * @param[in] measure_average_ measure the average across the entire domain
-     * @param[in] sigma_average_ variance of global average measurement
+     * @param[in] params_ measurement parameters
      */
     MeasuredOperator(const std::shared_ptr<LinearOperator> base_operator_,
-                     const std::vector<Eigen::VectorXd> measurement_locations_,
-                     const Eigen::MatrixXd Sigma_,
-                     const bool ignore_measurement_cross_correlations_,
-                     const bool measure_average_,
-                     const double sigma_average_);
+                     const MeasurementParameters params_);
 
     /** @brief Compute posterior mean
      *
@@ -88,6 +80,8 @@ protected:
      */
     inline double f_meas(const double xi) const { return 1.0; }
 
+    /** @brief Measurement parameters */
+    MeasurementParameters params;
     /** @brief underlying linear operator */
     std::shared_ptr<LinearOperator> base_operator;
 };

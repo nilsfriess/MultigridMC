@@ -51,19 +51,20 @@ protected:
         Eigen::HouseholderQR<Eigen::MatrixXd> qr(A);
         Q = qr.householderQ();
         Sigma = Q * Sigma * Q.transpose();
-        const bool measure_global = false;
-        const double sigma_global = 0.0;
         std::shared_ptr<DiffusionOperator> diffusion_operator = std::make_shared<DiffusionOperator>(lattice,
                                                                                                     alpha_K,
                                                                                                     beta_K,
                                                                                                     alpha_b,
                                                                                                     beta_b);
+        MeasurementParameters measurement_params;
+        measurement_params.measurement_locations = measurement_locations;
+        measurement_params.covariance = Sigma;
+        measurement_params.ignore_measurement_cross_correlations = false;
+        measurement_params.measure_global = false;
+        measurement_params.sigma_global = 0.0;
+        measurement_params.mean_global = 0.0;
         linear_operator_lowrank = std::make_shared<MeasuredOperator>(diffusion_operator,
-                                                                     measurement_locations,
-                                                                     Sigma,
-                                                                     false,
-                                                                     measure_global,
-                                                                     sigma_global);
+                                                                     measurement_params);
         // Create states
         x_exact = Eigen::VectorXd(ndof);
         x = Eigen::VectorXd(ndof);

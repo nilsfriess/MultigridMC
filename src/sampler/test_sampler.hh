@@ -286,19 +286,20 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     Eigen::HouseholderQR<Eigen::MatrixXd> qr(A);
     Q = qr.householderQ();
     Sigma = Q * Sigma * Q.transpose();
-    const bool measure_average = false;
-    const double sigma_average = 0.0;
     std::shared_ptr<DiffusionOperator> diffusion_operator = std::make_shared<DiffusionOperator>(lattice,
                                                                                                 alpha_K,
                                                                                                 beta_K,
                                                                                                 alpha_b,
                                                                                                 beta_b);
+    MeasurementParameters measurement_params;
+    measurement_params.measurement_locations = measurement_locations;
+    measurement_params.covariance = Sigma;
+    measurement_params.ignore_measurement_cross_correlations = false;
+    measurement_params.measure_global = false;
+    measurement_params.sigma_global = 0.0;
+    measurement_params.mean_global = 0.0;
     std::shared_ptr<MeasuredOperator> linear_operator = std::make_shared<MeasuredOperator>(diffusion_operator,
-                                                                                           measurement_locations,
-                                                                                           Sigma,
-                                                                                           false,
-                                                                                           measure_average,
-                                                                                           sigma_average);
+                                                                                           measurement_params);
 
     MultigridMCParameters multigridmc_params;
     multigridmc_params.nlevel = 3;

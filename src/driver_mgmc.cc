@@ -213,11 +213,7 @@ int main(int argc, char *argv[])
                                                              diffusion_params.beta_b,
                                                              1);
     std::shared_ptr<MeasuredOperator> linear_operator = std::make_shared<MeasuredOperator>(diffusion_operator,
-                                                                                           measurement_params.measurement_locations,
-                                                                                           measurement_params.covariance,
-                                                                                           measurement_params.ignore_measurement_cross_correlations,
-                                                                                           measurement_params.measure_global,
-                                                                                           measurement_params.sigma_global);
+                                                                                           measurement_params);
     //   Construct samplers
     /* prepare measurements */
     unsigned int seed = 5418513;

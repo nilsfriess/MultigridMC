@@ -7,27 +7,25 @@
 
 /* Create a new instance */
 MeasuredOperator::MeasuredOperator(const std::shared_ptr<LinearOperator> base_operator_,
-                                   const std::vector<Eigen::VectorXd> measurement_locations_,
-                                   const Eigen::MatrixXd Sigma_,
-                                   const bool ignore_measurement_cross_correlations_,
-                                   const bool measure_average_,
-                                   const double sigma_average_) : LinearOperator(base_operator_->get_lattice(),
-                                                                                 measurement_locations_.size() + measure_average_),
-                                                                  base_operator(base_operator_)
+                                   const MeasurementParameters params_) : LinearOperator(base_operator_->get_lattice(),
+                                                                                         params_.measurement_locations.size() + params_.measure_global),
+                                                                          params(params_),
+                                                                          base_operator(base_operator_)
 {
     A_sparse = base_operator->get_sparse();
     unsigned int nrow = base_operator->get_lattice()->Nvertex;
-    unsigned int n_measurements = measurement_locations_.size();
-    Sigma_inv = Eigen::MatrixXd(n_measurements + measure_average_, n_measurements + measure_average_);
+    unsigned int n_measurements = params.measurement_locations.size();
+    Sigma_inv = Eigen::MatrixXd(n_measurements + params.measure_global,
+                                n_measurements + params.measure_global);
     Sigma_inv.setZero();
     DenseMatrixType Sigma_local;
-    if (ignore_measurement_cross_correlations_)
+    if (params.ignore_measurement_cross_correlations)
     {
-        Sigma_local = Sigma_.diagonal().asDiagonal();
+        Sigma_local = params.covariance.diagonal().asDiagonal();
     }
     else
     {
-        Sigma_local = Sigma_;
+        Sigma_local = params.covariance;
     }
     Sigma_inv(Eigen::seqN(0, n_measurements), Eigen::seqN(0, n_measurements)) = Sigma_local.inverse();
     typedef Eigen::Triplet<double> T;
@@ -37,18 +35,18 @@ MeasuredOperator::MeasuredOperator(const std::shared_ptr<LinearOperator> base_op
     // <<<<<<<<<<<<<<<<<<<<< READ THIS FROM DISK
     for (int k = 0; k < n_measurements; ++k)
     {
-        Eigen::VectorXd x_0 = measurement_locations_[k];
+        Eigen::VectorXd x_0 = params.measurement_locations[k];
         Eigen::SparseVector<double> r_meas = measurement_vector(x_0, radius);
         for (Eigen::SparseVector<double>::InnerIterator it(r_meas); it; ++it)
             triplet_list.push_back(T(it.col(), k, it.value()));
     }
-    if (measure_average_)
+    if (params.measure_global)
     {
         for (int j = 0; j < nrow; ++j)
         {
             triplet_list.push_back(T(j, n_measurements, 1. / nrow));
         }
-        Sigma_inv(n_measurements, n_measurements) = 1. / sigma_average_;
+        Sigma_inv(n_measurements, n_measurements) = 1. / params.sigma_global;
     }
     B.setFromTriplets(triplet_list.begin(), triplet_list.end());
     Sigma_inv_BT = Sigma_inv.sparseView() * B.transpose();
