@@ -30,13 +30,10 @@ MeasuredOperator::MeasuredOperator(const std::shared_ptr<LinearOperator> base_op
     Sigma_inv(Eigen::seqN(0, n_measurements), Eigen::seqN(0, n_measurements)) = Sigma_local.inverse();
     typedef Eigen::Triplet<double> T;
     std::vector<T> triplet_list;
-    // <<<<<<<<<<<<<<<<<<<<< READ THIS FROM DISK
-    double radius = 0.1;
-    // <<<<<<<<<<<<<<<<<<<<< READ THIS FROM DISK
     for (int k = 0; k < n_measurements; ++k)
     {
         Eigen::VectorXd x_0 = params.measurement_locations[k];
-        Eigen::SparseVector<double> r_meas = measurement_vector(x_0, radius);
+        Eigen::SparseVector<double> r_meas = measurement_vector(x_0, params.radius);
         for (Eigen::SparseVector<double>::InnerIterator it(r_meas); it; ++it)
             triplet_list.push_back(T(it.col(), k, it.value()));
     }

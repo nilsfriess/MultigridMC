@@ -186,6 +186,9 @@ void MeasurementParameters::parse_config(const libconfig::Setting &root)
         }
         measurement_locations.push_back(v);
     }
+    // Radius
+    radius = measurements.lookup("radius");
+    std::cout << "  radius of individual measurements = " << radius << std::endl;
     // Measured averages
     const libconfig::Setting &s_mean = measurements.lookup("mean");
     mean = Eigen::VectorXd(n_meas);

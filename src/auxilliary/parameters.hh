@@ -241,6 +241,8 @@ public:
     unsigned int n;
     /** @brief measurement locations */
     std::vector<Eigen::VectorXd> measurement_locations;
+    /** @brief radius of measurement function */
+    double radius;
     /** @brief measured averages */
     Eigen::VectorXd mean;
     /** @brief covariance matrix of measurements */
