@@ -20,8 +20,8 @@ protected:
         unsigned int n = 8;
         lattice_1d = std::make_shared<Lattice1d>(n);
         coarse_lattice_1d = std::make_shared<Lattice1d>(n / 2);
-        unsigned int nx = 4;
-        unsigned int ny = 4;
+        unsigned int nx = 8;
+        unsigned int ny = 8;
         lattice_2d = std::make_shared<Lattice2d>(nx, ny);
         coarse_lattice_2d = std::make_shared<Lattice2d>(nx / 2, ny / 2);
         intergrid_operator_1dlinear = std::make_shared<IntergridOperatorLinear>(lattice_1d);
@@ -159,18 +159,17 @@ TEST_F(IntergridTest, TestProlongRestrict2dLinear)
 
 /** @brief check that coarsening the operator works
  *
- * Coarsening the shifted Laplace operator should result in rescaling the
- * second- order and zero- order terms by constant factors
+ * Coarsening the shifted Laplace operator with constant coefficients should
+ * result in the same operator on the next-coarser level
  */
-/*
+
 TEST_F(IntergridTest, TestCoarsenOperator2d)
 {
-    DiffusionOperator2d linear_operator(lattice_2d, 1.0, 0.0, 1.0, 0.0);
-    DiffusionOperator2d coarse_operator(coarse_lattice_2d, 8.0, 0.0, 4.0, 0.0);
-    LinearOperator coarsened_operator = linear_operator.coarsen(intergrid_operator_2davg);
+    DiffusionOperator linear_operator(lattice_2d, 1.0, 0.0, 1.0, 0.0);
+    DiffusionOperator coarse_operator(coarse_lattice_2d, 1.0, 0.0, 1.0, 0.0);
+    LinearOperator coarsened_operator = linear_operator.coarsen(intergrid_operator_2dlinear);
     const double tolerance = 1.E-12;
-    EXPECT_NEAR((0.25 * coarse_operator.get_sparse() - coarsened_operator.get_sparse()).norm(), 0.0, tolerance);
+    EXPECT_NEAR((coarse_operator.get_sparse() - coarsened_operator.get_sparse()).norm(), 0.0, tolerance);
 }
-*/
 
 #endif // TEST_INTERGRID_HH

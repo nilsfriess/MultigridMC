@@ -59,28 +59,23 @@ int main(int argc, char *argv[])
     {
         lattice = std::make_shared<Lattice2d>(lattice_params.nx,
                                               lattice_params.ny);
-        diffusion_operator = std::make_shared<DiffusionOperator2d>(lattice,
-                                                                   diffusion_params.alpha_K,
-                                                                   diffusion_params.beta_K,
-                                                                   diffusion_params.alpha_b,
-                                                                   diffusion_params.beta_b);
     }
     else if (general_params.dim == 3)
     {
         lattice = std::make_shared<Lattice3d>(lattice_params.nx,
                                               lattice_params.ny,
                                               lattice_params.nz);
-        diffusion_operator = std::make_shared<DiffusionOperator3d>(lattice,
-                                                                   diffusion_params.alpha_K,
-                                                                   diffusion_params.beta_K,
-                                                                   diffusion_params.alpha_b,
-                                                                   diffusion_params.beta_b);
     }
     else
     {
         std::cout << "ERROR: Invalid dimension : " << general_params.dim << std::endl;
         exit(-1);
     }
+    diffusion_operator = std::make_shared<DiffusionOperator>(lattice,
+                                                             diffusion_params.alpha_K,
+                                                             diffusion_params.beta_K,
+                                                             diffusion_params.alpha_b,
+                                                             diffusion_params.beta_b);
     std::shared_ptr<MeasuredOperator> linear_operator = std::make_shared<MeasuredOperator>(diffusion_operator,
                                                                                            measurement_params.measurement_locations,
                                                                                            measurement_params.covariance,

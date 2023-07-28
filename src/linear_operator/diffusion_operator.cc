@@ -1,143 +1,181 @@
 #include "diffusion_operator.hh"
 
-/** @file diffusion_operator_2d.cc
+/** @file diffusion_operator.cc
  *
  * @brief Implementation of diffusion_operator.hh
  */
 
-/** @brief Create a new instance */
-DiffusionOperator2d::DiffusionOperator2d(const std::shared_ptr<Lattice> lattice_,
-                                         const double alpha_K_,
-                                         const double beta_K_,
-                                         const double alpha_b_,
-                                         const double beta_b_) : DiffusionOperator(lattice_,
-                                                                                   alpha_K_,
-                                                                                   beta_K_,
-                                                                                   alpha_b_,
-                                                                                   beta_b_)
+/*  Create a new instance */
+DiffusionOperator::DiffusionOperator(const std::shared_ptr<Lattice> lattice_,
+                                     const double alpha_K_,
+                                     const double beta_K_,
+                                     const double alpha_b_,
+                                     const double beta_b_) : LinearOperator(lattice_),
+                                                             alpha_K(alpha_K_),
+                                                             beta_K(beta_K_),
+                                                             alpha_b(alpha_b_),
+                                                             beta_b(beta_b_)
 {
+    // dimension
+    int dim = lattice->dim();
+    // number of matrix rows
+    int nrow = lattice->Nvertex;
+    // shape of lattice
     Eigen::VectorXi shape = lattice->shape();
-    unsigned int nx = shape[0];
-    unsigned int ny = shape[1];
-    double hx = 1. / nx;
-    double hy = 1. / ny;
-    typedef Eigen::Triplet<double> T;
-    std::vector<T> triplet_list;
-    unsigned int nrow = lattice->Ncell;
-    triplet_list.reserve(5 * nrow);
-    for (unsigned int j = 0; j < ny; ++j)
+    // grid spacings in all directions
+    Eigen::VectorXd h(dim);
+    // inverse squared grid spacings in all dimensions (required in 2nd order term)
+    Eigen::VectorXd hinv2(dim);
+    // cell volume
+    double cell_volume = 1.0;
+    for (int d = 0; d < dim; ++d)
     {
-        for (unsigned int i = 0; i < nx; ++i)
-        {
-            unsigned int ell = nx * j + i;
-            unsigned int ell_prime;
-            double K_north = K_diff(i * hx, (j + 0.5) * hy);
-            double K_south = K_diff(i * hx, (j - 0.5) * hy);
-            double K_east = K_diff((i + 0.5) * hx, j * hy);
-            double K_west = K_diff((i - 0.5) * hx, j * hy);
-            double b_centre = b_zero(i * hx, j * hy);
-            // centre
-            triplet_list.push_back(T(ell, ell, b_centre * hx * hy + (K_east + K_west) * hy / hx + (K_north + K_south) * hx / hy));
-            // south
-            ell_prime = nx * ((j - 1 + ny) % ny) + i;
-            triplet_list.push_back(T(ell, ell_prime, -K_south * hx / hy));
-            // north
-            ell_prime = nx * ((j + 1) % ny) + i;
-            triplet_list.push_back(T(ell, ell_prime, -K_north * hx / hy));
-            // west
-            ell_prime = nx * j + ((i - 1) % nx);
-            triplet_list.push_back(T(ell, ell_prime, -K_west * hy / hx));
-            // east
-            ell_prime = nx * j + ((i + 1 + nx) % nx);
-            triplet_list.push_back(T(ell, ell_prime, -K_east * hy / hx));
-        }
+        h[d] = 1. / double(shape[d]);
+        hinv2[d] = 1. / (h[d] * h[d]);
+        cell_volume *= h[d];
     }
-    A_sparse.setFromTriplets(triplet_list.begin(), triplet_list.end());
-}
+    // offsets (=shifts) in one dimension
+    std::vector<int> shift_1d{-1, 0, +1};
+    // Vector of all possible d-dimensional offsets (=shifts) from a given lattice point
+    std::vector<std::vector<int>> shifts = cartesian_product(shift_1d, dim);
 
-/** @brief Diffusion coefficient */
-double DiffusionOperator2d::K_diff(const double x, const double y) const
-{
-    return alpha_K + beta_K * sin(2 * M_PI * x) * sin(2 * M_PI * y);
-}
+    /* ==== STEP 1 ==== Initialise sparsity structure of matrix
+     *
+     * Initialise all potentially non-zero entries of the matrix to zero; these
+     * entries will be populated with concrete values during matrix assembly.
+     */
 
-/** @brief Zero order term */
-double DiffusionOperator2d::b_zero(const double x, const double y) const
-{
-    return alpha_b + beta_b * cos(2 * M_PI * x) * cos(2 * M_PI * y);
-}
-
-/** @brief Create a new instance */
-DiffusionOperator3d::DiffusionOperator3d(const std::shared_ptr<Lattice> lattice_,
-                                         const double alpha_K_,
-                                         const double beta_K_,
-                                         const double alpha_b_,
-                                         const double beta_b_) : DiffusionOperator(lattice_,
-                                                                                   alpha_K_,
-                                                                                   beta_K_,
-                                                                                   alpha_b_,
-                                                                                   beta_b_)
-{
-    Eigen::VectorXi shape = lattice_->shape();
-    unsigned int nx = shape[0];
-    unsigned int ny = shape[1];
-    unsigned int nz = shape[2];
-    double hx = 1. / nx;
-    double hy = 1. / ny;
-    double hz = 1. / nz;
     typedef Eigen::Triplet<double> T;
     std::vector<T> triplet_list;
-    unsigned int nrow = lattice->Ncell;
-    triplet_list.reserve(7 * nrow);
-    for (unsigned int k = 0; k < nz; ++k)
-    {
-        for (unsigned int j = 0; j < ny; ++j)
-        {
-            for (unsigned int i = 0; i < nx; ++i)
+    triplet_list.reserve(nrow * int(pow(3, dim))); // there are (up to) 3^d entries per matrix row
+    for (unsigned int ell_row = 0; ell_row < lattice->Nvertex; ++ell_row)
+    { // loop over all internal vertices
+        for (auto it = shifts.begin(); it != shifts.end(); ++it)
+        { // loop over all possible shifts
+            Eigen::Map<Eigen::VectorXi> shift(it->data(), dim);
+            Eigen::VectorXi p = lattice->vertexidx_linear2euclidean(ell_row) + shift;
+            // Check whether the shift takes us to a point that is no longer an interior vertex
+            bool valid_shift = true;
+            for (int d = 0; d < dim; ++d)
+                valid_shift = valid_shift && (not((p[d] == 0) or (p[d] == shape[d])));
+            if (valid_shift)
             {
-                unsigned int ell = nx * ny * k + nx * j + i;
-                unsigned int ell_prime;
-                double K_north = K_diff(i * hx, (j + 0.5) * hy, k * hz);
-                double K_south = K_diff(i * hx, (j - 0.5) * hy, k * hz);
-                double K_east = K_diff((i + 0.5) * hx, j * hy, k * hz);
-                double K_west = K_diff((i - 0.5) * hx, j * hy, k * hz);
-                double K_up = K_diff(i * hx, j * hy, (k + 0.5) * hz);
-                double K_down = K_diff(i * hx, j * hy, (k - 0.5) * hz);
-                double b_centre = b_zero(i * hx, j * hy, k * hz);
-                // centre
-                triplet_list.push_back(T(ell, ell, b_centre * hx * hy * hz + (K_east + K_west) * hy * hz / hx + (K_north + K_south) * hx * hz / hy + (K_up + K_down) * hx * hy / hz));
-                // south
-                ell_prime = nx * ny * k + nx * ((j - 1 + ny) % ny) + i;
-                triplet_list.push_back(T(ell, ell_prime, -K_south * hx * hz / hy));
-                // north
-                ell_prime = nx * ny * k + nx * ((j + 1) % ny) + i;
-                triplet_list.push_back(T(ell, ell_prime, -K_north * hx * hz / hy));
-                // west
-                ell_prime = nx * ny * k + nx * j + ((i - 1) % nx);
-                triplet_list.push_back(T(ell, ell_prime, -K_west * hy * hz / hx));
-                // east
-                ell_prime = nx * ny * k + nx * j + ((i + 1 + nx) % nx);
-                triplet_list.push_back(T(ell, ell_prime, -K_east * hy * hz / hx));
-                // up
-                ell_prime = nx * ny * ((k + 1 + nz) % nz) + nx * j + i;
-                triplet_list.push_back(T(ell, ell_prime, -K_up * hx * hy / hz));
-                // down
-                ell_prime = nx * ny * ((k - 1 + nz) % nz) + nx * j + i;
-                triplet_list.push_back(T(ell, ell_prime, -K_down * hx * hy / hz));
+                unsigned int ell_col = lattice->vertexidx_euclidean2linear(p);
+                triplet_list.push_back(T(ell_row, ell_col, 0.0));
             }
         }
     }
     A_sparse.setFromTriplets(triplet_list.begin(), triplet_list.end());
+
+    /* ==== STEP 2 ==== global matrix assembly
+     *
+     * Loop over all cells and all pairs (alpha,beta) of basis functions inside a cell;
+     */
+    GaussLegendreQuadrature quadrature(dim, 1);
+    std::vector<double> quad_weights = quadrature.get_weights();
+    std::vector<Eigen::VectorXd> quad_points = quadrature.get_points();
+    std::vector<int> basis_idx_1d{0, 1}; // indices used to identify the basis functions
+    // Vector of all possible basis indices in d dimensions
+    std::vector<std::vector<int>> basis_idx = cartesian_product(basis_idx_1d, dim);
+    for (unsigned int cell_idx = 0; cell_idx < lattice->Ncell; ++cell_idx)
+    { // loop over all cells
+        Eigen::VectorXi cell_coord = lattice->cellidx_linear2euclidean(cell_idx);
+        for (auto it_alpha = basis_idx.begin(); it_alpha != basis_idx.end(); ++it_alpha)
+        {
+            for (auto it_beta = basis_idx.begin(); it_beta != basis_idx.end(); ++it_beta)
+            {
+                Eigen::Map<Eigen::VectorXi> alpha(it_alpha->data(), dim);
+                Eigen::Map<Eigen::VectorXi> beta(it_beta->data(), dim);
+                Eigen::VectorXi vertex_coord_alpha = cell_coord + alpha;
+                Eigen::VectorXi vertex_coord_beta = cell_coord + beta;
+                // Check whether the matrix entry is valid, i.e. whether it couples unknowns
+                // associated with interior vertices
+                bool valid_entry = true;
+                for (int d = 0; d < dim; ++d)
+                {
+                    valid_entry = valid_entry && (not((vertex_coord_alpha[d] == 0) or (vertex_coord_alpha[d] == shape[d])));
+                    valid_entry = valid_entry && (not((vertex_coord_beta[d] == 0) or (vertex_coord_beta[d] == shape[d])));
+                }
+                if (valid_entry)
+                {
+                    double local_matrix_entry = 0.0;
+                    for (int j = 0; j < quad_weights.size(); ++j)
+                    { // Loop over all quadrature points
+                        Eigen::VectorXd xhat = quad_points[j];
+                        // Convert integer-valued coordinates to coordinates in domain
+                        Eigen::VectorXd x = h.cwiseProduct(xhat + cell_coord.cast<double>());
+
+                        /* increment local matrix entry by
+                         *
+                         *    ( b(x_q) * phi_alpha(xhat_q) * phi_beta(xhat_q)
+                         *    + K(x_q) * sum_{j=0}^d h_j^{-2} * dphi_alpha(xhat_q)/dxhat_j * dphi_beta(xhat_q)/dxhat_j )
+                         *        * h_0 * h_1 * ... * h_{d-1} * w_q
+                         */
+                        local_matrix_entry += (b_zero(x) * phi(alpha, xhat) * phi(beta, xhat) +
+                                               K_diff(x) * grad_phi(alpha, xhat).dot(hinv2.cwiseProduct(grad_phi(beta, xhat)))) *
+                                              cell_volume * quad_weights[j];
+                    }
+                    unsigned int ell_row = lattice->vertexidx_euclidean2linear(vertex_coord_alpha);
+                    unsigned int ell_col = lattice->vertexidx_euclidean2linear(vertex_coord_beta);
+                    A_sparse.coeffRef(ell_row, ell_col) += local_matrix_entry;
+                }
+            }
+        }
+    }
 }
 
 /** @brief Diffusion coefficient */
-double DiffusionOperator3d::K_diff(const double x, const double y, const double z) const
+double DiffusionOperator::K_diff(const Eigen::VectorXd x) const
 {
-    return alpha_K + beta_K * sin(2 * M_PI * x) * sin(2 * M_PI * y) * sin(2 * M_PI * z);
+    double value = beta_K;
+    for (int j = 0; j < x.size(); ++j)
+        value *= sin(2 * M_PI * x[j]);
+    value += alpha_K;
+    return value;
 }
 
 /** @brief Zero order term */
-double DiffusionOperator3d::b_zero(const double x, const double y, const double z) const
+double DiffusionOperator::b_zero(const Eigen::VectorXd x) const
 {
-    return alpha_b + beta_b * cos(2 * M_PI * x) * cos(2 * M_PI * y) * cos(2 * M_PI * z);
+    double value = beta_b;
+    for (int j = 0; j < x.size(); ++j)
+        value *= cos(2 * M_PI * x[j]);
+    value += alpha_b;
+    return value;
+}
+
+/* Evaluate basis function in reference cell */
+double DiffusionOperator::phi(Eigen::VectorXi alpha, Eigen::VectorXd xhat) const
+{
+    int dim = alpha.size();
+    double phihat = 1.0;
+    for (int j = 0; j < dim; ++j)
+    {
+        phihat *= (alpha[j] == 0) ? (1.0 - xhat[j]) : xhat[j];
+    }
+    return phihat;
+}
+
+/* Evaluate gradients of basis function in reference cell */
+Eigen::VectorXd DiffusionOperator::grad_phi(Eigen::VectorXi alpha, Eigen::VectorXd xhat) const
+{
+    int dim = alpha.size();
+    Eigen::VectorXd grad_phihat(dim);
+    for (int k = 0; k < dim; ++k)
+    {
+        double grad_phihat_k = 1.0;
+        for (int j = 0; j < alpha.size(); ++j)
+        {
+            if (j == k)
+            {
+                grad_phihat_k *= (alpha[j] == 0) ? -1.0 : +1.0;
+            }
+            else
+            {
+                grad_phihat_k *= (alpha[j] == 0) ? (1.0 - xhat[j]) : xhat[j];
+            }
+        }
+        grad_phihat[k] = grad_phihat_k;
+    }
+    return grad_phihat;
 }

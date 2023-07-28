@@ -31,11 +31,11 @@ protected:
         double beta_K = 0.3;
         double alpha_b = 1.2;
         double beta_b = 0.1;
-        linear_operator = std::make_shared<DiffusionOperator2d>(lattice,
-                                                                alpha_K,
-                                                                beta_K,
-                                                                alpha_b,
-                                                                beta_b);
+        linear_operator = std::make_shared<DiffusionOperator>(lattice,
+                                                              alpha_K,
+                                                              beta_K,
+                                                              alpha_b,
+                                                              beta_b);
         unsigned int n_meas = 10;
         std::vector<Eigen::VectorXd> measurement_locations(n_meas);
         Eigen::MatrixXd Sigma(n_meas, n_meas);
@@ -53,11 +53,11 @@ protected:
         Sigma = Q * Sigma * Q.transpose();
         const bool measure_global = false;
         const double sigma_global = 0.0;
-        std::shared_ptr<DiffusionOperator2d> diffusion_operator = std::make_shared<DiffusionOperator2d>(lattice,
-                                                                                                        alpha_K,
-                                                                                                        beta_K,
-                                                                                                        alpha_b,
-                                                                                                        beta_b);
+        std::shared_ptr<DiffusionOperator> diffusion_operator = std::make_shared<DiffusionOperator>(lattice,
+                                                                                                    alpha_K,
+                                                                                                    beta_K,
+                                                                                                    alpha_b,
+                                                                                                    beta_b);
         linear_operator_lowrank = std::make_shared<MeasuredOperator>(diffusion_operator,
                                                                      measurement_locations,
                                                                      Sigma,
@@ -80,7 +80,7 @@ protected:
 
 protected:
     /** @brief linear operator */
-    std::shared_ptr<DiffusionOperator2d> linear_operator;
+    std::shared_ptr<DiffusionOperator> linear_operator;
     /** @brief linear operator */
     std::shared_ptr<MeasuredOperator> linear_operator_lowrank;
     /** @brief exact solution */

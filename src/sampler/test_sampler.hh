@@ -288,11 +288,11 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     Sigma = Q * Sigma * Q.transpose();
     const bool measure_average = false;
     const double sigma_average = 0.0;
-    std::shared_ptr<DiffusionOperator2d> diffusion_operator = std::make_shared<DiffusionOperator2d>(lattice,
-                                                                                                    alpha_K,
-                                                                                                    beta_K,
-                                                                                                    alpha_b,
-                                                                                                    beta_b);
+    std::shared_ptr<DiffusionOperator> diffusion_operator = std::make_shared<DiffusionOperator>(lattice,
+                                                                                                alpha_K,
+                                                                                                beta_K,
+                                                                                                alpha_b,
+                                                                                                beta_b);
     std::shared_ptr<MeasuredOperator> linear_operator = std::make_shared<MeasuredOperator>(diffusion_operator,
                                                                                            measurement_locations,
                                                                                            Sigma,
