@@ -3,8 +3,9 @@
 
 #include <vector>
 #include <Eigen/Dense>
-#include "linear_operator.hh"
+#include "auxilliary/quadrature.hh"
 #include "lattice/lattice.hh"
+#include "linear_operator.hh"
 
 /** @file measured_operator.hh
  *
@@ -45,50 +46,7 @@ public:
                      const Eigen::MatrixXd Sigma_,
                      const bool ignore_measurement_cross_correlations_,
                      const bool measure_average_,
-                     const double sigma_average_) : LinearOperator(base_operator_->get_lattice(),
-                                                                   measurement_locations_.size() + measure_average_),
-                                                    base_operator(base_operator_)
-    {
-        A_sparse = base_operator->get_sparse();
-        unsigned int nrow = base_operator->get_lattice()->Nvertex;
-        unsigned int n_measurements = measurement_locations_.size();
-        Sigma_inv = Eigen::MatrixXd(n_measurements + measure_average_, n_measurements + measure_average_);
-        Sigma_inv.setZero();
-        DenseMatrixType Sigma_local;
-        if (ignore_measurement_cross_correlations_)
-        {
-            Sigma_local = Sigma_.diagonal().asDiagonal();
-        }
-        else
-        {
-            Sigma_local = Sigma_;
-        }
-        Sigma_inv(Eigen::seqN(0, n_measurements), Eigen::seqN(0, n_measurements)) = Sigma_local.inverse();
-        typedef Eigen::Triplet<double> T;
-        std::vector<T> triplet_list;
-        for (int k = 0; k < n_measurements; ++k)
-        {
-            Eigen::VectorXd x_loc = measurement_locations_[k];
-            Eigen::VectorXi x_loc_int(x_loc.size());
-            Eigen::VectorXi shape = lattice->shape();
-            for (int j = 0; j < x_loc.size(); ++j)
-            {
-                x_loc_int[j] = int(round(x_loc[j] * shape[j]));
-            }
-            unsigned int ell = lattice->vertexidx_euclidean2linear(x_loc_int);
-            triplet_list.push_back(T(ell, k, 1.0));
-        }
-        if (measure_average_)
-        {
-            for (int j = 0; j < nrow; ++j)
-            {
-                triplet_list.push_back(T(j, n_measurements, 1. / nrow));
-            }
-            Sigma_inv(n_measurements, n_measurements) = 1. / sigma_average_;
-        }
-        B.setFromTriplets(triplet_list.begin(), triplet_list.end());
-        Sigma_inv_BT = Sigma_inv.sparseView() * B.transpose();
-    }
+                     const double sigma_average_);
 
     /** @brief Compute posterior mean
      *
@@ -106,7 +64,30 @@ public:
         return x_post;
     }
 
+    /** @brief Create measurement vector in dual space
+     *
+     * The entries of the vector are given by
+     *
+     *    w_j = int_{\Omega} f(x) phi_j(x)
+     *
+     * where phi_j is the j-th finite element basis function and f(x) is a function given by
+     *
+     *    f(x) = f_{meas}(|x-x_0|/R) if |x-x_0| < R and f(x) = 0 otherwise
+     *
+     * where f_{meas}(xi) is some square-integrable function defined in the interval [0,1]
+     *
+     * @param[in] x0 centre x_0 of measurement
+     * @param[in] radius radius R of measurement
+     */
+    Eigen::SparseVector<double> measurement_vector(const Eigen::VectorXd x0, const double radius) const;
+
 protected:
+    /** @brief measurement function
+     *
+     * @param[in] xi point xi in [0,1] at which the function is to be evaluated
+     */
+    inline double f_meas(const double xi) const { return 1.0; }
+
     /** @brief underlying linear operator */
     std::shared_ptr<LinearOperator> base_operator;
 };
