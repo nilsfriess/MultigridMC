@@ -24,8 +24,12 @@ protected:
         unsigned int ny = 8;
         lattice_2d = std::make_shared<Lattice2d>(nx, ny);
         coarse_lattice_2d = std::make_shared<Lattice2d>(nx / 2, ny / 2);
+        unsigned int nz = 8;
+        lattice_3d = std::make_shared<Lattice3d>(nx, ny, nz);
+        coarse_lattice_3d = std::make_shared<Lattice3d>(nx / 2, ny / 2, nz / 2);
         intergrid_operator_1dlinear = std::make_shared<IntergridOperatorLinear>(lattice_1d);
         intergrid_operator_2dlinear = std::make_shared<IntergridOperatorLinear>(lattice_2d);
+        intergrid_operator_3dlinear = std::make_shared<IntergridOperatorLinear>(lattice_3d);
     }
 
     /** @brief return a sample state
@@ -63,11 +67,17 @@ protected:
     std::shared_ptr<Lattice2d> lattice_2d;
     /** @brief underlying 2d coarse lattice */
     std::shared_ptr<Lattice2d> coarse_lattice_2d;
+    /** @brief underlying 3d lattice */
+    std::shared_ptr<Lattice3d> lattice_3d;
+    /** @brief underlying 3d coarse lattice */
+    std::shared_ptr<Lattice3d> coarse_lattice_3d;
 
     /** @brief intergrid operator for linear interpolation in 1d*/
     std::shared_ptr<IntergridOperatorLinear> intergrid_operator_1dlinear;
     /** @brief intergrid operator for linear interpolation in 2d */
     std::shared_ptr<IntergridOperatorLinear> intergrid_operator_2dlinear;
+    /** @brief intergrid operator for linear interpolation in 3d */
+    std::shared_ptr<IntergridOperatorLinear> intergrid_operator_3dlinear;
 };
 
 /** @brief check that prolongating a field in 1d will return the same result as manually interpolating */
@@ -157,7 +167,7 @@ TEST_F(IntergridTest, TestProlongRestrict2dLinear)
     EXPECT_NEAR(X_coarse.dot(r_restr) - X_prol.dot(r_fine), 0.0, tolerance);
 }
 
-/** @brief check that coarsening the operator works
+/** @brief check that coarsening the operator works in 2d
  *
  * Coarsening the shifted Laplace operator with constant coefficients should
  * result in the same operator on the next-coarser level
@@ -168,6 +178,21 @@ TEST_F(IntergridTest, TestCoarsenOperator2d)
     DiffusionOperator linear_operator(lattice_2d, 1.0, 0.0, 1.0, 0.0);
     DiffusionOperator coarse_operator(coarse_lattice_2d, 1.0, 0.0, 1.0, 0.0);
     LinearOperator coarsened_operator = linear_operator.coarsen(intergrid_operator_2dlinear);
+    const double tolerance = 1.E-12;
+    EXPECT_NEAR((coarse_operator.get_sparse() - coarsened_operator.get_sparse()).norm(), 0.0, tolerance);
+}
+
+/** @brief check that coarsening the operator works in 3d
+ *
+ * Coarsening the shifted Laplace operator with constant coefficients should
+ * result in the same operator on the next-coarser level
+ */
+
+TEST_F(IntergridTest, TestCoarsenOperator3d)
+{
+    DiffusionOperator linear_operator(lattice_3d, 1.0, 0.0, 1.0, 0.0);
+    DiffusionOperator coarse_operator(coarse_lattice_3d, 1.0, 0.0, 1.0, 0.0);
+    LinearOperator coarsened_operator = linear_operator.coarsen(intergrid_operator_3dlinear);
     const double tolerance = 1.E-12;
     EXPECT_NEAR((coarse_operator.get_sparse() - coarsened_operator.get_sparse()).norm(), 0.0, tolerance);
 }
