@@ -36,8 +36,8 @@ public:
                const IterativeSolverParameters params_) : IterativeSolver(linear_operator_, params_),
                                                           preconditioner(preconditioner_)
     {
-        r = Eigen::VectorXd(linear_operator_->get_lattice()->Ncell);
-        Pr = Eigen::VectorXd(linear_operator_->get_lattice()->Ncell);
+        r = Eigen::VectorXd(linear_operator_->get_lattice()->Nvertex);
+        Pr = Eigen::VectorXd(linear_operator_->get_lattice()->Nvertex);
     }
 
     /** @brief Solve the linear system Ax = b

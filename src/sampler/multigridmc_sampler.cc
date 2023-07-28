@@ -32,9 +32,9 @@ MultigridMCSampler::MultigridMCSampler(std::shared_ptr<LinearOperator> linear_op
         {
             std::cout << "  level " << level << " lattice : " << lattice->get_info() << std::endl;
         }
-        x_ell.push_back(Eigen::VectorXd(lattice->Ncell));
-        f_ell.push_back(Eigen::VectorXd(lattice->Ncell));
-        r_ell.push_back(Eigen::VectorXd(lattice->Ncell));
+        x_ell.push_back(Eigen::VectorXd(lattice->Nvertex));
+        f_ell.push_back(Eigen::VectorXd(lattice->Nvertex));
+        r_ell.push_back(Eigen::VectorXd(lattice->Nvertex));
         linear_operators.push_back(lin_op);
         std::shared_ptr<Sampler> presampler = presampler_factory->get(lin_op);
         presamplers.push_back(presampler);

@@ -55,7 +55,7 @@ public:
     {
         typedef Eigen::Triplet<double> T;
         std::vector<T> triplet_list;
-        const unsigned int nrow = lattice->Ncell;
+        const unsigned int nrow = lattice->Nvertex;
         triplet_list.reserve(3 * nrow);
         for (unsigned int i = 0; i < nrow; ++i)
         {
@@ -263,7 +263,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     int nx = thorough_testing ? 16 : 8;
     int ny = thorough_testing ? 16 : 8;
     std::shared_ptr<Lattice2d> lattice = std::make_shared<Lattice2d>(nx, ny);
-    unsigned int ndof = lattice->Ncell;
+    unsigned int ndof = lattice->Nvertex;
     double alpha_K = 1.5;
     double beta_K = 0.3;
     double alpha_b = 1.2;

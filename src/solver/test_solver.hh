@@ -31,7 +31,7 @@ protected:
         std::uniform_real_distribution<double> uniform_dist(0.0, 1.0);
 
         std::shared_ptr<Lattice2d> lattice = std::make_shared<Lattice2d>(nx, ny);
-        unsigned int ndof = lattice->Ncell;
+        unsigned int ndof = lattice->Nvertex;
         double alpha_K = 1.5;
         double beta_K = 0.3;
         double alpha_b = 1.2;
@@ -122,7 +122,7 @@ TEST_F(SolverTest, TestCholesky)
 TEST_F(SolverTest, TestMultigrid)
 {
     MultigridParameters multigrid_params;
-    multigrid_params.nlevel = 6;
+    multigrid_params.nlevel = 5;
     multigrid_params.npresmooth = 1;
     multigrid_params.npostsmooth = 1;
     const double omega = 1.0;
@@ -157,7 +157,7 @@ TEST_F(SolverTest, TestMultigrid)
 TEST_F(SolverTest, TestMultigridLowRank)
 {
     MultigridParameters multigrid_params;
-    multigrid_params.nlevel = 6;
+    multigrid_params.nlevel = 5;
     multigrid_params.npresmooth = 1;
     multigrid_params.npostsmooth = 1;
     const double omega = 1.0;

@@ -75,7 +75,7 @@ public:
             {
                 x_loc_int[j] = int(round(x_loc[j] * shape[j]));
             }
-            unsigned int ell = lattice->cellidx_euclidean2linear(x_loc_int);
+            unsigned int ell = lattice->vertexidx_euclidean2linear(x_loc_int);
             triplet_list.push_back(T(ell, k, 1.0));
         }
         if (measure_average_)

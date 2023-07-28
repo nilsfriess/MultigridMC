@@ -27,9 +27,9 @@ MultigridPreconditioner::MultigridPreconditioner(std::shared_ptr<LinearOperator>
         {
             std::cout << "  level " << level << " lattice : " << lattice->get_info() << std::endl;
         }
-        x_ell.push_back(Eigen::VectorXd(lattice->Ncell));
-        b_ell.push_back(Eigen::VectorXd(lattice->Ncell));
-        r_ell.push_back(Eigen::VectorXd(lattice->Ncell));
+        x_ell.push_back(Eigen::VectorXd(lattice->Nvertex));
+        b_ell.push_back(Eigen::VectorXd(lattice->Nvertex));
+        r_ell.push_back(Eigen::VectorXd(lattice->Nvertex));
         linear_operators.push_back(lin_op);
         std::shared_ptr<Smoother> presmoother = presmoother_factory->get(lin_op);
         presmoothers.push_back(presmoother);
