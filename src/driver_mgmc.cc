@@ -50,18 +50,15 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
         sampler->apply(f, x);
     };
     std::vector<double> data(sampling_params.nsamples);
-    Eigen::VectorXi idx(lattice->dim());
-    Eigen::VectorXi shape = lattice->shape();
-    for (int d = 0; d < lattice->dim(); ++d)
-    {
-        idx[d] = int(measurement_params.sample_location[d] * shape[d]);
-    }
-    int j_sample = lattice->vertexidx_euclidean2linear(idx);
+
+    Eigen::SparseVector<double> sample_vector = linear_operator->measurement_vector(measurement_params.sample_location,
+                                                                                    measurement_params.radius);
+
     auto t_start = std::chrono::high_resolution_clock::now();
     for (int k = 0; k < sampling_params.nsamples; ++k)
     {
         sampler->apply(f, x);
-        data[k] = x[j_sample];
+        data[k] = sample_vector.dot(x);
     }
     auto t_finish = std::chrono::high_resolution_clock::now();
     double t_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(t_finish - t_start).count() / (1.0 * sampling_params.nsamples);
@@ -130,7 +127,7 @@ void posterior_statistics(std::shared_ptr<Sampler> sampler,
     if (measurement_params.dim == 2)
     {
         write_vtk_circle(measurement_params.sample_location,
-                         0.02,
+                         measurement_params.radius,
                          "sample_location.vtk");
     }
 }
