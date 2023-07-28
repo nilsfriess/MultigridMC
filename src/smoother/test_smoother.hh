@@ -26,7 +26,7 @@ protected:
         std::uniform_real_distribution<double> uniform_dist(0.0, 1.0);
 
         std::shared_ptr<Lattice2d> lattice = std::make_shared<Lattice2d>(nx, ny);
-        unsigned int ndof = lattice->Ncell;
+        unsigned int ndof = lattice->Nvertex;
         double alpha_K = 1.5;
         double beta_K = 0.3;
         double alpha_b = 1.2;

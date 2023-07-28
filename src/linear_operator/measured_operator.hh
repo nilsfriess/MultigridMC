@@ -50,7 +50,7 @@ public:
                                                     base_operator(base_operator_)
     {
         A_sparse = base_operator->get_sparse();
-        unsigned int nrow = base_operator->get_lattice()->Ncell;
+        unsigned int nrow = base_operator->get_lattice()->Nvertex;
         unsigned int n_measurements = measurement_locations_.size();
         Sigma_inv = Eigen::MatrixXd(n_measurements + measure_average_, n_measurements + measure_average_);
         Sigma_inv.setZero();
