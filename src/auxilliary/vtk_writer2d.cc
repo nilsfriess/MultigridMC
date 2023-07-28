@@ -21,14 +21,7 @@ void VTKWriter2d::write() const
     out << "ORIGIN -0.5 -0.5 0.0" << std::endl;
     out << "SPACING " << hx << " " << hy << " 0" << std::endl;
     out << std::endl;
-    if (entity == Cells)
-    {
-        out << "CELL_DATA " << nx * ny << std::endl;
-    }
-    else
-    {
-        out << "POINT_DATA " << (nx + 1) * (ny + 1) << std::endl;
-    }
+    out << "POINT_DATA " << (nx + 1) * (ny + 1) << std::endl;
     for (auto it = sample_states.begin(); it != sample_states.end(); ++it)
     {
         std::string label = it->first;
@@ -37,22 +30,20 @@ void VTKWriter2d::write() const
         Eigen::VectorXd phi = it->second;
         out << "SCALARS " << label << " double 1" << std::endl;
         out << "LOOKUP_TABLE default" << std::endl;
-        if (entity == Cells)
+
+        for (int j = 0; j <= ny; ++j)
         {
-            for (unsigned int ell = 0; ell < nx * ny; ++ell)
+            for (int i = 0; i <= nx; ++i)
             {
-                out << phi[ell] << std::endl;
-            }
-        }
-        else
-        {
-            for (int j = 0; j <= ny; ++j)
-            {
-                for (int i = 0; i <= nx; ++i)
+                double data = 0.0;
+                if ((i > 0) and (i < nx) and (j > 0) and (j < ny))
                 {
-                    unsigned int ell = (j % ny) * nx + (i % nx);
-                    out << phi[ell] << std::endl;
+                    Eigen::VectorXi p(2);
+                    p[0] = i;
+                    p[1] = j;
+                    data = phi[lattice->vertexidx_euclidean2linear(p)];
                 }
+                out << data << std::endl;
             }
         }
     }

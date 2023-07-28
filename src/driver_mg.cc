@@ -75,7 +75,8 @@ int main(int argc, char *argv[])
                                                              diffusion_params.alpha_K,
                                                              diffusion_params.beta_K,
                                                              diffusion_params.alpha_b,
-                                                             diffusion_params.beta_b);
+                                                             diffusion_params.beta_b,
+                                                             1);
     std::shared_ptr<MeasuredOperator> linear_operator = std::make_shared<MeasuredOperator>(diffusion_operator,
                                                                                            measurement_params.measurement_locations,
                                                                                            measurement_params.covariance,
@@ -119,11 +120,11 @@ int main(int argc, char *argv[])
     std::shared_ptr<VTKWriter> vtk_writer;
     if (general_params.dim == 2)
     {
-        vtk_writer = std::make_shared<VTKWriter2d>("solution.vtk", Cells, lattice, 1);
+        vtk_writer = std::make_shared<VTKWriter2d>("solution.vtk", lattice, 1);
     }
     else
     {
-        vtk_writer = std::make_shared<VTKWriter3d>("solution.vtk", Cells, lattice, 1);
+        vtk_writer = std::make_shared<VTKWriter3d>("solution.vtk", lattice, 1);
     }
     vtk_writer->add_state(x_exact, "exact");
     vtk_writer->add_state(x, "numerical");

@@ -12,13 +12,6 @@
  * @brief classes for writing fields to a vtk files
  */
 
-/** @brief names of grid entities */
-enum Entity
-{
-    Vertices = 0,
-    Cells = 1
-};
-
 /** @class VTKWriter
  *
  * @brief base class for writing fields to disk
@@ -29,13 +22,10 @@ public:
     /** @brief Create a new instance
      *
      * @param[in] filename_ name of file to write to
-     * @param[in] entity_ grid entity which data is associated with
      * @param[in] verbose_ verbosity level
      */
     VTKWriter(const std::string filename_,
-              const Entity entity_,
               const int verbose_ = 0) : filename(filename_),
-                                        entity(entity_),
                                         verbose(verbose_) {}
 
     /** @brief Add state to collection of sample states to be written
@@ -51,8 +41,6 @@ public:
 protected:
     /** @brief name of file to write */
     const std::string filename;
-    /** @brief entity associated with data */
-    const Entity entity;
     /** @brief verbosity level */
     const int verbose;
     /** @brief dictionary of sample state to be written to disk

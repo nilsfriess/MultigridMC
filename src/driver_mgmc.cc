@@ -117,11 +117,11 @@ void posterior_statistics(std::shared_ptr<Sampler> sampler,
     std::shared_ptr<VTKWriter> vtk_writer;
     if (measurement_params.dim == 2)
     {
-        vtk_writer = std::make_shared<VTKWriter2d>("posterior.vtk", Cells, lattice, 1);
+        vtk_writer = std::make_shared<VTKWriter2d>("posterior.vtk", lattice, 1);
     }
     else
     {
-        vtk_writer = std::make_shared<VTKWriter3d>("posterior.vtk", Cells, lattice, 1);
+        vtk_writer = std::make_shared<VTKWriter3d>("posterior.vtk", lattice, 1);
     }
     vtk_writer->add_state(x_post, "x_post");
     vtk_writer->add_state(mean, "mean");
@@ -210,7 +210,8 @@ int main(int argc, char *argv[])
                                                              diffusion_params.alpha_K,
                                                              diffusion_params.beta_K,
                                                              diffusion_params.alpha_b,
-                                                             diffusion_params.beta_b);
+                                                             diffusion_params.beta_b,
+                                                             1);
     std::shared_ptr<MeasuredOperator> linear_operator = std::make_shared<MeasuredOperator>(diffusion_operator,
                                                                                            measurement_params.measurement_locations,
                                                                                            measurement_params.covariance,

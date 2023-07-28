@@ -1,6 +1,7 @@
 #ifndef DIFFUSION_OPERATOR_HH
 #define DIFFUSION_OPERATOR_HH DIFFUSION_OPERATOR_HH
 
+#include <chrono>
 #include <vector>
 #include <Eigen/Dense>
 #include "auxilliary/common.hh"
@@ -34,13 +35,14 @@ public:
      * @param[in] beta_K second coefficient in diffusion function
      * @param[in] alpha_b first coefficient in zero order term
      * @param[in] beta_b second coefficient in zero order term
-     * @param[in] m_lowrank_ the dimension of the low rank correction
+     * @param[in] verbose_ verbosity level
      */
     DiffusionOperator(const std::shared_ptr<Lattice> lattice_,
                       const double alpha_K_,
                       const double beta_K_,
                       const double alpha_b_,
-                      const double beta_b_);
+                      const double beta_b_,
+                      const int verbose = 0);
 
 protected:
     /** @brief Diffusion coefficient

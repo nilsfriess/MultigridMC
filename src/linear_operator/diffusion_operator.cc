@@ -10,12 +10,19 @@ DiffusionOperator::DiffusionOperator(const std::shared_ptr<Lattice> lattice_,
                                      const double alpha_K_,
                                      const double beta_K_,
                                      const double alpha_b_,
-                                     const double beta_b_) : LinearOperator(lattice_),
-                                                             alpha_K(alpha_K_),
-                                                             beta_K(beta_K_),
-                                                             alpha_b(alpha_b_),
-                                                             beta_b(beta_b_)
+                                     const double beta_b_,
+                                     const int verbose) : LinearOperator(lattice_),
+                                                          alpha_K(alpha_K_),
+                                                          beta_K(beta_K_),
+                                                          alpha_b(alpha_b_),
+                                                          beta_b(beta_b_)
 {
+    typedef std::chrono::time_point<std::chrono::high_resolution_clock> TimePointType;
+    TimePointType t_start;
+    if (verbose > 0)
+    {
+        t_start = std::chrono::high_resolution_clock::now();
+    }
     // dimension
     int dim = lattice->dim();
     // number of matrix rows
@@ -113,6 +120,17 @@ DiffusionOperator::DiffusionOperator(const std::shared_ptr<Lattice> lattice_,
                 }
             }
         }
+    }
+    if (verbose > 0)
+    {
+        TimePointType t_finish = std::chrono::high_resolution_clock::now();
+        double t_elapsed = 1.E-3 * std::chrono::duration_cast<std::chrono::milliseconds>(t_finish - t_start).count();
+        int buffersize = 64;
+        char buffer[buffersize];
+        snprintf(buffer, buffersize, "diffusion operator assembly time = %8.2f s", t_elapsed);
+        std::cout << std::endl
+                  << buffer << std::endl
+                  << std::endl;
     }
 }
 
