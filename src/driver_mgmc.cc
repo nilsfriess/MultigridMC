@@ -56,7 +56,7 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
     {
         idx[d] = int(measurement_params.sample_location[d] * shape[d]);
     }
-    int j_sample = lattice->cellidx_euclidean2linear(idx);
+    int j_sample = lattice->vertexidx_euclidean2linear(idx);
     auto t_start = std::chrono::high_resolution_clock::now();
     for (int k = 0; k < sampling_params.nsamples; ++k)
     {
