@@ -137,6 +137,8 @@ DiffusionOperator::DiffusionOperator(const std::shared_ptr<Lattice> lattice_,
 /** @brief Diffusion coefficient */
 double DiffusionOperator::K_diff(const Eigen::VectorXd x) const
 {
+    if (abs(beta_K / alpha_K) < 1.E-12)
+        return alpha_K;
     double value = beta_K;
     for (int j = 0; j < x.size(); ++j)
         value *= sin(2 * M_PI * x[j]);
@@ -147,6 +149,8 @@ double DiffusionOperator::K_diff(const Eigen::VectorXd x) const
 /** @brief Zero order term */
 double DiffusionOperator::b_zero(const Eigen::VectorXd x) const
 {
+    if (abs(beta_b / alpha_b) < 1.E-12)
+        return alpha_K;
     double value = beta_b;
     for (int j = 0; j < x.size(); ++j)
         value *= cos(2 * M_PI * x[j]);

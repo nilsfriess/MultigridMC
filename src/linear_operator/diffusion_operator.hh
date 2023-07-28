@@ -52,7 +52,7 @@ protected:
      * @param[in] x position in x-direction
      * @param[in] y position in y-direction
      */
-    double K_diff(const Eigen::VectorXd x) const;
+    inline double K_diff(const Eigen::VectorXd x) const;
 
     /** @brief Zero order term
      *
@@ -61,7 +61,7 @@ protected:
      * @param[in] x position in x-direction
      * @param[in] y position in y-direction
      */
-    double b_zero(const Eigen::VectorXd x) const;
+    inline double b_zero(const Eigen::VectorXd x) const;
 
     /** @brief evaluate multi-linear basis function in reference cell
      *
