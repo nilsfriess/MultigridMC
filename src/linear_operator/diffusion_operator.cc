@@ -84,14 +84,32 @@ DiffusionOperator::DiffusionOperator(const std::shared_ptr<Lattice> lattice_,
     std::vector<int> basis_idx_1d{0, 1}; // indices used to identify the basis functions
     // Vector of all possible basis indices in d dimensions
     std::vector<std::vector<int>> basis_idx = cartesian_product(basis_idx_1d, dim);
+    std::vector<double> phi_phi;
+    std::vector<double> gradphi_gradphi;
+    for (auto it_alpha = basis_idx.begin(); it_alpha != basis_idx.end(); ++it_alpha)
+    { // Loop over all basis functions
+        Eigen::Map<Eigen::VectorXi> alpha(it_alpha->data(), dim);
+        for (auto it_beta = basis_idx.begin(); it_beta != basis_idx.end(); ++it_beta)
+        {
+            Eigen::Map<Eigen::VectorXi> beta(it_beta->data(), dim);
+            for (int j = 0; j < quad_points.size(); ++j)
+            { // Loop over all quadrature points
+                Eigen::VectorXd xhat = quad_points[j];
+                phi_phi.push_back(phi(alpha, xhat) * phi(beta, xhat));
+                gradphi_gradphi.push_back(grad_phi(alpha, xhat).dot(hinv2.cwiseProduct(grad_phi(beta, xhat))));
+            }
+        }
+    }
+    // Now loop over all cells and assemble the matrix
     for (unsigned int cell_idx = 0; cell_idx < lattice->Ncell; ++cell_idx)
     { // loop over all cells
+        unsigned int count = 0;
         Eigen::VectorXi cell_coord = lattice->cellidx_linear2euclidean(cell_idx);
         for (auto it_alpha = basis_idx.begin(); it_alpha != basis_idx.end(); ++it_alpha)
         {
+            Eigen::Map<Eigen::VectorXi> alpha(it_alpha->data(), dim);
             for (auto it_beta = basis_idx.begin(); it_beta != basis_idx.end(); ++it_beta)
             {
-                Eigen::Map<Eigen::VectorXi> alpha(it_alpha->data(), dim);
                 Eigen::Map<Eigen::VectorXi> beta(it_beta->data(), dim);
                 // Check whether the matrix entry is valid, i.e. whether it couples unknowns
                 // associated with interior vertices
@@ -100,7 +118,7 @@ DiffusionOperator::DiffusionOperator(const std::shared_ptr<Lattice> lattice_,
                     lattice->corner_is_internal_vertex(cell_idx, beta, ell_col))
                 {
                     double local_matrix_entry = 0.0;
-                    for (int j = 0; j < quad_weights.size(); ++j)
+                    for (int j = 0; j < quad_points.size(); ++j)
                     { // Loop over all quadrature points
                         Eigen::VectorXd xhat = quad_points[j];
                         // Convert integer-valued coordinates to coordinates in domain
@@ -112,11 +130,16 @@ DiffusionOperator::DiffusionOperator(const std::shared_ptr<Lattice> lattice_,
                          *    + K(x_q) * sum_{j=0}^d h_j^{-2} * dphi_alpha(xhat_q)/dxhat_j * dphi_beta(xhat_q)/dxhat_j )
                          *        * h_0 * h_1 * ... * h_{d-1} * w_q
                          */
-                        local_matrix_entry += (b_zero(x) * phi(alpha, xhat) * phi(beta, xhat) +
-                                               K_diff(x) * grad_phi(alpha, xhat).dot(hinv2.cwiseProduct(grad_phi(beta, xhat)))) *
-                                              cell_volume * quad_weights[j];
+                        local_matrix_entry += (b_zero(x) * phi_phi[count] +
+                                               K_diff(x) * gradphi_gradphi[count]) *
+                                              quad_weights[j];
+                        count++;
                     }
-                    A_sparse.coeffRef(ell_row, ell_col) += local_matrix_entry;
+                    A_sparse.coeffRef(ell_row, ell_col) += local_matrix_entry * cell_volume;
+                }
+                else
+                {
+                    count += quad_points.size();
                 }
             }
         }
