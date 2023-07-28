@@ -52,7 +52,7 @@ public:
     assert(idx[0] >= 0);
     assert(idx[0] < n);
     return idx[0];
-  };
+  }
 
   /** @brief Convert linear vertex index to Euclidean index
    *
@@ -76,7 +76,7 @@ public:
     assert(idx[0] > 0);
     assert(idx[0] < n);
     return idx[0] - 1;
-  };
+  }
 
   /** @brief Shift a linear cell index by an Euclidean vector
    *
@@ -89,7 +89,7 @@ public:
     assert(i >= 0);
     assert(i < n);
     return i;
-  };
+  }
 
   /** @brief Shift a linear vertex index by an Euclidean vector
    *
@@ -102,13 +102,31 @@ public:
     assert(i >= 0);
     assert(i < n - 1);
     return i;
-  };
+  }
+
+  /** @brief Check whether a specific vertex of a cell with given index is an internal vertex
+   *
+   * Returns the index of the vertex, if the test has been successful
+   *
+   * @param[in] idx_cell index of cell
+   * @param[in] corner Euclidean shift vector specifying the corner to inspect, with (0,0,...,0)
+   *                   being the lower left corner
+   * @param[out] idx_vertex index of vertex, if it is valid (contains garbage otherwise)
+   */
+  inline virtual bool corner_is_internal_vertex(const unsigned int idx_cell,
+                                                const Eigen::VectorXi corner,
+                                                unsigned int &idx_vertex) const
+  {
+    assert(idx_cell < n);
+    idx_vertex = idx_cell + corner[0] - 1;
+    return ((idx_vertex > 0) and (idx_vertex < n));
+  }
 
   /** @brief get equivalent index of vertex on next-finer lattice */
   virtual unsigned int fine_vertex_idx(const unsigned int ell) const
   {
     return 2 * ell + 1;
-  };
+  }
 
   /** @brief get coarsened version of lattice */
   virtual std::shared_ptr<Lattice> get_coarse_lattice() const
@@ -126,7 +144,7 @@ public:
       exit(-1);
     }
     return std::make_shared<Lattice1d>(n / 2);
-  };
+  }
 
   /** @brief get info string */
   virtual std::string get_info() const;

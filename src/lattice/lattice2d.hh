@@ -109,7 +109,7 @@ public:
     int i = (ell % nx) + shift[0];
     int j = (ell / nx) + shift[1];
     return j * nx + i;
-  };
+  }
 
   /** @brief Shift a linear vertex index by an Euclidean vector
    *
@@ -126,6 +126,26 @@ public:
     assert(j > 0);
     assert(j < ny);
     return (j - 1) * (nx - 1) + (i - 1);
+  }
+
+  /** @brief Check whether a specific vertex of a cell with given index is an internal vertex
+   *
+   * Returns the index of the vertex, if the test has been successful
+   *
+   * @param[in] idx_cell index of cell
+   * @param[in] corner Euclidean shift vector specifying the corner to inspect, with (0,0,...,0)
+   *                   being the lower left corner
+   * @param[out] idx_vertex index of vertex, if it is valid (contains garbage otherwise)
+   */
+  inline virtual bool corner_is_internal_vertex(const unsigned int idx_cell,
+                                                const Eigen::VectorXi corner,
+                                                unsigned int &idx_vertex) const
+  {
+    assert(idx_cell < nx * ny);
+    int i = (idx_cell % nx) + corner[0];
+    int j = (idx_cell / nx) + corner[1];
+    idx_vertex = (j - 1) * (nx - 1) + (i - 1);
+    return ((i > 0) and (i < nx) and (j > 0) and (j < ny));
   }
 
   /** @brief get equivalent index of vertex on next-finer lattice */
@@ -156,7 +176,7 @@ public:
       exit(-1);
     }
     return std::make_shared<Lattice2d>(nx / 2, ny / 2);
-  };
+  }
 
   /** @brief get info string */
   virtual std::string get_info() const;

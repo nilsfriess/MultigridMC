@@ -86,17 +86,11 @@ DiffusionOperator::DiffusionOperator(const std::shared_ptr<Lattice> lattice_,
             {
                 Eigen::Map<Eigen::VectorXi> alpha(it_alpha->data(), dim);
                 Eigen::Map<Eigen::VectorXi> beta(it_beta->data(), dim);
-                Eigen::VectorXi vertex_coord_alpha = cell_coord + alpha;
-                Eigen::VectorXi vertex_coord_beta = cell_coord + beta;
                 // Check whether the matrix entry is valid, i.e. whether it couples unknowns
                 // associated with interior vertices
-                bool valid_entry = true;
-                for (int d = 0; d < dim; ++d)
-                {
-                    valid_entry = valid_entry && (not((vertex_coord_alpha[d] == 0) or (vertex_coord_alpha[d] == shape[d])));
-                    valid_entry = valid_entry && (not((vertex_coord_beta[d] == 0) or (vertex_coord_beta[d] == shape[d])));
-                }
-                if (valid_entry)
+                unsigned int ell_row, ell_col;
+                if (lattice->corner_is_internal_vertex(cell_idx, alpha, ell_row) and
+                    lattice->corner_is_internal_vertex(cell_idx, beta, ell_col))
                 {
                     double local_matrix_entry = 0.0;
                     for (int j = 0; j < quad_weights.size(); ++j)
@@ -115,8 +109,6 @@ DiffusionOperator::DiffusionOperator(const std::shared_ptr<Lattice> lattice_,
                                                K_diff(x) * grad_phi(alpha, xhat).dot(hinv2.cwiseProduct(grad_phi(beta, xhat)))) *
                                               cell_volume * quad_weights[j];
                     }
-                    unsigned int ell_row = lattice->vertexidx_euclidean2linear(vertex_coord_alpha);
-                    unsigned int ell_col = lattice->vertexidx_euclidean2linear(vertex_coord_beta);
                     A_sparse.coeffRef(ell_row, ell_col) += local_matrix_entry;
                 }
             }
