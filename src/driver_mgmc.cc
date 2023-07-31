@@ -41,10 +41,17 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
     const std::shared_ptr<MeasuredOperator> linear_operator = std::dynamic_pointer_cast<MeasuredOperator>(sampler->get_linear_operator());
     unsigned int ndof = linear_operator->get_ndof();
     std::shared_ptr<Lattice> lattice = linear_operator->get_lattice();
+    Eigen::VectorXd xbar(ndof);
+    xbar.setZero();
+    Eigen::VectorXd y(measurement_params.n + measurement_params.measure_global);
+    y(Eigen::seqN(0, measurement_params.n)) = measurement_params.mean;
+    if (measurement_params.measure_global)
+        y(measurement_params.n) = measurement_params.mean_global;
+    Eigen::VectorXd x_post = linear_operator->posterior_mean(xbar, y);
     Eigen::VectorXd x(ndof);
     Eigen::VectorXd f(ndof);
     x.setZero();
-    f.setRandom();
+    linear_operator->apply(x_post, f);
     for (int k = 0; k < sampling_params.nwarmup; ++k)
     {
         sampler->apply(f, x);
@@ -67,6 +74,18 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
     out.open(filename);
     for (auto it = data.begin(); it != data.end(); ++it)
         out << *it << std::endl;
+    // Compute mean and variance of measurements
+    double x_avg = 0.0;
+    double xsq_avg = 0.0;
+    for (int k = 0; k < sampling_params.nsamples; ++k)
+    {
+        x_avg += (data[k] - x_avg) / (k + 1.0);
+        xsq_avg += (data[k] * data[k] - xsq_avg) / (k + 1.0);
+    }
+    double variance = xsq_avg - x_avg * x_avg;
+    double x_error = sqrt(variance / sampling_params.nsamples);
+    printf("  mean     = %12.4e +/- %12.4e [ignoring autocorrelations]\n", x_avg, x_error);
+    printf("  variance = %12.4e\n\n", variance);
 
     out.close();
 }
