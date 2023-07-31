@@ -26,16 +26,10 @@ def visualise_3d(p):
     fig.show()
 
 
-def dist_periodic(x, y):
-    """Compute distance between two points, taking into account
-    periodic boundary conditions"""
+def distance_boundary(x):
+    """Compute distance between a point and the boundary"""
     dim = x.shape[0]
-    return min(
-        [
-            np.linalg.norm(x - y + np.asarray(offset))
-            for offset in itertools.product([-1.0, 0.0, +1.0], repeat=dim)
-        ]
-    )
+    return min([min(abs(x[d]), abs(1.0 - x[d])) for d in range(dim)])
 
 
 def sample_points(n, dim, dmin=0.1):
@@ -49,7 +43,9 @@ def sample_points(n, dim, dmin=0.1):
     points = []
     while len(points) < n:
         x = np.asarray(rng.uniform(low=0.0, high=1.0, size=dim))
-        if all([dist_periodic(x, p) > dmin for p in points]):
+        if (distance_boundary(x) > 0.1) and all(
+            [np.linalg.norm(x - p) > dmin for p in points]
+        ):
             points.append(x)
     return points
 
@@ -88,7 +84,7 @@ def covariance_matrix(n, sigma_low, sigma_high):
 
 nmeas = 8
 dim = 2
-dmin = 0.1
+dmin = 0.2
 
 parser = argparse.ArgumentParser("Specifications")
 parser.add_argument(
@@ -114,7 +110,7 @@ args = parser.parse_args()
 
 p = np.asarray(sample_points(args.nmeas + 1, args.dim, dmin))
 mean = average(args.nmeas, 1.0, 4.0)
-Sigma = covariance_matrix(args.nmeas, 0.01, 0.02)
+Sigma = covariance_matrix(args.nmeas, 1.0e-6, 2.0e-6)
 
 # Print results in a format that can be used in the configuration file
 print("dim = ", args.dim, ";")
@@ -129,12 +125,14 @@ fig = plt.figure()
 if args.dim == 2:
     ax = fig.add_subplot()
     ax.set_aspect("equal")
-    ax.plot(p[:, 0], p[:, 1], linewidth=0, markersize=4, marker="o")
+    ax.plot(p[:-1, 0], p[:-1, 1], linewidth=0, markersize=4, marker="o", color="blue")
+    ax.plot(p[-1, 0], p[-1, 1], linewidth=0, markersize=4, marker="o", color="red")
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
 else:
     ax = fig.add_subplot(projection="3d")
-    ax.scatter(p[:, 0], p[:, 1], p[:, 2])
+    ax.scatter(p[:-1, 0], p[:-1, 1], p[:-1, 2], color="blue")
+    ax.scatter(p[-1, 0], p[-1, 1], p[-1, 2], color="red")
     ax = plt.gca()
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
