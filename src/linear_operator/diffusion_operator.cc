@@ -173,7 +173,7 @@ double DiffusionOperator::K_diff(const Eigen::VectorXd x) const
 double DiffusionOperator::b_zero(const Eigen::VectorXd x) const
 {
     if (abs(beta_b / alpha_b) < 1.E-12)
-        return alpha_K;
+        return alpha_b;
     double value = beta_b;
     for (int j = 0; j < x.size(); ++j)
         value *= cos(2 * M_PI * x[j]);
