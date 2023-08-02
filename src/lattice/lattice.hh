@@ -27,6 +27,18 @@ public:
           const unsigned int Nvertex_) : Ncell(Ncell_),
                                          Nvertex(Nvertex_) {}
 
+  /** @brief cell volume */
+  double cell_volume() const
+  {
+    Eigen::VectorXi s = shape();
+    double volume = 1.0;
+    for (int d = 0; d < dim(); ++d)
+    {
+      volume /= s[d];
+    }
+    return volume;
+  }
+
   /** @brief Convert linear cell index to Euclidean index
    *
    * @param[in] ell linear index to be converted

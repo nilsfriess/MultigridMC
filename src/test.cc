@@ -4,6 +4,7 @@
 #include "auxilliary/test_cholesky_wrapper.hh"
 #include "auxilliary/test_statistics.hh"
 #include "lattice/test_lattice.hh"
+#include "linear_operator/test_linear_operator.hh"
 #include "intergrid/test_intergrid.hh"
 #include "smoother/test_smoother.hh"
 #include "solver/test_solver.hh"
