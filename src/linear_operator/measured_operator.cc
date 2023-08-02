@@ -41,9 +41,17 @@ MeasuredOperator::MeasuredOperator(const std::shared_ptr<LinearOperator> base_op
     }
     if (params.measure_global)
     {
-        for (int j = 0; j < nrow; ++j)
+        // shape of lattice
+        Eigen::VectorXi shape = lattice->shape();
+        // cell volume
+        double cell_volume = 1.0;
+        for (int d = 0; d < lattice->dim(); ++d)
         {
-            triplet_list.push_back(T(j, n_measurements, 1. / nrow));
+            cell_volume /= double(shape[d]);
+        }
+        for (int ell = 0; ell < nrow; ++ell)
+        {
+            triplet_list.push_back(T(ell, n_measurements, cell_volume));
         }
         Sigma_inv(n_measurements, n_measurements) = 1. / params.sigma_global;
     }
