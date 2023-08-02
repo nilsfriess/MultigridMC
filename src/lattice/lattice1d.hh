@@ -104,6 +104,21 @@ public:
     return i;
   }
 
+  /** @brief Check whether shifting a vertex by an Euclidean vector results in an interior vertex
+   *
+   * @param[in] ell Euclidean index to be shifted
+   * @param[in] shift Euclidean shift vector specifying the corner to inspect, with (0,0,...,0)
+   *                  being the lower left corner
+   * @param[out] idx_vertex index of vertex, if it is valid (contains garbage otherwise)
+   */
+  inline virtual bool shifted_vertex_is_internal_vertex(const unsigned int ell, const Eigen::VectorXi shift,
+                                                        unsigned int &idx_vertex) const
+  {
+    int i = (int)ell + shift[0] + 1;
+    idx_vertex = i - 1;
+    return ((i > 0) and (i < n));
+  }
+
   /** @brief Check whether a specific vertex of a cell with given index is an internal vertex
    *
    * Returns the index of the vertex, if the test has been successful
