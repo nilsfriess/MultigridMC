@@ -49,6 +49,8 @@ public:
      */
     virtual void parse_config(const libconfig::Setting &root);
 
+    /** @brief underlying prior to use */
+    std::string prior;
     /** @brief spatial dimension */
     int dim;
     /** @brief Run the Cholesky sampler? */

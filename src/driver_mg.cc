@@ -9,6 +9,7 @@
 #include "smoother/ssor_smoother.hh"
 #include "linear_operator/linear_operator.hh"
 #include "linear_operator/diffusion_operator.hh"
+#include "linear_operator/shiftedlaplace_operator.hh"
 #include "linear_operator/measured_operator.hh"
 #include "intergrid/intergrid_operator_linear.hh"
 #include "solver/linear_solver.hh"
@@ -54,7 +55,6 @@ int main(int argc, char *argv[])
 
     // Construct lattice and linear operator
     std::shared_ptr<Lattice> lattice;
-    std::shared_ptr<DiffusionOperator> diffusion_operator;
     if (general_params.dim == 2)
     {
         lattice = std::make_shared<Lattice2d>(lattice_params.nx,
@@ -71,14 +71,25 @@ int main(int argc, char *argv[])
         std::cout << "ERROR: Invalid dimension : " << general_params.dim << std::endl;
         exit(-1);
     }
-    diffusion_operator = std::make_shared<DiffusionOperator>(lattice,
+    std::shared_ptr<LinearOperator> prior_operator;
+    if (general_params.prior == "diffusion")
+    {
+        prior_operator = std::make_shared<DiffusionOperator>(lattice,
                                                              diffusion_params.alpha_K,
                                                              diffusion_params.beta_K,
                                                              diffusion_params.alpha_b,
                                                              diffusion_params.beta_b,
                                                              1);
-    std::shared_ptr<MeasuredOperator> linear_operator = std::make_shared<MeasuredOperator>(diffusion_operator,
-                                                                                           measurement_params);
+    }
+    else if (general_params.prior == "shiftedlaplace")
+    {
+        prior_operator = std::make_shared<ShiftedLaplaceOperator>(lattice,
+                                                                  diffusion_params.alpha_K,
+                                                                  diffusion_params.alpha_b,
+                                                                  1);
+    }
+    std::shared_ptr<MeasuredOperator> posterior_operator = std::make_shared<MeasuredOperator>(prior_operator,
+                                                                                              measurement_params);
     //   Construct smoothers
     /* prepare measurements */
     std::shared_ptr<SmootherFactory> presmoother_factory = std::make_shared<SORSmootherFactory>(smoother_params.omega,
@@ -87,7 +98,7 @@ int main(int argc, char *argv[])
                                                                                                  backward);
     std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
     std::shared_ptr<LinearSolverFactory> coarse_solver_factory = std::make_shared<CholeskySolverFactory>();
-    std::shared_ptr<Preconditioner> multigrid_preconditioner = std::make_shared<MultigridPreconditioner>(linear_operator,
+    std::shared_ptr<Preconditioner> multigrid_preconditioner = std::make_shared<MultigridPreconditioner>(posterior_operator,
                                                                                                          multigrid_params,
                                                                                                          presmoother_factory,
                                                                                                          postsmoother_factory,
@@ -95,11 +106,11 @@ int main(int argc, char *argv[])
                                                                                                          coarse_solver_factory);
     std::cout << std::endl;
     // Run sampling experiments
-    LoopSolver solver(linear_operator,
+    LoopSolver solver(posterior_operator,
                       multigrid_preconditioner,
                       iterative_solver_params);
     // Create states
-    unsigned int ndof = linear_operator->get_ndof();
+    unsigned int ndof = posterior_operator->get_ndof();
     Eigen::VectorXd x_exact(ndof);
     Eigen::VectorXd x(ndof);
     unsigned int seed = 1482817;
@@ -111,7 +122,7 @@ int main(int argc, char *argv[])
     }
 
     Eigen::VectorXd b(ndof);
-    linear_operator->apply(x_exact, b);
+    posterior_operator->apply(x_exact, b);
     solver.apply(b, x);
     std::shared_ptr<VTKWriter> vtk_writer;
     if (general_params.dim == 2)

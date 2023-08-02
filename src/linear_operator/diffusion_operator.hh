@@ -30,7 +30,6 @@ public:
      * Populates matrix entries across the grid
      *
      * @param[in] lattice_ underlying 2d lattice
-     * @param[in] rng_ random number generator
      * @param[in] alpha_K first coefficient in diffusion function
      * @param[in] beta_K second coefficient in diffusion function
      * @param[in] alpha_b first coefficient in zero order term

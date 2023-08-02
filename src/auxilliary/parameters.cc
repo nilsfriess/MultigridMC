@@ -52,6 +52,13 @@ int Parameters::read_from_file(const std::string filename)
 void GeneralParameters::parse_config(const libconfig::Setting &root)
 {
     const libconfig::Setting &general = root["general"];
+    prior = general.lookup("prior").c_str();
+    if (not((prior == "diffusion") or (prior == "shiftedlaplace")))
+    {
+        std::cout << "ERROR: Unknown prior: \'" << prior << "\'" << std::endl;
+        exit(-1);
+    }
+    std::cout << "  prior = " << prior << std::endl;
     dim = general["dim"];
     std::cout << "  dimension = " << dim << std::endl;
     do_cholesky = general["do_cholesky"];

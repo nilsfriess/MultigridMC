@@ -14,6 +14,7 @@
 #include "smoother/ssor_smoother.hh"
 #include "linear_operator/linear_operator.hh"
 #include "linear_operator/diffusion_operator.hh"
+#include "linear_operator/shiftedlaplace_operator.hh"
 #include "linear_operator/measured_operator.hh"
 #include "intergrid/intergrid_operator_linear.hh"
 #include "sampler/cholesky_sampler.hh"
@@ -205,7 +206,6 @@ int main(int argc, char *argv[])
 #endif // NCHOLMOD
     // Construct lattice and linear operator
     std::shared_ptr<Lattice> lattice;
-    std::shared_ptr<DiffusionOperator> diffusion_operator;
     if (general_params.dim == 2)
     {
         lattice = std::make_shared<Lattice2d>(lattice_params.nx,
@@ -222,14 +222,25 @@ int main(int argc, char *argv[])
         std::cout << "ERROR: Invalid dimension : " << general_params.dim << std::endl;
         exit(-1);
     }
-    diffusion_operator = std::make_shared<DiffusionOperator>(lattice,
+    std::shared_ptr<LinearOperator> prior_operator;
+    if (general_params.prior == "diffusion")
+    {
+        prior_operator = std::make_shared<DiffusionOperator>(lattice,
                                                              diffusion_params.alpha_K,
                                                              diffusion_params.beta_K,
                                                              diffusion_params.alpha_b,
                                                              diffusion_params.beta_b,
                                                              1);
-    std::shared_ptr<MeasuredOperator> linear_operator = std::make_shared<MeasuredOperator>(diffusion_operator,
-                                                                                           measurement_params);
+    }
+    else if (general_params.prior == "shiftedlaplace")
+    {
+        prior_operator = std::make_shared<ShiftedLaplaceOperator>(lattice,
+                                                                  diffusion_params.alpha_K,
+                                                                  diffusion_params.alpha_b,
+                                                                  1);
+    }
+    std::shared_ptr<MeasuredOperator> posterior_operator = std::make_shared<MeasuredOperator>(prior_operator,
+                                                                                              measurement_params);
     //   Construct samplers
     /* prepare measurements */
     unsigned int seed = 5418513;
@@ -250,25 +261,25 @@ int main(int argc, char *argv[])
     {
         coarse_sampler_factory = std::make_shared<DenseCholeskySamplerFactory>(rng);
     }
-    std::shared_ptr<Sampler> multigridmc_sampler = std::make_shared<MultigridMCSampler>(linear_operator,
+    std::shared_ptr<Sampler> multigridmc_sampler = std::make_shared<MultigridMCSampler>(posterior_operator,
                                                                                         rng,
                                                                                         multigridmc_params,
                                                                                         presampler_factory,
                                                                                         postsampler_factory,
                                                                                         intergrid_operator_factory,
                                                                                         coarse_sampler_factory);
-    std::shared_ptr<Sampler> ssor_sampler = std::make_shared<SSORSampler>(linear_operator, rng, smoother_params.omega);
+    std::shared_ptr<Sampler> ssor_sampler = std::make_shared<SSORSampler>(posterior_operator, rng, smoother_params.omega);
     std::shared_ptr<Sampler> cholesky_sampler;
     if (general_params.do_cholesky)
     {
         auto t_start = std::chrono::high_resolution_clock::now();
         if (cholesky_params.factorisation == SparseFactorisation)
         {
-            cholesky_sampler = std::make_shared<SparseCholeskySampler>(linear_operator, rng, true);
+            cholesky_sampler = std::make_shared<SparseCholeskySampler>(posterior_operator, rng, true);
         }
         else if (cholesky_params.factorisation == DenseFactorisation)
         {
-            cholesky_sampler = std::make_shared<DenseCholeskySampler>(linear_operator, rng);
+            cholesky_sampler = std::make_shared<DenseCholeskySampler>(posterior_operator, rng);
         }
         auto t_finish = std::chrono::high_resolution_clock::now();
         double t_elapsed = std::chrono::duration_cast<std::chrono::seconds>(t_finish - t_start).count();
