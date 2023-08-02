@@ -23,6 +23,22 @@ def visualise_3d(p):
     fig = px.scatter_3d(
         df, x="x", y="y", z="z", color="type", color_discrete_sequence=["blue", "red"]
     )
+    fig.update_layout(
+        scene=dict(
+            xaxis=dict(
+                nticks=10,
+                range=[0, 1],
+            ),
+            yaxis=dict(
+                nticks=10,
+                range=[0, 1],
+            ),
+            zaxis=dict(
+                nticks=10,
+                range=[0, 1],
+            ),
+        ),
+    )
     fig.show()
 
 
