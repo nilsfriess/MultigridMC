@@ -53,7 +53,7 @@ void GeneralParameters::parse_config(const libconfig::Setting &root)
 {
     const libconfig::Setting &general = root["general"];
     prior = general.lookup("prior").c_str();
-    if (not((prior == "diffusion") or (prior == "shiftedlaplace")))
+    if (not((prior == "diffusion") or (prior == "shiftedlaplace") or (prior == "shiftedbiharmonic")))
     {
         std::cout << "ERROR: Unknown prior: \'" << prior << "\'" << std::endl;
         exit(-1);
