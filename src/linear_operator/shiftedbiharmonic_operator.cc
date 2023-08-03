@@ -47,8 +47,8 @@ ShiftedBiharmonicOperator::ShiftedBiharmonicOperator(const std::shared_ptr<Latti
     /* stencil elements for Laplacian^2 */
     double stencil_squared_laplacian[3][3];
     stencil_squared_laplacian[0][0] = 6 * (hinv2[0] * hinv2[0] + hinv2[1] * hinv2[1]) + 8 * hinv2[0] * hinv2[1];
-    stencil_squared_laplacian[0][1] = -4 * hinv2[0] * (hinv2[0] + hinv2[1]);
-    stencil_squared_laplacian[1][0] = -4 * hinv2[1] * (hinv2[0] + hinv2[1]);
+    stencil_squared_laplacian[1][0] = -4 * hinv2[0] * (hinv2[0] + hinv2[1]);
+    stencil_squared_laplacian[0][1] = -4 * hinv2[1] * (hinv2[0] + hinv2[1]);
     stencil_squared_laplacian[2][0] = hinv2[0] * hinv2[0];
     stencil_squared_laplacian[0][2] = hinv2[1] * hinv2[1];
     stencil_squared_laplacian[1][1] = 2 * hinv2[0] * hinv2[1];
@@ -57,11 +57,11 @@ ShiftedBiharmonicOperator::ShiftedBiharmonicOperator(const std::shared_ptr<Latti
         double diagonal = (alpha_b * alpha_b - 2 * alpha_K * alpha_b * stencil_laplacian[0][0] + alpha_K * alpha_K * stencil_squared_laplacian[0][0]) * cell_volume;
         /* Loop over 5x5 stencil and only treat entries in this diamond:
          *
-         *          ..x..
-         *          .xxx.
-         *          xx.xx
-         *          .xxx.
-         *          ..x..
+         *          . . x . .
+         *          . x x x .
+         *          x x . x x
+         *          . x x x .
+         *          . . x . .
          */
         for (int j = -2; j <= 2; ++j)
         {
@@ -87,7 +87,7 @@ ShiftedBiharmonicOperator::ShiftedBiharmonicOperator(const std::shared_ptr<Latti
                      * the entry (+2,0), (-2,0), (0,+2), (0,-2) needs to be added to the
                      * diagonal.
                      */
-                    diagonal += alpha_K * stencil_squared_laplacian[2 * j][2 * k] * cell_volume;
+                    diagonal += alpha_K * alpha_K * stencil_squared_laplacian[2 * abs(j)][2 * abs(k)] * cell_volume;
                 }
             }
         }
