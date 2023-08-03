@@ -43,7 +43,7 @@ ShiftedBiharmonicOperator::ShiftedBiharmonicOperator(const std::shared_ptr<Latti
     double stencil_laplacian[2][2];
     stencil_laplacian[0][0] = -2 * (hinv2[0] + hinv2[1]);
     stencil_laplacian[1][0] = hinv2[0];
-    stencil_laplacian[0][1] = hinv2[0];
+    stencil_laplacian[0][1] = hinv2[1];
     /* stencil elements for Laplacian^2 */
     double stencil_squared_laplacian[3][3];
     stencil_squared_laplacian[0][0] = 6 * (hinv2[0] * hinv2[0] + hinv2[1] * hinv2[1]) + 8 * hinv2[0] * hinv2[1];
