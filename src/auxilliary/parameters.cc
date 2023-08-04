@@ -137,23 +137,11 @@ void MultigridParameters::parse_config(const libconfig::Setting &root)
         cycle_label = "( W-cycle )";
     }
     verbose = multigrid.lookup("verbose");
-    std::cout << "  multigrid levels = " << nlevel << std::endl;
-    std::cout << "  npresmooth = " << npresmooth << std::endl;
-    std::cout << "  npostsmooth = " << npostsmooth << std::endl;
-    std::cout << "  cycle = " << cycle << " " << cycle_label << std::endl;
-}
-
-/* parse multigrid Monte Carlo configuration */
-void MultigridMCParameters::parse_config(const libconfig::Setting &root)
-{
-    const libconfig::Setting &multigrid = root["multigridmc"];
-    nlevel = multigrid.lookup("level");
-    npresample = multigrid.lookup("npresample");
-    npostsample = multigrid.lookup("npostsample");
-    verbose = multigrid.lookup("verbose");
-    std::cout << "  MultigridMC levels      = " << nlevel << std::endl;
-    std::cout << "  MultigridMC npresample  = " << npresample << std::endl;
-    std::cout << "  MultigridMC npostsample  = " << npostsample << std::endl;
+    std::cout << "  Multigrid" << std::endl;
+    std::cout << "   levels = " << nlevel << std::endl;
+    std::cout << "   npresmooth = " << npresmooth << std::endl;
+    std::cout << "   npostsmooth = " << npostsmooth << std::endl;
+    std::cout << "   cycle = " << cycle << " " << cycle_label << std::endl;
 }
 
 /* parse sampling configuration */

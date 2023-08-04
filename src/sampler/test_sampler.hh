@@ -221,11 +221,11 @@ TEST_F(SamplerTest, TestMultigridMCSampler1d)
 {
     for (bool lowrank_correction : {false, true})
     {
-        MultigridMCParameters multigridmc_params;
-        multigridmc_params.nlevel = 3;
-        multigridmc_params.npresample = 1;
-        multigridmc_params.npostsample = 1;
-        multigridmc_params.verbose = 0;
+        MultigridParameters multigrid_params;
+        multigrid_params.nlevel = 3;
+        multigrid_params.npresmooth = 1;
+        multigrid_params.npostsmooth = 1;
+        multigrid_params.verbose = 0;
         std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
         std::mt19937_64 rng(31841287);
         const double omega = 0.8;
@@ -237,7 +237,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler1d)
         std::shared_ptr<SparseCholeskySamplerFactory> coarse_sampler_factory = std::make_shared<SparseCholeskySamplerFactory>(rng);
         std::shared_ptr<MultigridMCSampler> sampler = std::make_shared<MultigridMCSampler>(linear_operator,
                                                                                            rng,
-                                                                                           multigridmc_params,
+                                                                                           multigrid_params,
                                                                                            presampler_factory,
                                                                                            postsampler_factory,
                                                                                            intergrid_operator_factory,
@@ -301,11 +301,11 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     std::shared_ptr<MeasuredOperator> linear_operator = std::make_shared<MeasuredOperator>(diffusion_operator,
                                                                                            measurement_params);
 
-    MultigridMCParameters multigridmc_params;
-    multigridmc_params.nlevel = 3;
-    multigridmc_params.npresample = 1;
-    multigridmc_params.npostsample = 1;
-    multigridmc_params.verbose = 0;
+    MultigridParameters multigrid_params;
+    multigrid_params.nlevel = 3;
+    multigrid_params.npresmooth = 1;
+    multigrid_params.npostsmooth = 1;
+    multigrid_params.verbose = 0;
     const double omega = 1.0;
     std::shared_ptr<SSORSamplerFactory> presampler_factory = std::make_shared<SSORSamplerFactory>(rng,
                                                                                                   omega);
@@ -315,7 +315,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     std::shared_ptr<SparseCholeskySamplerFactory> coarse_sampler_factory = std::make_shared<SparseCholeskySamplerFactory>(rng);
     std::shared_ptr<Sampler> sampler = std::make_shared<MultigridMCSampler>(linear_operator,
                                                                             rng,
-                                                                            multigridmc_params,
+                                                                            multigrid_params,
                                                                             presampler_factory,
                                                                             postsampler_factory,
                                                                             intergrid_operator_factory,

@@ -7,7 +7,7 @@
 /** Create a new instance */
 MultigridMCSampler::MultigridMCSampler(std::shared_ptr<LinearOperator> linear_operator_,
                                        std::mt19937_64 &rng_,
-                                       const MultigridMCParameters params_,
+                                       const MultigridParameters params_,
                                        std::shared_ptr<SamplerFactory> presampler_factory_,
                                        std::shared_ptr<SamplerFactory> postsampler_factory_,
                                        std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory_,
@@ -63,7 +63,7 @@ void MultigridMCSampler::sample(const unsigned int level) const
     else
     {
         // Presampler
-        for (unsigned int k = 0; k < params.npresample; ++k)
+        for (unsigned int k = 0; k < params.npresmooth; ++k)
         {
             presamplers[level]->apply(f_ell[level], x_ell[level]);
         }
@@ -77,7 +77,7 @@ void MultigridMCSampler::sample(const unsigned int level) const
         // Prolongate and add
         intergrid_operators[level]->prolongate_add(x_ell[level + 1], x_ell[level]);
         // Postsmooth
-        for (unsigned int k = 0; k < params.npostsample; ++k)
+        for (unsigned int k = 0; k < params.npostsmooth; ++k)
         {
             postsamplers[level]->apply(f_ell[level], x_ell[level]);
         }

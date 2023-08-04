@@ -159,26 +159,6 @@ public:
     int verbose;
 };
 
-/** @struct Multigrid Monte Carlo parameters */
-class MultigridMCParameters : public Parameters
-{
-public:
-    /** @brief parse configuration
-     *
-     * @param[in] root root of configuration object
-     */
-    virtual void parse_config(const libconfig::Setting &root);
-
-    /** @brief Number of levels */
-    unsigned int nlevel;
-    /** @brief Number of presmoothing steps */
-    unsigned int npresample;
-    /** @brief number of postsmoothing steps */
-    unsigned int npostsample;
-    /** @brief verbosity level */
-    int verbose;
-};
-
 /** @brief structure for sampling parameters */
 class SamplingParameters : public Parameters
 {

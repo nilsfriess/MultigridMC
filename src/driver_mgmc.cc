@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
     LatticeParameters lattice_params;
     CholeskyParameters cholesky_params;
     SmootherParameters smoother_params;
-    MultigridMCParameters multigridmc_params;
+    MultigridParameters multigrid_params;
     SamplingParameters sampling_params;
     DiffusionParameters diffusion_params;
     MeasurementParameters measurement_params;
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
     lattice_params.read_from_file(filename);
     cholesky_params.read_from_file(filename);
     smoother_params.read_from_file(filename);
-    multigridmc_params.read_from_file(filename);
+    multigrid_params.read_from_file(filename);
     sampling_params.read_from_file(filename);
     diffusion_params.read_from_file(filename);
     measurement_params.read_from_file(filename);
@@ -263,7 +263,7 @@ int main(int argc, char *argv[])
     }
     std::shared_ptr<Sampler> multigridmc_sampler = std::make_shared<MultigridMCSampler>(posterior_operator,
                                                                                         rng,
-                                                                                        multigridmc_params,
+                                                                                        multigrid_params,
                                                                                         presampler_factory,
                                                                                         postsampler_factory,
                                                                                         intergrid_operator_factory,

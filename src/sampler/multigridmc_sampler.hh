@@ -32,7 +32,7 @@ public:
      */
     MultigridMCSampler(std::shared_ptr<LinearOperator> linear_operator_,
                        std::mt19937_64 &rng_,
-                       const MultigridMCParameters params_,
+                       const MultigridParameters params_,
                        std::shared_ptr<SamplerFactory> presampler_factory_,
                        std::shared_ptr<SamplerFactory> postsampler_factory_,
                        std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory_,
@@ -53,7 +53,7 @@ protected:
     void sample(const unsigned int level) const;
 
     /** @brief parameters */
-    const MultigridMCParameters params;
+    const MultigridParameters params;
     /** @brief presampler factory on each level */
     std::shared_ptr<SamplerFactory> presampler_factory;
     /** @brief postsmoother factory on each level */
