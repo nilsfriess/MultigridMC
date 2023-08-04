@@ -58,23 +58,27 @@ void MultigridPreconditioner::solve(const unsigned int level)
     }
     else
     {
-        // Presmooth
-        for (unsigned int k = 0; k < params.npresmooth; ++k)
+        int cycle_ = (level > 0) ? params.cycle : 1;
+        for (int j = 0; j < cycle_; ++j)
         {
-            presmoothers[level]->apply(b_ell[level], x_ell[level]);
-        }
-        // Compute residual
-        linear_operators[level]->apply(x_ell[level], r_ell[level]);
-        r_ell[level] = b_ell[level] - r_ell[level];
-        intergrid_operators[level]->restrict(r_ell[level], b_ell[level + 1]);
-        // Recursive call
-        solve(level + 1);
-        // Prolongate and add
-        intergrid_operators[level]->prolongate_add(x_ell[level + 1], x_ell[level]);
-        // Postsmooth
-        for (unsigned int k = 0; k < params.npostsmooth; ++k)
-        {
-            postsmoothers[level]->apply(b_ell[level], x_ell[level]);
+            // Presmooth
+            for (unsigned int k = 0; k < params.npresmooth; ++k)
+            {
+                presmoothers[level]->apply(b_ell[level], x_ell[level]);
+            }
+            // Compute residual
+            linear_operators[level]->apply(x_ell[level], r_ell[level]);
+            r_ell[level] = b_ell[level] - r_ell[level];
+            intergrid_operators[level]->restrict(r_ell[level], b_ell[level + 1]);
+            // Recursive call
+            solve(level + 1);
+            // Prolongate and add
+            intergrid_operators[level]->prolongate_add(x_ell[level + 1], x_ell[level]);
+            // Postsmooth
+            for (unsigned int k = 0; k < params.npostsmooth; ++k)
+            {
+                postsmoothers[level]->apply(b_ell[level], x_ell[level]);
+            }
         }
     }
 }

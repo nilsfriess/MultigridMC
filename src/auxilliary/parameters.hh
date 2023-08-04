@@ -153,6 +153,8 @@ public:
     unsigned int npresmooth;
     /** @brief number of postsmoothing steps */
     unsigned int npostsmooth;
+    /** @brief cycle type (1 = V-cycle, 2 = W-cycle)*/
+    unsigned int cycle;
     /** @brief verbosity level */
     int verbose;
 };

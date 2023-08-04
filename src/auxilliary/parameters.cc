@@ -126,10 +126,21 @@ void MultigridParameters::parse_config(const libconfig::Setting &root)
     nlevel = multigrid.lookup("nlevel");
     npresmooth = multigrid.lookup("npresmooth");
     npostsmooth = multigrid.lookup("npostsmooth");
+    cycle = multigrid.lookup("cycle");
+    std::string cycle_label = "";
+    if (cycle == 1)
+    {
+        cycle_label = "( V-cycle )";
+    }
+    else if (cycle == 2)
+    {
+        cycle_label = "( W-cycle )";
+    }
     verbose = multigrid.lookup("verbose");
-    std::cout << "   multigrid levels = " << nlevel << std::endl;
-    std::cout << "   npresmooth = " << npresmooth << std::endl;
-    std::cout << "   npostsmooth = " << npostsmooth << std::endl;
+    std::cout << "  multigrid levels = " << nlevel << std::endl;
+    std::cout << "  npresmooth = " << npresmooth << std::endl;
+    std::cout << "  npostsmooth = " << npostsmooth << std::endl;
+    std::cout << "  cycle = " << cycle << " " << cycle_label << std::endl;
 }
 
 /* parse multigrid Monte Carlo configuration */
