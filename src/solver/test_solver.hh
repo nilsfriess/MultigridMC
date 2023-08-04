@@ -126,6 +126,7 @@ TEST_F(SolverTest, TestMultigrid)
     multigrid_params.nlevel = 5;
     multigrid_params.npresmooth = 1;
     multigrid_params.npostsmooth = 1;
+    multigrid_params.cycle = 1;
     const double omega = 1.0;
     std::shared_ptr<SSORSmootherFactory> presmoother_factory = std::make_shared<SSORSmootherFactory>(omega);
     std::shared_ptr<SSORSmootherFactory> postsmoother_factory = std::make_shared<SSORSmootherFactory>(omega);
@@ -161,6 +162,7 @@ TEST_F(SolverTest, TestMultigridLowRank)
     multigrid_params.nlevel = 5;
     multigrid_params.npresmooth = 1;
     multigrid_params.npostsmooth = 1;
+    multigrid_params.cycle = 1;
     const double omega = 1.0;
     std::shared_ptr<SSORSmootherFactory> presmoother_factory = std::make_shared<SSORSmootherFactory>(omega);
     std::shared_ptr<SSORSmootherFactory> postsmoother_factory = std::make_shared<SSORSmootherFactory>(omega);
