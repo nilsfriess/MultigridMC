@@ -62,24 +62,28 @@ void MultigridMCSampler::sample(const unsigned int level) const
     }
     else
     {
-        // Presampler
-        for (unsigned int k = 0; k < params.npresmooth; ++k)
+        int cycle_ = (level > 0) ? params.cycle : 1;
+        for (int j = 0; j < cycle_; ++j)
         {
-            presamplers[level]->apply(f_ell[level], x_ell[level]);
-        }
-        // Compute residual
-        linear_operators[level]->apply(x_ell[level], r_ell[level]);
-        r_ell[level] = f_ell[level] - r_ell[level];
-        intergrid_operators[level]->restrict(r_ell[level], f_ell[level + 1]);
-        // Recursive call
-        x_ell[level + 1].setZero();
-        sample(level + 1);
-        // Prolongate and add
-        intergrid_operators[level]->prolongate_add(x_ell[level + 1], x_ell[level]);
-        // Postsmooth
-        for (unsigned int k = 0; k < params.npostsmooth; ++k)
-        {
-            postsamplers[level]->apply(f_ell[level], x_ell[level]);
+            // Presampler
+            for (unsigned int k = 0; k < params.npresmooth; ++k)
+            {
+                presamplers[level]->apply(f_ell[level], x_ell[level]);
+            }
+            // Compute residual
+            linear_operators[level]->apply(x_ell[level], r_ell[level]);
+            r_ell[level] = f_ell[level] - r_ell[level];
+            intergrid_operators[level]->restrict(r_ell[level], f_ell[level + 1]);
+            // Recursive call
+            x_ell[level + 1].setZero();
+            sample(level + 1);
+            // Prolongate and add
+            intergrid_operators[level]->prolongate_add(x_ell[level + 1], x_ell[level]);
+            // Postsmooth
+            for (unsigned int k = 0; k < params.npostsmooth; ++k)
+            {
+                postsamplers[level]->apply(f_ell[level], x_ell[level]);
+            }
         }
     }
 }
