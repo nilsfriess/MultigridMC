@@ -31,7 +31,7 @@ int Parameters::read_from_file(const std::string filename)
     {
         std::cerr << "Error in class \'" << classname << "\': "
                   << "cannot open configuration file \'" << filename << "\'." << std::endl;
-        return (EXIT_FAILURE);
+        exit(-1);
     }
     const libconfig::Setting &root = cfg.getRoot();
     try
@@ -43,7 +43,7 @@ int Parameters::read_from_file(const std::string filename)
     {
         std::cerr << "Error in class \'" << classname << "\': "
                   << "cannot read configuration from file \'" << filename << "\'." << std::endl;
-        return (EXIT_FAILURE);
+        exit(-1);
     }
     return (EXIT_SUCCESS);
 }
@@ -127,6 +127,7 @@ void MultigridParameters::parse_config(const libconfig::Setting &root)
     npresmooth = multigrid.lookup("npresmooth");
     npostsmooth = multigrid.lookup("npostsmooth");
     cycle = multigrid.lookup("cycle");
+    coarse_scaling = multigrid.lookup("coarse_scaling");
     std::string cycle_label = "";
     if (cycle == 1)
     {
@@ -142,6 +143,7 @@ void MultigridParameters::parse_config(const libconfig::Setting &root)
     std::cout << "   npresmooth = " << npresmooth << std::endl;
     std::cout << "   npostsmooth = " << npostsmooth << std::endl;
     std::cout << "   cycle = " << cycle << " " << cycle_label << std::endl;
+    std::cout << "   coarse_scaling = " << coarse_scaling << std::endl;
 }
 
 /* parse sampling configuration */

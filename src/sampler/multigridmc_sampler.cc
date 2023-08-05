@@ -78,7 +78,7 @@ void MultigridMCSampler::sample(const unsigned int level) const
             x_ell[level + 1].setZero();
             sample(level + 1);
             // Prolongate and add
-            intergrid_operators[level]->prolongate_add(x_ell[level + 1], x_ell[level]);
+            intergrid_operators[level]->prolongate_add(params.coarse_scaling, x_ell[level + 1], x_ell[level]);
             // Postsmooth
             for (unsigned int k = 0; k < params.npostsmooth; ++k)
             {

@@ -89,7 +89,7 @@ TEST_F(IntergridTest, TestProlong1dLinear)
     // prolongated state
     Eigen::VectorXd X_prol = get_state(lattice_1d, false);
     // prolongate state
-    intergrid_operator_1dlinear->prolongate_add(X_coarse, X_prol);
+    intergrid_operator_1dlinear->prolongate_add(1.0, X_coarse, X_prol);
     // Manually interpolate linearly
     Eigen::VectorXd X_linear = get_state(lattice_1d, false);
     Eigen::VectorXi shift_right(1);
@@ -115,7 +115,7 @@ TEST_F(IntergridTest, TestProlong2dLinear)
     // prolongated state
     Eigen::VectorXd X_prol = get_state(lattice_2d, false);
     // prolongate state
-    intergrid_operator_2dlinear->prolongate_add(X_coarse, X_prol);
+    intergrid_operator_2dlinear->prolongate_add(1.0, X_coarse, X_prol);
     // Manually interpolate linearly
     Eigen::VectorXd X_linear = get_state(lattice_2d, false);
     Eigen::Vector2i shift_north = {0, +1};
@@ -161,7 +161,7 @@ TEST_F(IntergridTest, TestProlongRestrict2dLinear)
     // restricted residual
     Eigen::VectorXd r_restr = get_state(coarse_lattice_2d, false);
     // Prolongate state
-    intergrid_operator_2dlinear->prolongate_add(X_coarse, X_prol);
+    intergrid_operator_2dlinear->prolongate_add(1.0, X_coarse, X_prol);
     // Restrict residual
     intergrid_operator_2dlinear->restrict(r_fine, r_restr);
     double tolerance = 1.E-12;

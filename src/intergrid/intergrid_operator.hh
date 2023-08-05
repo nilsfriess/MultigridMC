@@ -89,20 +89,23 @@ public:
 
     /** @brief Prolongate-add a vector from the next-coarser level
      *
-     * Compute x += I_{2h}^{h} x^{c}
+     * Compute x += alpha * I_{2h}^{h} x^{c}
      *
      * The prolongation operator does not depend on position, so the operation can be written as:
      *
-     * x_i  = x_i + \sum_j (I_{2h}^h)_{ij} x^{c}_j
-     *      = x_i + \sum_{\sigma} (I_{2h}^h)_{i,2*i+\sigma} x^{c}_{2*i+\sigma}
-     *      = x_i + \sum_{\sigma} P_{\sigma} x^{c}_{2*i+\sigma}
+     * x_i  = x_i + alpha * \sum_j (I_{2h}^h)_{ij} x^{c}_j
+     *      = x_i + alpha * \sum_{\sigma} (I_{2h}^h)_{i,2*i+\sigma} x^{c}_{2*i+\sigma}
+     *      = x_i + alpha * \sum_{\sigma} P_{\sigma} x^{c}_{2*i+\sigma}
      *
      * where \sigma runs over all possible offsets.
      *
+     * @param[in] alpha scale factor alpha
      * @param[in] x_coarse input vector on next-coarser lattice
      * @param[out] x output vector on current lattice
      */
-    virtual void prolongate_add(const Eigen::VectorXd &x_coarse, Eigen::VectorXd &x)
+    virtual void prolongate_add(const double alpha,
+                                const Eigen::VectorXd &x_coarse,
+                                Eigen::VectorXd &x)
     {
         std::shared_ptr<Lattice> coarse_lattice = lattice->get_coarse_lattice();
         for (unsigned int ell_coarse = 0; ell_coarse < coarse_lattice->Nvertex; ++ell_coarse)
@@ -111,7 +114,7 @@ public:
             for (unsigned k = 0; k < stencil_size; ++k)
             {
                 unsigned int ell = colidx[ell_coarse * stencil_size + k];
-                x[ell] += matrix[k] * x_coarse_ell;
+                x[ell] += alpha * matrix[k] * x_coarse_ell;
             }
         }
     };

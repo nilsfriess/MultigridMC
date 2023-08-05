@@ -73,7 +73,7 @@ void MultigridPreconditioner::solve(const unsigned int level)
             // Recursive call
             solve(level + 1);
             // Prolongate and add
-            intergrid_operators[level]->prolongate_add(x_ell[level + 1], x_ell[level]);
+            intergrid_operators[level]->prolongate_add(params.coarse_scaling, x_ell[level + 1], x_ell[level]);
             // Postsmooth
             for (unsigned int k = 0; k < params.npostsmooth; ++k)
             {
