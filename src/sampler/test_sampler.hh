@@ -225,6 +225,8 @@ TEST_F(SamplerTest, TestMultigridMCSampler1d)
         multigrid_params.nlevel = 3;
         multigrid_params.npresmooth = 1;
         multigrid_params.npostsmooth = 1;
+        multigrid_params.cycle = 1;
+        multigrid_params.coarse_scaling = 1.0;
         multigrid_params.verbose = 0;
         std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
         std::mt19937_64 rng(31841287);
@@ -305,6 +307,8 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     multigrid_params.nlevel = 3;
     multigrid_params.npresmooth = 1;
     multigrid_params.npostsmooth = 1;
+    multigrid_params.cycle = 1;
+    multigrid_params.coarse_scaling = 1.0;
     multigrid_params.verbose = 0;
     const double omega = 1.0;
     std::shared_ptr<SSORSamplerFactory> presampler_factory = std::make_shared<SSORSamplerFactory>(rng,
