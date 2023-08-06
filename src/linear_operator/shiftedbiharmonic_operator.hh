@@ -1,6 +1,7 @@
 #ifndef SHIFTEDBIHARMONIC_OPERATOR_HH
 #define SHIFTEDBIHARMONIC_OPERATOR_HH SHIFTEDBIHARMONIC_OPERATOR_HH
 
+#include <utility>
 #include <vector>
 #include <Eigen/Dense>
 #include "auxilliary/common.hh"

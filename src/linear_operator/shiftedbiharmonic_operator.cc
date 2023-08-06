@@ -29,12 +29,11 @@ ShiftedBiharmonicOperator::ShiftedBiharmonicOperator(const std::shared_ptr<Latti
     // inverse squared grid spacings in all dimensions (required in 2nd order term)
     Eigen::VectorXd hinv2(dim);
     // cell volume
-    double cell_volume = 1.0;
+    double cell_volume = lattice->cell_volume();
     for (int d = 0; d < dim; ++d)
     {
         h[d] = 1. / double(shape[d]);
         hinv2[d] = 1. / (h[d] * h[d]);
-        cell_volume *= h[d];
     }
     typedef Eigen::Triplet<double> T;
     std::vector<T> tripletList;
@@ -54,7 +53,6 @@ ShiftedBiharmonicOperator::ShiftedBiharmonicOperator(const std::shared_ptr<Latti
     stencil_squared_laplacian[1][1] = 2 * hinv2[0] * hinv2[1];
     for (unsigned int ell = 0; ell < nrow; ++ell)
     {
-        double diagonal = (alpha_b * alpha_b - 2 * alpha_K * alpha_b * stencil_laplacian[0][0] + alpha_K * alpha_K * stencil_squared_laplacian[0][0]) * cell_volume;
         /* Loop over 5x5 stencil and only treat entries in this diamond:
          *
          *          . . x . .
@@ -63,6 +61,8 @@ ShiftedBiharmonicOperator::ShiftedBiharmonicOperator(const std::shared_ptr<Latti
          *          . x x x .
          *          . . x . .
          */
+        std::map<std::pair<unsigned int, unsigned int>, double> m;
+        m[std::make_pair<int, int>(ell, ell)] = (alpha_b * alpha_b - 2 * alpha_K * alpha_b * stencil_laplacian[0][0] + alpha_K * alpha_K * stencil_squared_laplacian[0][0]) * cell_volume;
         for (int j = -2; j <= 2; ++j)
         {
             for (int k = -2; k <= 2; ++k)
@@ -78,20 +78,42 @@ ShiftedBiharmonicOperator::ShiftedBiharmonicOperator(const std::shared_ptr<Latti
                     double local_matrix_element = alpha_K * alpha_K * stencil_squared_laplacian[abs(j)][abs(k)];
                     if (abs(j) + abs(k) == 1)
                         local_matrix_element += -2 * alpha_K * alpha_b * stencil_laplacian[abs(j)][abs(k)];
-                    tripletList.push_back(T(ell, ell_shifted, local_matrix_element * cell_volume));
-                }
-                else if (abs(j) + abs(k) == 1)
-                {
-                    /* deal with homogeneous Neumann BCs: is one of the stencil entries
-                     * (+1,0), (-1,0), (0,+1), (0,-1) touches the boundary, the value for
-                     * the entry (+2,0), (-2,0), (0,+2), (0,-2) needs to be added to the
-                     * diagonal.
-                     */
-                    diagonal += alpha_K * alpha_K * stencil_squared_laplacian[2 * abs(j)][2 * abs(k)] * cell_volume;
+                    m[std::make_pair<int, int>(ell, ell_shifted)] = local_matrix_element * cell_volume;
                 }
             }
         }
-        tripletList.push_back(T(ell, ell, diagonal));
+        for (int j = -1; j <= 1; ++j)
+        {
+            for (int k = -1; k <= 1; ++k)
+            {
+                if (abs(j) + abs(k) == 1)
+                {
+                    Eigen::Vector2i shift;
+                    shift[0] = j;
+                    shift[1] = k;
+                    unsigned int ell_shifted;
+                    if (not(lattice->shifted_vertex_is_internal_vertex(ell, shift, ell_shifted)))
+                    {
+                        double neg_value = alpha_K * alpha_K * stencil_squared_laplacian[2 * abs(j)][2 * abs(k)] * cell_volume;
+                        unsigned int ell_neg_shifted;
+                        m[std::make_pair<int, int>(ell, ell)] += 6 * neg_value;
+                        Eigen::Vector2i neg_shift;
+                        neg_shift[0] = -j;
+                        neg_shift[1] = -k;
+                        ell_neg_shifted = lattice->shift_vertexidx(ell, neg_shift);
+                        m[std::make_pair<int, int>(ell, ell_neg_shifted)] -= 2 * neg_value;
+                        neg_shift[0] = -2 * j;
+                        neg_shift[1] = -2 * k;
+                        ell_neg_shifted = lattice->shift_vertexidx(ell, neg_shift);
+                        m[std::make_pair<int, int>(ell, ell_neg_shifted)] += 1. / 3. * neg_value;
+                    }
+                }
+            }
+        }
+        for (auto it = m.begin(); it != m.end(); ++it)
+        {
+            tripletList.push_back(T(it->first.first, it->first.second, it->second));
+        }
     }
     A_sparse.setFromTriplets(tripletList.begin(), tripletList.end());
 }
