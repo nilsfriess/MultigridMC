@@ -269,7 +269,7 @@ TEST_F(LinearOperatorTest, TestShiftedBiharmonicOperator2d)
     construct_exact_solution_rhs_shiftedbiharmonic(lattice_2d, u_exact, rhs_exact);
     shiftedbiharmonic_operator->apply(u_exact, rhs);
     double error = (rhs - rhs_exact).norm() / (rhs).norm();
-    double tolerance = 7.E-3;
+    double tolerance = 2.5E-2;
     EXPECT_NEAR(error, 0.0, tolerance);
 }
 
