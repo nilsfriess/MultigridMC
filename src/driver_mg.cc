@@ -21,6 +21,12 @@
 #include "auxilliary/vtk_writer2d.hh"
 #include "auxilliary/vtk_writer3d.hh"
 
+inline double g(double z)
+{
+
+    return 2500 * z * z * z * z * (1 - z) * (1 - z) * exp(-8 * z);
+}
+
 /* *********************************************************************** *
  *                                M A I N
  * *********************************************************************** */
@@ -130,9 +136,16 @@ int main(int argc, char *argv[])
     unsigned int seed = 1482817;
     std::mt19937_64 rng(seed);
     std::normal_distribution<double> normal_dist(0.0, 1.0);
-    for (unsigned int ell = 0; ell < ndof; ++ell)
+    double volume = lattice->cell_volume();
+    Eigen::VectorXi shape = lattice->shape();
+    Eigen::VectorXd h_lat(2);
+    h_lat[0] = 1 / double(shape[0]);
+    h_lat[1] = 1 / double(shape[1]);
+    for (unsigned int ell = 0; ell < lattice->Nvertex; ++ell)
     {
-        x_exact[ell] = normal_dist(rng);
+        Eigen::VectorXi coord = lattice->vertexidx_linear2euclidean(ell);
+        Eigen::VectorXd x = h_lat.cwiseProduct(coord.cast<double>());
+        x_exact[ell] = g(x[0]) * g(x[1]);
     }
 
     Eigen::VectorXd b(ndof);
