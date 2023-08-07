@@ -10,6 +10,7 @@
 #include "linear_operator/linear_operator.hh"
 #include "linear_operator/diffusion_operator.hh"
 #include "linear_operator/shiftedlaplace_operator.hh"
+#include "linear_operator/shiftedbiharmonic_operator.hh"
 #include "linear_operator/measured_operator.hh"
 #include "intergrid/intergrid_operator_linear.hh"
 #include "solver/linear_solver.hh"
@@ -88,6 +89,19 @@ int main(int argc, char *argv[])
                                                                   diffusion_params.alpha_b,
                                                                   1);
     }
+    else if (general_params.prior == "shiftedbiharmonic")
+    {
+        prior_operator = std::make_shared<ShiftedBiharmonicOperator>(lattice,
+                                                                     diffusion_params.alpha_K,
+                                                                     diffusion_params.alpha_b,
+                                                                     1);
+    }
+    else
+    {
+        std::cout << "Error: invalid prior \'" << general_params.prior << "\'" << std::endl;
+        exit(-1);
+    }
+
     std::shared_ptr<MeasuredOperator> posterior_operator = std::make_shared<MeasuredOperator>(prior_operator,
                                                                                               measurement_params);
     //   Construct smoothers
