@@ -152,9 +152,10 @@ void SamplingParameters::parse_config(const libconfig::Setting &root)
 /* prior configuration */
 void PriorParameters::parse_config(const libconfig::Setting &root)
 {
+
     const libconfig::Setting &prior = root["prior"];
     pde_model = prior.lookup("pdemodel").c_str();
-    if (not((prior == "diffusion") or (prior == "shiftedlaplace") or (prior == "shiftedbiharmonic")))
+    if (not((pde_model == "diffusion") or (pde_model == "shiftedlaplace") or (pde_model == "shiftedbiharmonic")))
     {
         std::cout << "ERROR: Unknown prior: \'" << pde_model << "\'" << std::endl;
         exit(-1);
