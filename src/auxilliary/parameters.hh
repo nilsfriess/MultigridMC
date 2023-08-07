@@ -177,22 +177,9 @@ public:
     unsigned int nwarmup;
 };
 
-/** @brief structure for diffusion
- *
- * The coefficient is assumed to be of the form
- *
- *    K(x,y) = alpha_K + beta_K * sin(2 pi x) * sin(2 pi y)                 [in 2d]
- * or
- *    K(x,y) = alpha_K + beta_K * sin(2 pi x) * sin(2 pi y) * sin(2 pi z)   [in 3d]
- *
- * and the zero order term is assumed to be
- *
- *    b(x,y) = alpha_b + beta_b * cos(2 pi x) * cos(2 pi y)                 [in 2d]
- * or
- *    b(x,y) = alpha_b + beta_b * cos(2 pi x) * cos(2 pi y) * cos(2 pi z)   [in 3d]
- *
+/** @brief structure for prior parameters
  */
-class DiffusionParameters : public Parameters
+class PriorParameters : public Parameters
 {
 public:
     /** @brief parse configuration
@@ -201,14 +188,23 @@ public:
      */
     virtual void parse_config(const libconfig::Setting &root);
 
-    /** @brief constant alpha_K in diffusion coefficient K(x,y) */
-    double alpha_K;
-    /** @brief constant beta_K in diffusion coefficient K(x,y) */
-    double beta_K;
-    /** @brief constant alpha_b in zero-order term b(x,y) */
-    double alpha_b;
-    /** @brief constant beta_K in zero-order term b(x,y) */
-    double beta_b;
+    /** @brief name of the correlationlength model to be used */
+    std::string correlationlength_model;
+};
+
+/** @brief structure for prior parameters
+ */
+class ConstantCorrelationLengthModelParameters : public Parameters
+{
+public:
+    /** @brief parse configuration
+     *
+     * @param[in] root root of configuration object
+     */
+    virtual void parse_config(const libconfig::Setting &root);
+
+    /** @brief constant correlation length kappa */
+    double kappa;
 };
 
 /** @brief Structure for measurement parameters */

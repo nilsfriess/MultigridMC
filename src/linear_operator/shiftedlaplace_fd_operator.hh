@@ -5,6 +5,7 @@
 #include <Eigen/Dense>
 #include "auxilliary/common.hh"
 #include "linear_operator.hh"
+#include "correlationlength_model.hh"
 #include "lattice/lattice.hh"
 
 /** @file shiftedlaplace_fd_operator.hh
@@ -16,7 +17,7 @@
  *
  * Class for finite difference discretisation of shifted Laplace operator
  *
- *   -alpha_K * div( grad (u)) + alpha_b u
+ *   -div( grad (u)) + kappa^{-2} u
  *
  * with homogeneous Dirichlet boundary conditions
  *
@@ -29,20 +30,16 @@ public:
      * Populates matrix entries across the grid
      *
      * @param[in] lattice_ underlying 2d lattice
-     * @param[in] alpha_K coefficient of second order term
-     * @param[in] alpha_b coefficient of zero order term
+     * @param[in] correlationlength_model_ model for correlation length
      * @param[in] verbose_ verbosity level
      */
     ShiftedLaplaceFDOperator(const std::shared_ptr<Lattice> lattice_,
-                             const double alpha_K_,
-                             const double alpha_b_,
+                             const std::shared_ptr<CorrelationLengthModel> correlationlength_model_,
                              const int verbose = 0);
 
 protected:
-    /** @brief Coefficient of Laplace term */
-    const double alpha_K;
-    /** @brief Coefficient of zero order term */
-    const double alpha_b;
+    /** @brief Correlation length model */
+    std::shared_ptr<CorrelationLengthModel> correlationlength_model;
 };
 
 #endif // SHIFTEDLAPLACE_FD_OPERATOR_HH

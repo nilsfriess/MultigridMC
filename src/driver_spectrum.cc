@@ -24,20 +24,20 @@ int main(int argc, char *argv[])
     std::string filename(argv[1]);
     std::cout << "Reading parameters from file \'" << filename << "\'" << std::endl;
     LatticeParameters lattice_params;
-    DiffusionParameters diffusion2d_params;
+    PriorParameters prior_params;
+    ConstantCorrelationLengthModelParameters constantcorrelationlengthmodel_params;
     MeasurementParameters measurement_params;
     lattice_params.read_from_file(filename);
-    diffusion2d_params.read_from_file(filename);
+    prior_params.read_from_file(filename);
+    constantcorrelationlengthmodel_params.read_from_file(filename);
     measurement_params.read_from_file(filename);
 
     // Construct lattice and linear operator
     std::shared_ptr<Lattice2d> lattice = std::make_shared<Lattice2d>(lattice_params.nx,
                                                                      lattice_params.ny);
+    std::shared_ptr<CorrelationLengthModel> correlationlengthmodel = std::make_shared<ConstantCorrelationLengthModel>(constantcorrelationlengthmodel_params);
     std::shared_ptr<ShiftedLaplaceFEMOperator> prior_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice,
-                                                                                                            diffusion2d_params.alpha_K,
-                                                                                                            diffusion2d_params.beta_K,
-                                                                                                            diffusion2d_params.alpha_b,
-                                                                                                            diffusion2d_params.beta_b);
+                                                                                                            correlationlengthmodel);
     std::shared_ptr<MeasuredOperator> linear_operator = std::make_shared<MeasuredOperator>(prior_operator,
                                                                                            measurement_params);
     LinearOperator::DenseMatrixType covariance = linear_operator->covariance();

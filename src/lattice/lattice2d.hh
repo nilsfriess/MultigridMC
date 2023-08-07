@@ -48,6 +48,8 @@ public:
    */
   Lattice2d(const unsigned int nx_, const unsigned int ny_) : nx(nx_),
                                                               ny(ny_),
+                                                              hx(1. / double(nx_)),
+                                                              hy(1. / double(ny_)),
                                                               Lattice(nx_ * ny_, (nx_ - 1) * (ny_ - 1)) {}
 
   /** @brief Convert linear index to Euclidean index
@@ -177,6 +179,19 @@ public:
     return (2 * j - 1) * (2 * nx - 1) + (2 * i - 1);
   }
 
+  /** @brief Get coordinates of vertex inside domain [0,1]^d
+   *
+   * @param[in] ell index of vertex
+   */
+  virtual Eigen::VectorXd vertex_coordinates(const unsigned int ell) const
+  {
+    assert(ell < (nx - 1) * (ny - 1));
+    Eigen::VectorXd coord(2);
+    coord[0] = (ell % (nx - 1) + 1.0) * hx;
+    coord[1] = (ell / (nx - 1) + 1.0) * hy;
+    return coord;
+  }
+
   /** @brief get coarsened version of lattice */
   virtual std::shared_ptr<Lattice> get_coarse_lattice() const
   {
@@ -211,6 +226,10 @@ public:
   const unsigned int nx;
   /** @brief extent in y-direction */
   const unsigned int ny;
+  /** @brief lattice spacing in x-direction */
+  const double hx;
+  /** @brief lattice spacing in y-direction */
+  const double hy;
 };
 
 #endif // LATTICE2D_HH

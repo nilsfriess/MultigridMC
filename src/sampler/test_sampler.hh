@@ -7,8 +7,10 @@
 #include <Eigen/Dense>
 #include <Eigen/QR>
 #include "config.h"
+#include "auxilliary/parameters.hh"
 #include "lattice/lattice1d.hh"
 #include "lattice/lattice2d.hh"
+#include "linear_operator/correlationlength_model.hh"
 #include "linear_operator/linear_operator.hh"
 #include "linear_operator/shiftedlaplace_fem_operator.hh"
 #include "linear_operator/measured_operator.hh"
@@ -266,10 +268,10 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     int ny = thorough_testing ? 16 : 8;
     std::shared_ptr<Lattice2d> lattice = std::make_shared<Lattice2d>(nx, ny);
     unsigned int ndof = lattice->Nvertex;
-    double alpha_K = 1.5;
-    double beta_K = 0.3;
-    double alpha_b = 1.2;
-    double beta_b = 0.1;
+    ConstantCorrelationLengthModelParameters correlationlengthmodel_params;
+    correlationlengthmodel_params.kappa = 1.2;
+    std::shared_ptr<CorrelationLengthModel> correlationlengthmodel = std::make_shared<ConstantCorrelationLengthModel>(correlationlengthmodel_params);
+
     unsigned int n_meas = 4;
     std::vector<Eigen::VectorXd> measurement_locations(n_meas);
     Eigen::MatrixXd Sigma(n_meas, n_meas);
@@ -289,10 +291,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     Q = qr.householderQ();
     Sigma = Q * Sigma * Q.transpose();
     std::shared_ptr<ShiftedLaplaceFEMOperator> prior_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice,
-                                                                                                            alpha_K,
-                                                                                                            beta_K,
-                                                                                                            alpha_b,
-                                                                                                            beta_b);
+                                                                                                            correlationlengthmodel);
     MeasurementParameters measurement_params;
     measurement_params.measurement_locations = measurement_locations;
     measurement_params.covariance = Sigma;

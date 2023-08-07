@@ -29,7 +29,7 @@ public:
    *
    * @param[in] n_ Extent of lattice (= number of cells)
    */
-  Lattice1d(const unsigned int n_) : n(n_), Lattice(n_, n_ - 1) {}
+  Lattice1d(const unsigned int n_) : n(n_), h(1. / double(n_)), Lattice(n_, n_ - 1) {}
 
   /** @brief Convert linear cell index to Euclidean index
    *
@@ -60,7 +60,6 @@ public:
    */
   inline virtual Eigen::VectorXi vertexidx_linear2euclidean(const unsigned int ell) const
   {
-    assert(ell >= 0);
     assert(ell < Ncell - 1);
     Eigen::VectorXi idx(1);
     idx[0] = ell + 1;
@@ -137,10 +136,25 @@ public:
     return ((idx_vertex > 0) and (idx_vertex < n));
   }
 
-  /** @brief get equivalent index of vertex on next-finer lattice */
+  /** @brief get equivalent index of vertex on next-finer lattice
+   *
+   * @param[in] ell index of vertex
+   */
   virtual unsigned int fine_vertex_idx(const unsigned int ell) const
   {
     return 2 * ell + 1;
+  }
+
+  /** @brief Get coordinates of vertex inside domain [0,1]^d
+   *
+   * @param[in] ell index of vertex
+   */
+  virtual Eigen::VectorXd vertex_coordinates(const unsigned int ell) const
+  {
+    assert(ell < Ncell - 1);
+    Eigen::VectorXd coord(1);
+    coord[0] = (ell + 1.) * h;
+    return coord;
   }
 
   /** @brief get coarsened version of lattice */
@@ -174,6 +188,8 @@ public:
 
   /** @brief extent of lattice */
   const unsigned int n;
+  /** @brief lattice spaceing */
+  const double h;
 };
 
 #endif // LATTICE1D_HH

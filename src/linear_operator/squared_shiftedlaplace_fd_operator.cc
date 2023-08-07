@@ -7,11 +7,9 @@
 
 /*  Create a new instance */
 SquaredShiftedLaplaceFDOperator::SquaredShiftedLaplaceFDOperator(const std::shared_ptr<Lattice> lattice_,
-                                                                 const double alpha_K_,
-                                                                 const double alpha_b_,
+                                                                 const std::shared_ptr<CorrelationLengthModel> correlationlength_model_,
                                                                  const int verbose) : LinearOperator(lattice_),
-                                                                                      alpha_K(alpha_K_),
-                                                                                      alpha_b(alpha_b_)
+                                                                                      correlationlength_model(correlationlength_model_)
 {
     // dimension
     int dim = lattice->dim();
@@ -54,7 +52,9 @@ SquaredShiftedLaplaceFDOperator::SquaredShiftedLaplaceFDOperator(const std::shar
     stencil_squared_laplacian[1][1] = 2 * hinv2[0] * hinv2[1];
     for (unsigned int ell = 0; ell < nrow; ++ell)
     {
-        double diagonal = (alpha_b * alpha_b - 2 * alpha_K * alpha_b * stencil_laplacian[0][0] + alpha_K * alpha_K * stencil_squared_laplacian[0][0]) * cell_volume;
+        Eigen::VectorXd x = lattice->vertex_coordinates(ell);
+        double alpha_b = correlationlength_model->kappa_invsq(x);
+        double diagonal = (alpha_b * alpha_b - 2. * alpha_b * stencil_laplacian[0][0] + stencil_squared_laplacian[0][0]) * cell_volume;
         /* Loop over 5x5 stencil and only treat entries in this diamond:
          *
          *          . . x . .
@@ -75,9 +75,9 @@ SquaredShiftedLaplaceFDOperator::SquaredShiftedLaplaceFDOperator(const std::shar
                 unsigned int ell_shifted;
                 if (lattice->shifted_vertex_is_internal_vertex(ell, shift, ell_shifted))
                 {
-                    double local_matrix_element = alpha_K * alpha_K * stencil_squared_laplacian[abs(j)][abs(k)];
+                    double local_matrix_element = stencil_squared_laplacian[abs(j)][abs(k)];
                     if (abs(j) + abs(k) == 1)
-                        local_matrix_element += -2 * alpha_K * alpha_b * stencil_laplacian[abs(j)][abs(k)];
+                        local_matrix_element += -2. * alpha_b * stencil_laplacian[abs(j)][abs(k)];
                     tripletList.push_back(T(ell, ell_shifted, local_matrix_element * cell_volume));
                 }
                 else if (abs(j) + abs(k) == 1)
@@ -87,7 +87,7 @@ SquaredShiftedLaplaceFDOperator::SquaredShiftedLaplaceFDOperator(const std::shar
                      * the entry (+2,0), (-2,0), (0,+2), (0,-2) needs to be added to the
                      * diagonal.
                      */
-                    diagonal += alpha_K * alpha_K * stencil_squared_laplacian[2 * abs(j)][2 * abs(k)] * cell_volume;
+                    diagonal += stencil_squared_laplacian[2 * abs(j)][2 * abs(k)] * cell_volume;
                 }
             }
         }

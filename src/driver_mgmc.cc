@@ -171,7 +171,8 @@ int main(int argc, char *argv[])
     SmootherParameters smoother_params;
     MultigridParameters multigrid_params;
     SamplingParameters sampling_params;
-    DiffusionParameters diffusion_params;
+    PriorParameters prior_params;
+    ConstantCorrelationLengthModelParameters constantcorrelationlengthmodel_params;
     MeasurementParameters measurement_params;
     general_params.read_from_file(filename);
     lattice_params.read_from_file(filename);
@@ -179,7 +180,8 @@ int main(int argc, char *argv[])
     smoother_params.read_from_file(filename);
     multigrid_params.read_from_file(filename);
     sampling_params.read_from_file(filename);
-    diffusion_params.read_from_file(filename);
+    prior_params.read_from_file(filename);
+    constantcorrelationlengthmodel_params.read_from_file(filename);
     measurement_params.read_from_file(filename);
 
     if (measurement_params.dim != general_params.dim)
@@ -223,22 +225,15 @@ int main(int argc, char *argv[])
         std::cout << "ERROR: Invalid dimension : " << general_params.dim << std::endl;
         exit(-1);
     }
+    std::shared_ptr<CorrelationLengthModel> correlationlengthmodel = std::make_shared<ConstantCorrelationLengthModel>(constantcorrelationlengthmodel_params);
     std::shared_ptr<LinearOperator> prior_operator;
     if (general_params.prior == "diffusion")
     {
-        prior_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice,
-                                                                     diffusion_params.alpha_K,
-                                                                     diffusion_params.beta_K,
-                                                                     diffusion_params.alpha_b,
-                                                                     diffusion_params.beta_b,
-                                                                     1);
+        prior_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice, correlationlengthmodel, 1);
     }
     else if (general_params.prior == "shiftedlaplace")
     {
-        prior_operator = std::make_shared<ShiftedLaplaceFDOperator>(lattice,
-                                                                    diffusion_params.alpha_K,
-                                                                    diffusion_params.alpha_b,
-                                                                    1);
+        prior_operator = std::make_shared<ShiftedLaplaceFDOperator>(lattice, correlationlengthmodel, 1);
     }
     std::shared_ptr<MeasuredOperator> posterior_operator = std::make_shared<MeasuredOperator>(prior_operator,
                                                                                               measurement_params);

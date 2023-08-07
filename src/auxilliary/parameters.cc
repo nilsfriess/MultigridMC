@@ -156,21 +156,27 @@ void SamplingParameters::parse_config(const libconfig::Setting &root)
     std::cout << "  number of warmup samples = " << nwarmup << std::endl;
 }
 
-/* parse 2d diffusion configuration */
-void DiffusionParameters::parse_config(const libconfig::Setting &root)
+/* prior configuration */
+void PriorParameters::parse_config(const libconfig::Setting &root)
 {
-    const libconfig::Setting &sampling = root["diffusion"];
-    alpha_K = sampling["alpha_K"];
-    beta_K = sampling["beta_K"];
-    alpha_b = sampling["alpha_b"];
-    beta_b = sampling["beta_b"];
-    std::cout << "  diffusion operator" << std::endl;
-    std::cout << "    parameters of diffusion coefficient K(x,y)" << std::endl;
-    std::cout << "      alpha_K = " << alpha_K << std::endl;
-    std::cout << "      beta_K  = " << beta_K << std::endl;
-    std::cout << "    parameters of zero order coefficient b(x,y)" << std::endl;
-    std::cout << "      alpha_b = " << alpha_b << std::endl;
-    std::cout << "      beta_b  = " << beta_b << std::endl;
+    const libconfig::Setting &prior = root["prior"];
+    correlationlength_model = prior.lookup("correlationlengthmodel").c_str();
+    if (not(correlationlength_model == "constant"))
+    {
+        std::cout << "ERROR: Invalied correlation length model \'" << correlationlength_model << "\'." << std::endl;
+        exit(-1);
+    }
+    std::cout << "  prior" << std::endl;
+    std::cout << "    correlationlengthmodel = " << correlationlength_model << std::endl;
+}
+
+/* constant correlation length model configuration */
+void ConstantCorrelationLengthModelParameters::parse_config(const libconfig::Setting &root)
+{
+    const libconfig::Setting &model = root["constantcorrelationlengthmodel"];
+    kappa = model.lookup("kappa");
+    std::cout << "  constantcorrelationlengthmodel" << std::endl;
+    std::cout << "    kappa = " << kappa << std::endl;
 }
 
 /* parse measurement configuration */

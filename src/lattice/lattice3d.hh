@@ -69,6 +69,9 @@ public:
             const unsigned int nz_) : nx(nx_),
                                       ny(ny_),
                                       nz(nz_),
+                                      hx(1. / double(nx_)),
+                                      hy(1. / double(ny_)),
+                                      hz(1. / double(nz_)),
                                       Lattice(nx_ * ny_ * nz_, (nx_ - 1) * (ny_ - 1) * (nz_ - 1)) {}
 
   /** @brief Convert linear index to Euclidean index
@@ -219,6 +222,20 @@ public:
     return (2 * k - 1) * (2 * nx - 1) * (2 * ny - 1) + (2 * j - 1) * (2 * nx - 1) + 2 * i - 1;
   }
 
+  /** @brief Get coordinates of vertex inside domain [0,1]^d
+   *
+   * @param[in] ell index of vertex
+   */
+  virtual Eigen::VectorXd vertex_coordinates(const unsigned int ell) const
+  {
+    assert(ell < (nx - 1) * (ny - 1) * (nz - 1));
+    Eigen::VectorXd coord(3);
+    coord[0] = ((ell % ((nx - 1) * (ny - 1))) % (nx - 1) + 1.) * hx;
+    coord[1] = ((ell % ((nx - 1) * (ny - 1))) / (nx - 1) + 1) * hy;
+    coord[2] = (ell / ((nx - 1) * (ny - 1)) + 1) * hz;
+    return coord;
+  }
+
   /** @brief get coarsened version of lattice */
   virtual std::shared_ptr<Lattice> get_coarse_lattice() const
   {
@@ -256,6 +273,12 @@ public:
   const unsigned int ny;
   /** @brief extent in z-direction */
   const unsigned int nz;
+  /** @brief grid spacing in x-direction */
+  const double hx;
+  /** @brief grid spacing in y-direction */
+  const double hy;
+  /** @brief grid spacing in z-direction */
+  const double hz;
 };
 
 #endif // LATTICE3D_HH

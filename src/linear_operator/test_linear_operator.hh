@@ -4,8 +4,10 @@
 #include <gtest/gtest.h>
 #include <random>
 #include <Eigen/Dense>
+#include "auxilliary/parameters.hh"
 #include "lattice/lattice2d.hh"
 #include "lattice/lattice3d.hh"
+#include "linear_operator/correlationlength_model.hh"
 #include "linear_operator/shiftedlaplace_fem_operator.hh"
 #include "linear_operator/shiftedlaplace_fd_operator.hh"
 #include "linear_operator/squared_shiftedlaplace_fd_operator.hh"
@@ -13,8 +15,6 @@
 /** @brief fixture class for solver tests */
 class LinearOperatorTest : public ::testing::Test
 {
-public:
-    LinearOperatorTest() : alpha_K(1.4), alpha_b(3.2){};
 
 protected:
     /* @brief initialise tests */
@@ -28,6 +28,9 @@ protected:
         ny = 64;
         nz = 64;
         lattice_3d = std::make_shared<Lattice3d>(nx, ny, nz);
+        ConstantCorrelationLengthModelParameters params;
+        params.kappa = 2.3;
+        correlationlengthmodel = std::make_shared<ConstantCorrelationLengthModel>(params);
     }
 
 protected:
@@ -62,33 +65,27 @@ protected:
      *      g(z) = 100*z^2*(1-x)*exp(-6*z)
      *
      * @param[in] lattice underlying lattice
+     * @param[in] correlationlengthmodel model for correlation length
      * @param[out] u_exact exact solution
      * @param[out] rhs right hand side
      */
     void construct_exact_solution_rhs_shiftedlaplace(std::shared_ptr<Lattice> lattice,
+                                                     std::shared_ptr<CorrelationLengthModel> correlationlengthmodel,
                                                      Eigen::VectorXd &u_exact,
                                                      Eigen::VectorXd &rhs)
     {
         const int dim = lattice->dim();
         double volume = lattice->cell_volume();
         Eigen::VectorXi shape = lattice->shape();
-        Eigen::VectorXd h_lat(dim);
-        Eigen::VectorXd ones(dim);
-        for (int d = 0; d < dim; ++d)
-        {
-            h_lat[d] = 1 / double(shape[d]);
-            ones[d] = 1.0;
-        }
         for (unsigned int ell = 0; ell < lattice->Nvertex; ++ell)
         {
-            Eigen::VectorXi coord = lattice->vertexidx_linear2euclidean(ell);
-            Eigen::VectorXd x = h_lat.cwiseProduct(coord.cast<double>());
+            Eigen::VectorXd x = lattice->vertex_coordinates(ell);
             u_exact[ell] = 1.0;
             for (int d = 0; d < dim; ++d)
             {
                 u_exact[ell] *= f(x[d]);
             }
-            rhs[ell] = alpha_b * u_exact[ell];
+            rhs[ell] = correlationlengthmodel->kappa_invsq(x) * u_exact[ell];
             for (int j = 0; j < dim; ++j)
             {
                 double dd_u = 1.0;
@@ -99,7 +96,7 @@ protected:
                     else
                         dd_u *= f(x[d]);
                 }
-                rhs[ell] -= alpha_K * dd_u;
+                rhs[ell] -= dd_u;
             }
             rhs[ell] *= volume;
         }
@@ -146,37 +143,32 @@ protected:
      *      g(z) = 100*z^2*(1-x)*exp(-6*z)
      *
      * @param[in] lattice underlying lattice
-     * @param[in] alpha_K coefficient of second order coefficient
-     * @param[in] alpha_b coefficient of zero order coefficient
+     * @param[in] correlationlengthmodel model for correlation length
      * @param[out] u_exact exact solution
      * @param[out] rhs right hand side
      */
     void construct_exact_solution_rhs_squared_shiftedlaplace(std::shared_ptr<Lattice> lattice,
+                                                             std::shared_ptr<CorrelationLengthModel> correlationlengthmodel,
                                                              Eigen::VectorXd &u_exact,
                                                              Eigen::VectorXd &rhs)
     {
         double volume = lattice->cell_volume();
         Eigen::VectorXi shape = lattice->shape();
-        Eigen::VectorXd h_lat(2);
-        h_lat[0] = 1 / double(shape[0]);
-        h_lat[1] = 1 / double(shape[1]);
         for (unsigned int ell = 0; ell < lattice->Nvertex; ++ell)
         {
-            Eigen::VectorXi coord = lattice->vertexidx_linear2euclidean(ell);
-            Eigen::VectorXd x = h_lat.cwiseProduct(coord.cast<double>());
+            Eigen::VectorXd x = lattice->vertex_coordinates(ell);
+            double alpha_b = correlationlengthmodel->kappa_invsq(x);
             u_exact[ell] = g(x[0]) * g(x[1]);
-            rhs[ell] = (alpha_K * alpha_K * (d4_g(x[0]) * g(x[1]) + 2 * d2_g(x[0]) * d2_g(x[1]) + g(x[0]) * d4_g(x[1])) - 2 * alpha_K * alpha_b * (d2_g(x[0]) * g(x[1]) + g(x[0]) * d2_g(x[1])) + alpha_b * alpha_b * u_exact[ell]) * volume;
+            rhs[ell] = (d4_g(x[0]) * g(x[1]) + 2 * d2_g(x[0]) * d2_g(x[1]) + g(x[0]) * d4_g(x[1]) - 2 * alpha_b * (d2_g(x[0]) * g(x[1]) + g(x[0]) * d2_g(x[1])) + alpha_b * alpha_b * u_exact[ell]) * volume;
         }
     }
 
-    /** @brief Coefficient alpha_K */
-    const double alpha_K;
-    /** @brief Coefficient alpha_b */
-    const double alpha_b;
     /** @brief 2d lattice */
     std::shared_ptr<Lattice2d> lattice_2d;
     /** @brief 3d lattice */
     std::shared_ptr<Lattice3d> lattice_3d;
+    /** @brief model for correlation length in */
+    std::shared_ptr<CorrelationLengthModel> correlationlengthmodel;
 };
 
 /* Test 2d FEM shifted Laplace operator */
@@ -184,14 +176,13 @@ TEST_F(LinearOperatorTest, TestShiftedLaplaceFEMOperator2d)
 {
     double V_cell = lattice_2d->cell_volume();
     std::shared_ptr<ShiftedLaplaceFEMOperator> shiftedlaplace_fem_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice_2d,
-                                                                                                                         alpha_K, 0.0,
-                                                                                                                         alpha_b, 0.0,
+                                                                                                                         correlationlengthmodel,
                                                                                                                          0);
     unsigned int nrow = lattice_2d->Nvertex;
     Eigen::VectorXd u_exact(nrow);
     Eigen::VectorXd rhs_exact(nrow);
     Eigen::VectorXd rhs(nrow);
-    construct_exact_solution_rhs_shiftedlaplace(lattice_2d, u_exact, rhs_exact);
+    construct_exact_solution_rhs_shiftedlaplace(lattice_2d, correlationlengthmodel, u_exact, rhs_exact);
     shiftedlaplace_fem_operator->apply(u_exact, rhs);
     double error = (rhs - rhs_exact).norm() / rhs.norm();
     double tolerance = 2.E-4;
@@ -203,14 +194,13 @@ TEST_F(LinearOperatorTest, TestShiftedLaplaceFEMOperator3d)
 {
     double V_cell = lattice_3d->cell_volume();
     std::shared_ptr<ShiftedLaplaceFEMOperator> shiftedlaplace_fem_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice_3d,
-                                                                                                                         alpha_K, 0.0,
-                                                                                                                         alpha_b, 0.0,
+                                                                                                                         correlationlengthmodel,
                                                                                                                          0);
     unsigned int nrow = lattice_3d->Nvertex;
     Eigen::VectorXd u_exact(nrow);
     Eigen::VectorXd rhs_exact(nrow);
     Eigen::VectorXd rhs(nrow);
-    construct_exact_solution_rhs_shiftedlaplace(lattice_3d, u_exact, rhs_exact);
+    construct_exact_solution_rhs_shiftedlaplace(lattice_3d, correlationlengthmodel, u_exact, rhs_exact);
     shiftedlaplace_fem_operator->apply(u_exact, rhs);
     double error = (rhs - rhs_exact).norm() / rhs.norm();
     double tolerance = 7.E-3;
@@ -222,14 +212,12 @@ TEST_F(LinearOperatorTest, TestShiftedLaplaceFDOperator2d)
 {
     double V_cell = lattice_2d->cell_volume();
     std::shared_ptr<ShiftedLaplaceFDOperator> shiftedlaplace_fd_operator = std::make_shared<ShiftedLaplaceFDOperator>(lattice_2d,
-                                                                                                                      alpha_K,
-                                                                                                                      alpha_b,
-                                                                                                                      0);
+                                                                                                                      correlationlengthmodel);
     unsigned int nrow = lattice_2d->Nvertex;
     Eigen::VectorXd u_exact(nrow);
     Eigen::VectorXd rhs_exact(nrow);
     Eigen::VectorXd rhs(nrow);
-    construct_exact_solution_rhs_shiftedlaplace(lattice_2d, u_exact, rhs_exact);
+    construct_exact_solution_rhs_shiftedlaplace(lattice_2d, correlationlengthmodel, u_exact, rhs_exact);
     shiftedlaplace_fd_operator->apply(u_exact, rhs);
     double error = (rhs - rhs_exact).norm() / rhs.norm();
     double tolerance = 2.E-4;
@@ -241,13 +229,13 @@ TEST_F(LinearOperatorTest, TestShiftedLaplaceFDOperator3d)
 {
     double V_cell = lattice_3d->cell_volume();
     std::shared_ptr<ShiftedLaplaceFDOperator> shiftedlaplace_fd_operator = std::make_shared<ShiftedLaplaceFDOperator>(lattice_3d,
-                                                                                                                      alpha_K, alpha_b,
+                                                                                                                      correlationlengthmodel,
                                                                                                                       0);
     unsigned int nrow = lattice_3d->Nvertex;
     Eigen::VectorXd u_exact(nrow);
     Eigen::VectorXd rhs_exact(nrow);
     Eigen::VectorXd rhs(nrow);
-    construct_exact_solution_rhs_shiftedlaplace(lattice_3d, u_exact, rhs_exact);
+    construct_exact_solution_rhs_shiftedlaplace(lattice_3d, correlationlengthmodel, u_exact, rhs_exact);
     shiftedlaplace_fd_operator->apply(u_exact, rhs);
     double error = (rhs - rhs_exact).norm() / rhs.norm();
     double tolerance = 7.E-3;
@@ -259,14 +247,13 @@ TEST_F(LinearOperatorTest, TestSquaredShiftedLaplaceFDOperator2d)
 {
     double V_cell = lattice_2d->cell_volume();
     std::shared_ptr<SquaredShiftedLaplaceFDOperator> squared_shiftedlaplace_fd_operator = std::make_shared<SquaredShiftedLaplaceFDOperator>(lattice_2d,
-                                                                                                                                            alpha_K,
-                                                                                                                                            alpha_b,
+                                                                                                                                            correlationlengthmodel,
                                                                                                                                             0);
     unsigned int nrow = lattice_2d->Nvertex;
     Eigen::VectorXd u_exact(nrow);
     Eigen::VectorXd rhs_exact(nrow);
     Eigen::VectorXd rhs(nrow);
-    construct_exact_solution_rhs_squared_shiftedlaplace(lattice_2d, u_exact, rhs_exact);
+    construct_exact_solution_rhs_squared_shiftedlaplace(lattice_2d, correlationlengthmodel, u_exact, rhs_exact);
     squared_shiftedlaplace_fd_operator->apply(u_exact, rhs);
     double error = (rhs - rhs_exact).norm() / (rhs).norm();
     double tolerance = 2.5E-2;

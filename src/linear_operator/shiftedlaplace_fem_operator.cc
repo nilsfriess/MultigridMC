@@ -7,15 +7,9 @@
 
 /*  Create a new instance */
 ShiftedLaplaceFEMOperator::ShiftedLaplaceFEMOperator(const std::shared_ptr<Lattice> lattice_,
-                                     const double alpha_K_,
-                                     const double beta_K_,
-                                     const double alpha_b_,
-                                     const double beta_b_,
-                                     const int verbose) : LinearOperator(lattice_),
-                                                          alpha_K(alpha_K_),
-                                                          beta_K(beta_K_),
-                                                          alpha_b(alpha_b_),
-                                                          beta_b(beta_b_)
+                                                     const std::shared_ptr<CorrelationLengthModel> correlationlength_model_,
+                                                     const int verbose) : LinearOperator(lattice_),
+                                                                          correlationlength_model(correlationlength_model_)
 {
     typedef std::chrono::time_point<std::chrono::high_resolution_clock> TimePointType;
     TimePointType t_start;
@@ -130,8 +124,8 @@ ShiftedLaplaceFEMOperator::ShiftedLaplaceFEMOperator(const std::shared_ptr<Latti
                          *    + K(x_q) * sum_{j=0}^d h_j^{-2} * dphi_alpha(xhat_q)/dxhat_j * dphi_beta(xhat_q)/dxhat_j )
                          *        * h_0 * h_1 * ... * h_{d-1} * w_q
                          */
-                        local_matrix_entry += (b_zero(x) * phi_phi[count] +
-                                               K_diff(x) * gradphi_gradphi[count]) *
+                        local_matrix_entry += (correlationlength_model->kappa_invsq(x) * phi_phi[count] +
+                                               gradphi_gradphi[count]) *
                                               quad_weights[j];
                         count++;
                     }
@@ -155,30 +149,6 @@ ShiftedLaplaceFEMOperator::ShiftedLaplaceFEMOperator(const std::shared_ptr<Latti
                   << buffer << std::endl
                   << std::endl;
     }
-}
-
-/** @brief Diffusion coefficient */
-double ShiftedLaplaceFEMOperator::K_diff(const Eigen::VectorXd x) const
-{
-    if (abs(beta_K / alpha_K) < 1.E-12)
-        return alpha_K;
-    double value = beta_K;
-    for (int j = 0; j < x.size(); ++j)
-        value *= sin(2 * M_PI * x[j]);
-    value += alpha_K;
-    return value;
-}
-
-/** @brief Zero order term */
-double ShiftedLaplaceFEMOperator::b_zero(const Eigen::VectorXd x) const
-{
-    if (abs(beta_b / alpha_b) < 1.E-12)
-        return alpha_b;
-    double value = beta_b;
-    for (int j = 0; j < x.size(); ++j)
-        value *= cos(2 * M_PI * x[j]);
-    value += alpha_b;
-    return value;
 }
 
 /* Evaluate basis function in reference cell */

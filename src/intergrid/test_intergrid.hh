@@ -4,10 +4,12 @@
 #include <gtest/gtest.h>
 #include <random>
 #include <Eigen/Dense>
+#include "auxilliary/parameters.hh"
 #include "lattice/lattice1d.hh"
 #include "lattice/lattice2d.hh"
 #include "lattice/lattice3d.hh"
 #include "intergrid/intergrid_operator_linear.hh"
+#include "linear_operator/correlationlength_model.hh"
 #include "linear_operator/shiftedlaplace_fem_operator.hh"
 
 /** @brief fixture class for intergrid tests */
@@ -176,8 +178,11 @@ TEST_F(IntergridTest, TestProlongRestrict2dLinear)
 
 TEST_F(IntergridTest, TestCoarsenOperator2d)
 {
-    ShiftedLaplaceFEMOperator linear_operator(lattice_2d, 1.0, 0.0, 1.0, 0.0);
-    ShiftedLaplaceFEMOperator coarse_operator(coarse_lattice_2d, 1.0, 0.0, 1.0, 0.0);
+    ConstantCorrelationLengthModelParameters correlationmodel_params;
+    correlationmodel_params.kappa = 1.0;
+    std::shared_ptr<CorrelationLengthModel> correlationlength_model = std::make_shared<ConstantCorrelationLengthModel>(correlationmodel_params);
+    ShiftedLaplaceFEMOperator linear_operator(lattice_2d, correlationlength_model);
+    ShiftedLaplaceFEMOperator coarse_operator(coarse_lattice_2d, correlationlength_model);
     LinearOperator coarsened_operator = linear_operator.coarsen(intergrid_operator_2dlinear);
     const double tolerance = 1.E-12;
     EXPECT_NEAR((coarse_operator.get_sparse() - coarsened_operator.get_sparse()).norm(), 0.0, tolerance);
@@ -191,8 +196,11 @@ TEST_F(IntergridTest, TestCoarsenOperator2d)
 
 TEST_F(IntergridTest, TestCoarsenOperator3d)
 {
-    ShiftedLaplaceFEMOperator linear_operator(lattice_3d, 1.0, 0.0, 1.0, 0.0);
-    ShiftedLaplaceFEMOperator coarse_operator(coarse_lattice_3d, 1.0, 0.0, 1.0, 0.0);
+    ConstantCorrelationLengthModelParameters correlationmodel_params;
+    correlationmodel_params.kappa = 1.0;
+    std::shared_ptr<CorrelationLengthModel> correlationlength_model = std::make_shared<ConstantCorrelationLengthModel>(correlationmodel_params);
+    ShiftedLaplaceFEMOperator linear_operator(lattice_3d, correlationlength_model);
+    ShiftedLaplaceFEMOperator coarse_operator(coarse_lattice_3d, correlationlength_model);
     LinearOperator coarsened_operator = linear_operator.coarsen(intergrid_operator_3dlinear);
     const double tolerance = 1.E-12;
     EXPECT_NEAR((coarse_operator.get_sparse() - coarsened_operator.get_sparse()).norm(), 0.0, tolerance);

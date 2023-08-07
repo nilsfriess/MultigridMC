@@ -103,6 +103,12 @@ public:
   /** @brief get equivalent index of vertex on next-finer lattice */
   virtual unsigned int fine_vertex_idx(const unsigned int ell) const = 0;
 
+  /** @brief Get coordinates of vertex inside domain [0,1]^d
+   *
+   * @param[in] ell index of vertex
+   */
+  virtual Eigen::VectorXd vertex_coordinates(const unsigned int ell) const = 0;
+
   /** @brief return lattice shape */
   inline virtual Eigen::VectorXi shape() const = 0;
 

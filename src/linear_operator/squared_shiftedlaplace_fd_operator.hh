@@ -6,6 +6,7 @@
 #include <Eigen/Dense>
 #include "auxilliary/common.hh"
 #include "linear_operator.hh"
+#include "correlationlength_model.hh"
 #include "lattice/lattice.hh"
 
 /** @file squared_shiftedlaplace_fd_operator.hh
@@ -17,8 +18,8 @@
  *
  * Class for finite difference discretisation of shifted biharmonic operator
  *
- *     (-alpha_K * Laplace + alpha_b)^2 u
- *   = alpha_K^2 Laplace^2(u) -2 * alpha_K * alpha_b Laplace(u) + alpha_b^2 u
+ *     (-Laplace + kappa^{-2})^2 u
+ *   = Laplace^2(u) -2 * kappa^{-2} Laplace(u) + kappa^{-4} u
  *
  *
  * with homogeneous Dirichlet boundary conditions u(x)=0, du/dn(x)=0 on the boundary.
@@ -106,20 +107,16 @@ public:
      * Populates matrix entries across the grid
      *
      * @param[in] lattice_ underlying 2d lattice
-     * @param[in] alpha_K coefficient of second order term
-     * @param[in] alpha_b coefficient of zero order term
+     * @param[in] correlationlength_model_ model for correlation length in domain
      * @param[in] verbose_ verbosity level
      */
     SquaredShiftedLaplaceFDOperator(const std::shared_ptr<Lattice> lattice_,
-                                    const double alpha_K_,
-                                    const double alpha_b_,
+                                    const std::shared_ptr<CorrelationLengthModel> correlationlength_model_,
                                     const int verbose = 0);
 
 protected:
-    /** @brief Coefficient of Laplace term */
-    const double alpha_K;
-    /** @brief Coefficient of zero order term */
-    const double alpha_b;
+    /** @brief Model for correlation length in domain */
+    const std::shared_ptr<CorrelationLengthModel> correlationlength_model;
 };
 
 #endif // SQUARED_SHIFTEDLAPLACE_FD_OPERATOR_HH
