@@ -26,16 +26,31 @@ int main(int argc, char *argv[])
     LatticeParameters lattice_params;
     PriorParameters prior_params;
     ConstantCorrelationLengthModelParameters constantcorrelationlengthmodel_params;
+    PeriodicCorrelationLengthModelParameters periodiccorrelationlengthmodel_params;
     MeasurementParameters measurement_params;
     lattice_params.read_from_file(filename);
     prior_params.read_from_file(filename);
     constantcorrelationlengthmodel_params.read_from_file(filename);
+    periodiccorrelationlengthmodel_params.read_from_file(filename);
     measurement_params.read_from_file(filename);
 
     // Construct lattice and linear operator
     std::shared_ptr<Lattice2d> lattice = std::make_shared<Lattice2d>(lattice_params.nx,
                                                                      lattice_params.ny);
-    std::shared_ptr<CorrelationLengthModel> correlationlengthmodel = std::make_shared<ConstantCorrelationLengthModel>(constantcorrelationlengthmodel_params);
+    std::shared_ptr<CorrelationLengthModel> correlationlengthmodel;
+    if (prior_params.correlationlength_model == "constant")
+    {
+        correlationlengthmodel = std::make_shared<ConstantCorrelationLengthModel>(constantcorrelationlengthmodel_params);
+    }
+    else if (prior_params.correlationlength_model == "periodic")
+    {
+        correlationlengthmodel = std::make_shared<PeriodicCorrelationLengthModel>(periodiccorrelationlengthmodel_params);
+    }
+    else
+    {
+        std::cout << "Error: invalid correlationlengthmodel \'" << prior_params.correlationlength_model << "\'" << std::endl;
+        exit(-1);
+    }
     std::shared_ptr<ShiftedLaplaceFEMOperator> prior_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice,
                                                                                                             correlationlengthmodel);
     std::shared_ptr<MeasuredOperator> linear_operator = std::make_shared<MeasuredOperator>(prior_operator,

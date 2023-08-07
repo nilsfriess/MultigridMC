@@ -268,9 +268,10 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     int ny = thorough_testing ? 16 : 8;
     std::shared_ptr<Lattice2d> lattice = std::make_shared<Lattice2d>(nx, ny);
     unsigned int ndof = lattice->Nvertex;
-    ConstantCorrelationLengthModelParameters correlationlengthmodel_params;
-    correlationlengthmodel_params.kappa = 1.2;
-    std::shared_ptr<CorrelationLengthModel> correlationlengthmodel = std::make_shared<ConstantCorrelationLengthModel>(correlationlengthmodel_params);
+    PeriodicCorrelationLengthModelParameters correlationlengthmodel_params;
+    correlationlengthmodel_params.kappa_min = 1.2;
+    correlationlengthmodel_params.kappa_max = 2.3;
+    std::shared_ptr<CorrelationLengthModel> correlationlengthmodel = std::make_shared<PeriodicCorrelationLengthModel>(correlationlengthmodel_params);
 
     unsigned int n_meas = 4;
     std::vector<Eigen::VectorXd> measurement_locations(n_meas);

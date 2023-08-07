@@ -192,7 +192,7 @@ public:
     std::string correlationlength_model;
 };
 
-/** @brief structure for prior parameters
+/** @brief structure for const correlation length parameters
  */
 class ConstantCorrelationLengthModelParameters : public Parameters
 {
@@ -205,6 +205,23 @@ public:
 
     /** @brief constant correlation length kappa */
     double kappa;
+};
+
+/** @brief structure for periodic correlation length parameters
+ */
+class PeriodicCorrelationLengthModelParameters : public Parameters
+{
+public:
+    /** @brief parse configuration
+     *
+     * @param[in] root root of configuration object
+     */
+    virtual void parse_config(const libconfig::Setting &root);
+
+    /** @brief lower bound on correlation length kappa */
+    double kappa_min;
+    /** @brief upper bound on correlation length kappa */
+    double kappa_max;
 };
 
 /** @brief Structure for measurement parameters */

@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
     MultigridParameters multigrid_params;
     PriorParameters prior_params;
     ConstantCorrelationLengthModelParameters constantcorrelationlengthmodel_params;
+    PeriodicCorrelationLengthModelParameters periodiccorrelationlengthmodel_params;
     MeasurementParameters measurement_params;
     general_params.read_from_file(filename);
     lattice_params.read_from_file(filename);
@@ -55,6 +56,7 @@ int main(int argc, char *argv[])
     iterative_solver_params.read_from_file(filename);
     prior_params.read_from_file(filename);
     constantcorrelationlengthmodel_params.read_from_file(filename);
+    periodiccorrelationlengthmodel_params.read_from_file(filename);
     measurement_params.read_from_file(filename);
 
     if (measurement_params.dim != general_params.dim)
@@ -81,7 +83,20 @@ int main(int argc, char *argv[])
         std::cout << "ERROR: Invalid dimension : " << general_params.dim << std::endl;
         exit(-1);
     }
-    std::shared_ptr<CorrelationLengthModel> correlationlengthmodel = std::make_shared<ConstantCorrelationLengthModel>(constantcorrelationlengthmodel_params);
+    std::shared_ptr<CorrelationLengthModel> correlationlengthmodel;
+    if (prior_params.correlationlength_model == "constant")
+    {
+        correlationlengthmodel = std::make_shared<ConstantCorrelationLengthModel>(constantcorrelationlengthmodel_params);
+    }
+    else if (prior_params.correlationlength_model == "periodic")
+    {
+        correlationlengthmodel = std::make_shared<PeriodicCorrelationLengthModel>(periodiccorrelationlengthmodel_params);
+    }
+    else
+    {
+        std::cout << "Error: invalid correlationlengthmodel \'" << prior_params.correlationlength_model << "\'" << std::endl;
+        exit(-1);
+    }
     std::shared_ptr<LinearOperator> prior_operator;
     if (general_params.prior == "diffusion")
     {

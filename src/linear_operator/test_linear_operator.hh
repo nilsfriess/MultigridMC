@@ -28,9 +28,10 @@ protected:
         ny = 64;
         nz = 64;
         lattice_3d = std::make_shared<Lattice3d>(nx, ny, nz);
-        ConstantCorrelationLengthModelParameters params;
-        params.kappa = 2.3;
-        correlationlengthmodel = std::make_shared<ConstantCorrelationLengthModel>(params);
+        PeriodicCorrelationLengthModelParameters params;
+        params.kappa_min = 1.3;
+        params.kappa_max = 2.3;
+        correlationlengthmodel = std::make_shared<PeriodicCorrelationLengthModel>(params);
     }
 
 protected:

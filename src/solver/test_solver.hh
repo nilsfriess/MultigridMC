@@ -33,9 +33,10 @@ protected:
         std::shared_ptr<Lattice2d> lattice = std::make_shared<Lattice2d>(nx, ny);
         unsigned int ndof = lattice->Nvertex;
 
-        ConstantCorrelationLengthModelParameters correlationlengthmodel_params;
-        correlationlengthmodel_params.kappa = 1.2;
-        std::shared_ptr<CorrelationLengthModel> correlationlengthmodel = std::make_shared<ConstantCorrelationLengthModel>(correlationlengthmodel_params);
+        PeriodicCorrelationLengthModelParameters correlationlengthmodel_params;
+        correlationlengthmodel_params.kappa_min = 1.2;
+        correlationlengthmodel_params.kappa_max = 2.3;
+        std::shared_ptr<CorrelationLengthModel> correlationlengthmodel = std::make_shared<PeriodicCorrelationLengthModel>(correlationlengthmodel_params);
 
         linear_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice,
                                                                       correlationlengthmodel);

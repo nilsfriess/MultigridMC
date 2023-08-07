@@ -161,7 +161,7 @@ void PriorParameters::parse_config(const libconfig::Setting &root)
 {
     const libconfig::Setting &prior = root["prior"];
     correlationlength_model = prior.lookup("correlationlengthmodel").c_str();
-    if (not(correlationlength_model == "constant"))
+    if (not((correlationlength_model == "constant") or (correlationlength_model == "periodic")))
     {
         std::cout << "ERROR: Invalied correlation length model \'" << correlationlength_model << "\'." << std::endl;
         exit(-1);
@@ -177,6 +177,27 @@ void ConstantCorrelationLengthModelParameters::parse_config(const libconfig::Set
     kappa = model.lookup("kappa");
     std::cout << "  constantcorrelationlengthmodel" << std::endl;
     std::cout << "    kappa = " << kappa << std::endl;
+}
+
+/* periodic correlation length model configuration */
+void PeriodicCorrelationLengthModelParameters::parse_config(const libconfig::Setting &root)
+{
+    const libconfig::Setting &model = root["periodiccorrelationlengthmodel"];
+    kappa_min = model.lookup("kappa_min");
+    kappa_max = model.lookup("kappa_max");
+    std::cout << "  periodiccorrelationlengthmodel" << std::endl;
+    std::cout << "    kappa_min = " << kappa_min << std::endl;
+    std::cout << "    kappa_max = " << kappa_max << std::endl;
+    if (not(kappa_max >= kappa_min))
+    {
+        std::cout << "ERROR: upper bound on correlation length has to exceed lower bound." << std::endl;
+        exit(-1);
+    }
+    if (not(kappa_min > 0))
+    {
+        std::cout << "ERROR: lower bound on correlation length has to be positive." << std::endl;
+        exit(-1);
+    }
 }
 
 /* parse measurement configuration */
