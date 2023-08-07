@@ -7,7 +7,7 @@
 #include "config.h"
 #include "lattice/lattice2d.hh"
 #include "linear_operator/linear_operator.hh"
-#include "linear_operator/diffusion_operator.hh"
+#include "linear_operator/shiftedlaplace_fem_operator.hh"
 #include "linear_operator/measured_operator.hh"
 #include "auxilliary/parameters.hh"
 

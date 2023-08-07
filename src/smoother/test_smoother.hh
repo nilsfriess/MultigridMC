@@ -7,7 +7,7 @@
 #include <Eigen/QR>
 #include "lattice/lattice.hh"
 #include "smoother/ssor_smoother.hh"
-#include "linear_operator/diffusion_operator.hh"
+#include "linear_operator/shiftedlaplace_fem_operator.hh"
 #include "linear_operator/measured_operator.hh"
 
 /** @brief fixture class for smoother tests */

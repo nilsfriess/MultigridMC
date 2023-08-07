@@ -1,5 +1,5 @@
-#ifndef DIFFUSION_OPERATOR_HH
-#define DIFFUSION_OPERATOR_HH DIFFUSION_OPERATOR_HH
+#ifndef SHIFTEDLAPLACE_FEM_OPERATOR_HH
+#define SHIFTEDLAPLACE_FEM_OPERATOR_HH SHIFTEDLAPLACE_FEM_OPERATOR_HH
 
 #include <chrono>
 #include <vector>
@@ -9,7 +9,7 @@
 #include "linear_operator.hh"
 #include "lattice/lattice.hh"
 
-/** @file diffusion_operator.hh
+/** @file shiftedlaplace_fem_operator.hh
  *
  * @brief Contains class for diffusion operator in arbitrary dimensions
  */
@@ -86,4 +86,4 @@ protected:
     const double beta_b;
 };
 
-#endif // DIFFUSION_OPERATOR_HH
+#endif // SHIFTEDLAPLACE_FEM_OPERATOR_HH

@@ -1,5 +1,5 @@
-#ifndef SHIFTEDLAPLACE_OPERATOR_HH
-#define SHIFTEDLAPLACE_OPERATOR_HH SHIFTEDLAPLACE_OPERATOR_HH
+#ifndef SHIFTEDLAPLACE_FD_OPERATOR_HH
+#define SHIFTEDLAPLACE_FD_OPERATOR_HH SHIFTEDLAPLACE_FD_OPERATOR_HH
 
 #include <vector>
 #include <Eigen/Dense>
@@ -7,7 +7,7 @@
 #include "linear_operator.hh"
 #include "lattice/lattice.hh"
 
-/** @file shiftedlaplace_operator.hh
+/** @file shiftedlaplace_fd_operator.hh
  *
  * @brief Contains class for shifted laplace operator in arbitrary dimensions
  */
@@ -45,4 +45,4 @@ protected:
     const double alpha_b;
 };
 
-#endif // SHIFTEDLAPLACE_OPERATOR_HH
+#endif // SHIFTEDLAPLACE_FD_OPERATOR_HH

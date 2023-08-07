@@ -1,8 +1,8 @@
-#include "shiftedlaplace_operator.hh"
+#include "shiftedlaplace_fd_operator.hh"
 
-/** @file shiftedlaplace_operator.cc
+/** @file shiftedlaplace_fd_operator.cc
  *
- * @brief Implementation of shiftedlaplace_operator.hh
+ * @brief Implementation of shiftedlaplace_fd_operator.hh
  */
 
 /*  Create a new instance */

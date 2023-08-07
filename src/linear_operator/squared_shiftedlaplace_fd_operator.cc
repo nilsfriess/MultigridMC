@@ -1,6 +1,6 @@
-#include "shiftedbiharmonic_operator.hh"
+#include "squared_shiftedlaplace_fd_operator.hh"
 
-/** @file shiftedbiharmonic_operator.cc
+/** @file squared_shiftedlaplace_fd_operator.cc
  *
  * @brief Implementation of shiftedbiharmonic_operator.hh
  */

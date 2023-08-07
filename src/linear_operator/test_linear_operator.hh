@@ -6,9 +6,9 @@
 #include <Eigen/Dense>
 #include "lattice/lattice2d.hh"
 #include "lattice/lattice3d.hh"
-#include "linear_operator/diffusion_operator.hh"
-#include "linear_operator/shiftedlaplace_operator.hh"
-#include "linear_operator/shiftedbiharmonic_operator.hh"
+#include "linear_operator/shiftedlaplace_fem_operator.hh"
+#include "linear_operator/shiftedlaplace_fd_operator.hh"
+#include "linear_operator/squared_shiftedlaplace_fd_operator.hh"
 
 /** @brief fixture class for solver tests */
 class LinearOperatorTest : public ::testing::Test

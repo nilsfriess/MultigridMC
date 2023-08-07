@@ -10,7 +10,7 @@
 #include "lattice/lattice1d.hh"
 #include "lattice/lattice2d.hh"
 #include "linear_operator/linear_operator.hh"
-#include "linear_operator/diffusion_operator.hh"
+#include "linear_operator/shiftedlaplace_fem_operator.hh"
 #include "linear_operator/measured_operator.hh"
 #include "intergrid/intergrid_operator_linear.hh"
 #include "sampler/sampler.hh"

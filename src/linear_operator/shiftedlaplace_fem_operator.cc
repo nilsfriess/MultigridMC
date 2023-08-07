@@ -1,8 +1,8 @@
-#include "diffusion_operator.hh"
+#include "shiftedlaplace_fem_operator.hh"
 
-/** @file diffusion_operator.cc
+/** @file shiftedlaplace_fem_operator.cc
  *
- * @brief Implementation of diffusion_operator.hh
+ * @brief Implementation of shiftedlaplace_fem_operator.hh
  */
 
 /*  Create a new instance */
