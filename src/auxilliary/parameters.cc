@@ -52,13 +52,6 @@ int Parameters::read_from_file(const std::string filename)
 void GeneralParameters::parse_config(const libconfig::Setting &root)
 {
     const libconfig::Setting &general = root["general"];
-    prior = general.lookup("prior").c_str();
-    if (not((prior == "diffusion") or (prior == "shiftedlaplace") or (prior == "shiftedbiharmonic")))
-    {
-        std::cout << "ERROR: Unknown prior: \'" << prior << "\'" << std::endl;
-        exit(-1);
-    }
-    std::cout << "  prior = " << prior << std::endl;
     dim = general["dim"];
     std::cout << "  dimension = " << dim << std::endl;
     do_cholesky = general["do_cholesky"];
@@ -160,6 +153,13 @@ void SamplingParameters::parse_config(const libconfig::Setting &root)
 void PriorParameters::parse_config(const libconfig::Setting &root)
 {
     const libconfig::Setting &prior = root["prior"];
+    pde_model = prior.lookup("pdemodel").c_str();
+    if (not((prior == "diffusion") or (prior == "shiftedlaplace") or (prior == "shiftedbiharmonic")))
+    {
+        std::cout << "ERROR: Unknown prior: \'" << pde_model << "\'" << std::endl;
+        exit(-1);
+    }
+
     correlationlength_model = prior.lookup("correlationlengthmodel").c_str();
     if (not((correlationlength_model == "constant") or (correlationlength_model == "periodic")))
     {
@@ -167,6 +167,7 @@ void PriorParameters::parse_config(const libconfig::Setting &root)
         exit(-1);
     }
     std::cout << "  prior" << std::endl;
+    std::cout << "    PDEmodel = " << pde_model << std::endl;
     std::cout << "    correlationlengthmodel = " << correlationlength_model << std::endl;
 }
 

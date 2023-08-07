@@ -242,11 +242,11 @@ int main(int argc, char *argv[])
         exit(-1);
     }
     std::shared_ptr<LinearOperator> prior_operator;
-    if (general_params.prior == "diffusion")
+    if (prior_params.pde_model == "diffusion")
     {
         prior_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice, correlationlengthmodel, 1);
     }
-    else if (general_params.prior == "shiftedlaplace")
+    else if (prior_params.pde_model == "shiftedlaplace")
     {
         prior_operator = std::make_shared<ShiftedLaplaceFDOperator>(lattice, correlationlengthmodel, 1);
     }

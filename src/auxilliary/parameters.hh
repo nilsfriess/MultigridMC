@@ -49,8 +49,6 @@ public:
      */
     virtual void parse_config(const libconfig::Setting &root);
 
-    /** @brief underlying prior to use */
-    std::string prior;
     /** @brief spatial dimension */
     int dim;
     /** @brief Run the Cholesky sampler? */
@@ -188,6 +186,8 @@ public:
      */
     virtual void parse_config(const libconfig::Setting &root);
 
+    /** @brief PDE model */
+    std::string pde_model;
     /** @brief name of the correlationlength model to be used */
     std::string correlationlength_model;
 };
