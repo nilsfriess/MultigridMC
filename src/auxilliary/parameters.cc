@@ -155,7 +155,9 @@ void PriorParameters::parse_config(const libconfig::Setting &root)
 
     const libconfig::Setting &prior = root["prior"];
     pde_model = prior.lookup("pdemodel").c_str();
-    if (not((pde_model == "diffusion") or (pde_model == "shiftedlaplace") or (pde_model == "shiftedbiharmonic")))
+    if (not((pde_model == "shiftedlaplace_fem") or
+            (pde_model == "shiftedlaplace_fd") or
+            (pde_model == "squared_shiftedlaplace_fd")))
     {
         std::cout << "ERROR: Unknown prior: \'" << pde_model << "\'" << std::endl;
         exit(-1);
