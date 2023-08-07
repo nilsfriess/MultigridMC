@@ -6,18 +6,18 @@
  */
 
 /*  Create a new instance */
-ShiftedBiharmonicOperator::ShiftedBiharmonicOperator(const std::shared_ptr<Lattice> lattice_,
-                                                     const double alpha_K_,
-                                                     const double alpha_b_,
-                                                     const int verbose) : LinearOperator(lattice_),
-                                                                          alpha_K(alpha_K_),
-                                                                          alpha_b(alpha_b_)
+SquaredShiftedLaplaceFDOperator::SquaredShiftedLaplaceFDOperator(const std::shared_ptr<Lattice> lattice_,
+                                                                 const double alpha_K_,
+                                                                 const double alpha_b_,
+                                                                 const int verbose) : LinearOperator(lattice_),
+                                                                                      alpha_K(alpha_K_),
+                                                                                      alpha_b(alpha_b_)
 {
     // dimension
     int dim = lattice->dim();
     if (not(dim == 2))
     {
-        std::cout << "ShiftedBiharmonicOperator only implemented for d=2" << std::endl;
+        std::cout << "SquaredShiftedLaplaceFDOperator only implemented for d=2" << std::endl;
         exit(-1);
     }
     // number of matrix rows

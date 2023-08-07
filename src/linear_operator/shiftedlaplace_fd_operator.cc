@@ -6,7 +6,7 @@
  */
 
 /*  Create a new instance */
-ShiftedLaplaceOperator::ShiftedLaplaceOperator(const std::shared_ptr<Lattice> lattice_,
+ShiftedLaplaceFDOperator::ShiftedLaplaceFDOperator(const std::shared_ptr<Lattice> lattice_,
                                                const double alpha_K_,
                                                const double alpha_b_,
                                                const int verbose) : LinearOperator(lattice_),

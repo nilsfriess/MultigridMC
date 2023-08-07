@@ -37,11 +37,11 @@ protected:
         double alpha_b = 1.2;
         double beta_b = 0.1;
 
-        linear_operator = std::make_shared<DiffusionOperator>(lattice,
-                                                              alpha_K,
-                                                              beta_K,
-                                                              alpha_b,
-                                                              beta_b);
+        linear_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice,
+                                                                      alpha_K,
+                                                                      beta_K,
+                                                                      alpha_b,
+                                                                      beta_b);
         unsigned int n_meas = 10;
         std::vector<Eigen::VectorXd> measurement_locations(n_meas);
         Eigen::MatrixXd Sigma(n_meas, n_meas);
@@ -57,11 +57,11 @@ protected:
         Eigen::HouseholderQR<Eigen::MatrixXd> qr(A);
         Q = qr.householderQ();
         Sigma = Q * Sigma * Q.transpose();
-        std::shared_ptr<DiffusionOperator> diffusion_operator = std::make_shared<DiffusionOperator>(lattice,
-                                                                                                    alpha_K,
-                                                                                                    beta_K,
-                                                                                                    alpha_b,
-                                                                                                    beta_b);
+        std::shared_ptr<ShiftedLaplaceFEMOperator> prior_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice,
+                                                                                                                alpha_K,
+                                                                                                                beta_K,
+                                                                                                                alpha_b,
+                                                                                                                beta_b);
         MeasurementParameters measurement_params;
         measurement_params.measurement_locations = measurement_locations;
         measurement_params.covariance = Sigma;
@@ -69,7 +69,7 @@ protected:
         measurement_params.measure_global = false;
         measurement_params.sigma_global = 0.0;
         measurement_params.mean_global = 0.0;
-        linear_operator_lowrank = std::make_shared<MeasuredOperator>(diffusion_operator,
+        linear_operator_lowrank = std::make_shared<MeasuredOperator>(prior_operator,
                                                                      measurement_params);
         // Create states
         x_exact = Eigen::VectorXd(ndof);
@@ -87,7 +87,7 @@ protected:
 
 protected:
     /** @brief linear operator */
-    std::shared_ptr<DiffusionOperator> linear_operator;
+    std::shared_ptr<ShiftedLaplaceFEMOperator> linear_operator;
     /** @brief linear operator */
     std::shared_ptr<MeasuredOperator> linear_operator_lowrank;
     /** @brief exact solution */

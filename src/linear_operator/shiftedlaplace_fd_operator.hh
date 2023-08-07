@@ -9,10 +9,10 @@
 
 /** @file shiftedlaplace_fd_operator.hh
  *
- * @brief Contains class for shifted laplace operator in arbitrary dimensions
+ * @brief Finite difference discretisation of the shifted laplace operator in arbitrary dimensions
  */
 
-/** @class ShiftedLaplaceOperator
+/** @class ShiftedLaplaceFDOperator
  *
  * Class for finite difference discretisation of shifted Laplace operator
  *
@@ -21,7 +21,7 @@
  * with homogeneous Dirichlet boundary conditions
  *
  */
-class ShiftedLaplaceOperator : public LinearOperator
+class ShiftedLaplaceFDOperator : public LinearOperator
 {
 public:
     /** @brief Create a new instance
@@ -33,10 +33,10 @@ public:
      * @param[in] alpha_b coefficient of zero order term
      * @param[in] verbose_ verbosity level
      */
-    ShiftedLaplaceOperator(const std::shared_ptr<Lattice> lattice_,
-                           const double alpha_K_,
-                           const double alpha_b_,
-                           const int verbose = 0);
+    ShiftedLaplaceFDOperator(const std::shared_ptr<Lattice> lattice_,
+                             const double alpha_K_,
+                             const double alpha_b_,
+                             const int verbose = 0);
 
 protected:
     /** @brief Coefficient of Laplace term */

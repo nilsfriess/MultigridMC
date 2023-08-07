@@ -6,7 +6,7 @@
  */
 
 /*  Create a new instance */
-DiffusionOperator::DiffusionOperator(const std::shared_ptr<Lattice> lattice_,
+ShiftedLaplaceFEMOperator::ShiftedLaplaceFEMOperator(const std::shared_ptr<Lattice> lattice_,
                                      const double alpha_K_,
                                      const double beta_K_,
                                      const double alpha_b_,
@@ -158,7 +158,7 @@ DiffusionOperator::DiffusionOperator(const std::shared_ptr<Lattice> lattice_,
 }
 
 /** @brief Diffusion coefficient */
-double DiffusionOperator::K_diff(const Eigen::VectorXd x) const
+double ShiftedLaplaceFEMOperator::K_diff(const Eigen::VectorXd x) const
 {
     if (abs(beta_K / alpha_K) < 1.E-12)
         return alpha_K;
@@ -170,7 +170,7 @@ double DiffusionOperator::K_diff(const Eigen::VectorXd x) const
 }
 
 /** @brief Zero order term */
-double DiffusionOperator::b_zero(const Eigen::VectorXd x) const
+double ShiftedLaplaceFEMOperator::b_zero(const Eigen::VectorXd x) const
 {
     if (abs(beta_b / alpha_b) < 1.E-12)
         return alpha_b;
@@ -182,7 +182,7 @@ double DiffusionOperator::b_zero(const Eigen::VectorXd x) const
 }
 
 /* Evaluate basis function in reference cell */
-double DiffusionOperator::phi(Eigen::VectorXi alpha, Eigen::VectorXd xhat) const
+double ShiftedLaplaceFEMOperator::phi(Eigen::VectorXi alpha, Eigen::VectorXd xhat) const
 {
     int dim = alpha.size();
     double phihat = 1.0;
@@ -194,7 +194,7 @@ double DiffusionOperator::phi(Eigen::VectorXi alpha, Eigen::VectorXd xhat) const
 }
 
 /* Evaluate gradients of basis function in reference cell */
-Eigen::VectorXd DiffusionOperator::grad_phi(Eigen::VectorXi alpha, Eigen::VectorXd xhat) const
+Eigen::VectorXd ShiftedLaplaceFEMOperator::grad_phi(Eigen::VectorXi alpha, Eigen::VectorXd xhat) const
 {
     int dim = alpha.size();
     Eigen::VectorXd grad_phihat(dim);

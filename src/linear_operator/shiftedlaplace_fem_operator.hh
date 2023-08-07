@@ -11,18 +11,20 @@
 
 /** @file shiftedlaplace_fem_operator.hh
  *
- * @brief Contains class for diffusion operator in arbitrary dimensions
+ * @brief Finite element discretisation of the shifted laplace operator in arbitrary dimensions
  */
 
-/** @class DiffusionOperator
+/** @class ShiftedLaplaceFEMOperator
  *
- * Base class for diffusion operator in lowest order (multilinear)
+ * Class for shifted Laplace operator in lowest order (multilinear)
  * finite element discretisation. In the continuum the linear operator given by
  *
  *   -div( K grad (u)) + b u
  *
+ * with homogeneous Dirichlet boundary conditions.
+ *
  */
-class DiffusionOperator : public LinearOperator
+class ShiftedLaplaceFEMOperator : public LinearOperator
 {
 public:
     /** @brief Create a new instance
@@ -36,12 +38,12 @@ public:
      * @param[in] beta_b second coefficient in zero order term
      * @param[in] verbose_ verbosity level
      */
-    DiffusionOperator(const std::shared_ptr<Lattice> lattice_,
-                      const double alpha_K_,
-                      const double beta_K_,
-                      const double alpha_b_,
-                      const double beta_b_,
-                      const int verbose = 0);
+    ShiftedLaplaceFEMOperator(const std::shared_ptr<Lattice> lattice_,
+                              const double alpha_K_,
+                              const double beta_K_,
+                              const double alpha_b_,
+                              const double beta_b_,
+                              const int verbose = 0);
 
 protected:
     /** @brief Diffusion coefficient

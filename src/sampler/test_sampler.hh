@@ -288,11 +288,11 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     Eigen::HouseholderQR<Eigen::MatrixXd> qr(A);
     Q = qr.householderQ();
     Sigma = Q * Sigma * Q.transpose();
-    std::shared_ptr<DiffusionOperator> diffusion_operator = std::make_shared<DiffusionOperator>(lattice,
-                                                                                                alpha_K,
-                                                                                                beta_K,
-                                                                                                alpha_b,
-                                                                                                beta_b);
+    std::shared_ptr<ShiftedLaplaceFEMOperator> prior_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice,
+                                                                                                            alpha_K,
+                                                                                                            beta_K,
+                                                                                                            alpha_b,
+                                                                                                            beta_b);
     MeasurementParameters measurement_params;
     measurement_params.measurement_locations = measurement_locations;
     measurement_params.covariance = Sigma;
@@ -300,7 +300,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     measurement_params.measure_global = false;
     measurement_params.sigma_global = 0.0;
     measurement_params.mean_global = 0.0;
-    std::shared_ptr<MeasuredOperator> linear_operator = std::make_shared<MeasuredOperator>(diffusion_operator,
+    std::shared_ptr<MeasuredOperator> linear_operator = std::make_shared<MeasuredOperator>(prior_operator,
                                                                                            measurement_params);
 
     MultigridParameters multigrid_params;

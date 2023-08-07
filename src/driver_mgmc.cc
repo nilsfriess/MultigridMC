@@ -226,19 +226,19 @@ int main(int argc, char *argv[])
     std::shared_ptr<LinearOperator> prior_operator;
     if (general_params.prior == "diffusion")
     {
-        prior_operator = std::make_shared<DiffusionOperator>(lattice,
-                                                             diffusion_params.alpha_K,
-                                                             diffusion_params.beta_K,
-                                                             diffusion_params.alpha_b,
-                                                             diffusion_params.beta_b,
-                                                             1);
+        prior_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice,
+                                                                     diffusion_params.alpha_K,
+                                                                     diffusion_params.beta_K,
+                                                                     diffusion_params.alpha_b,
+                                                                     diffusion_params.beta_b,
+                                                                     1);
     }
     else if (general_params.prior == "shiftedlaplace")
     {
-        prior_operator = std::make_shared<ShiftedLaplaceOperator>(lattice,
-                                                                  diffusion_params.alpha_K,
-                                                                  diffusion_params.alpha_b,
-                                                                  1);
+        prior_operator = std::make_shared<ShiftedLaplaceFDOperator>(lattice,
+                                                                    diffusion_params.alpha_K,
+                                                                    diffusion_params.alpha_b,
+                                                                    1);
     }
     std::shared_ptr<MeasuredOperator> posterior_operator = std::make_shared<MeasuredOperator>(prior_operator,
                                                                                               measurement_params);

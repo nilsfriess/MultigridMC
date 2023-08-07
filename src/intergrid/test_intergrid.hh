@@ -176,8 +176,8 @@ TEST_F(IntergridTest, TestProlongRestrict2dLinear)
 
 TEST_F(IntergridTest, TestCoarsenOperator2d)
 {
-    DiffusionOperator linear_operator(lattice_2d, 1.0, 0.0, 1.0, 0.0);
-    DiffusionOperator coarse_operator(coarse_lattice_2d, 1.0, 0.0, 1.0, 0.0);
+    ShiftedLaplaceFEMOperator linear_operator(lattice_2d, 1.0, 0.0, 1.0, 0.0);
+    ShiftedLaplaceFEMOperator coarse_operator(coarse_lattice_2d, 1.0, 0.0, 1.0, 0.0);
     LinearOperator coarsened_operator = linear_operator.coarsen(intergrid_operator_2dlinear);
     const double tolerance = 1.E-12;
     EXPECT_NEAR((coarse_operator.get_sparse() - coarsened_operator.get_sparse()).norm(), 0.0, tolerance);
@@ -191,8 +191,8 @@ TEST_F(IntergridTest, TestCoarsenOperator2d)
 
 TEST_F(IntergridTest, TestCoarsenOperator3d)
 {
-    DiffusionOperator linear_operator(lattice_3d, 1.0, 0.0, 1.0, 0.0);
-    DiffusionOperator coarse_operator(coarse_lattice_3d, 1.0, 0.0, 1.0, 0.0);
+    ShiftedLaplaceFEMOperator linear_operator(lattice_3d, 1.0, 0.0, 1.0, 0.0);
+    ShiftedLaplaceFEMOperator coarse_operator(coarse_lattice_3d, 1.0, 0.0, 1.0, 0.0);
     LinearOperator coarsened_operator = linear_operator.coarsen(intergrid_operator_3dlinear);
     const double tolerance = 1.E-12;
     EXPECT_NEAR((coarse_operator.get_sparse() - coarsened_operator.get_sparse()).norm(), 0.0, tolerance);

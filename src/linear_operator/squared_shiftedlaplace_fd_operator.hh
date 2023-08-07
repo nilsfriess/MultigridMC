@@ -8,12 +8,12 @@
 #include "linear_operator.hh"
 #include "lattice/lattice.hh"
 
-/** @file shiftedlaplace_operator.hh
+/** @file squared_shiftedlaplace_fd_operator.hh
  *
- * @brief Contains class for shifted laplace operator in arbitrary dimensions
+ * @brief Finite difference discretisation of the squared shifted laplace operator in arbitrary dimensions
  */
 
-/** @class ShiftedLaplaceOperator
+/** @class SquaredShiftedLaplaceFDOperator
  *
  * Class for finite difference discretisation of shifted biharmonic operator
  *
@@ -98,7 +98,7 @@
  *       30(1_2), pp.235-244.
  *
  */
-class ShiftedBiharmonicOperator : public LinearOperator
+class SquaredShiftedLaplaceFDOperator : public LinearOperator
 {
 public:
     /** @brief Create a new instance
@@ -110,10 +110,10 @@ public:
      * @param[in] alpha_b coefficient of zero order term
      * @param[in] verbose_ verbosity level
      */
-    ShiftedBiharmonicOperator(const std::shared_ptr<Lattice> lattice_,
-                              const double alpha_K_,
-                              const double alpha_b_,
-                              const int verbose = 0);
+    SquaredShiftedLaplaceFDOperator(const std::shared_ptr<Lattice> lattice_,
+                                    const double alpha_K_,
+                                    const double alpha_b_,
+                                    const int verbose = 0);
 
 protected:
     /** @brief Coefficient of Laplace term */

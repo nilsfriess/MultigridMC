@@ -135,7 +135,7 @@ protected:
         return 20000 * exp(-8 * z) * (z * (z * (32 * z * (z * (16 * (z - 5) * z + 141) - 107) + 1101) - 126) + 3);
     }
 
-    /* @brief Construct exact solution for the biharmonic problem
+    /* @brief Construct exact solution for the squared shifted Laplace problem
      *
      * The exact solution is assumed to be of the form
      *
@@ -151,9 +151,9 @@ protected:
      * @param[out] u_exact exact solution
      * @param[out] rhs right hand side
      */
-    void construct_exact_solution_rhs_shiftedbiharmonic(std::shared_ptr<Lattice> lattice,
-                                                        Eigen::VectorXd &u_exact,
-                                                        Eigen::VectorXd &rhs)
+    void construct_exact_solution_rhs_squared_shiftedlaplace(std::shared_ptr<Lattice> lattice,
+                                                             Eigen::VectorXd &u_exact,
+                                                             Eigen::VectorXd &rhs)
     {
         double volume = lattice->cell_volume();
         Eigen::VectorXi shape = lattice->shape();
@@ -179,95 +179,95 @@ protected:
     std::shared_ptr<Lattice3d> lattice_3d;
 };
 
-/* Test 2d diffusion operator */
-TEST_F(LinearOperatorTest, TestDiffusionOperator2d)
+/* Test 2d FEM shifted Laplace operator */
+TEST_F(LinearOperatorTest, TestShiftedLaplaceFEMOperator2d)
 {
     double V_cell = lattice_2d->cell_volume();
-    std::shared_ptr<DiffusionOperator> diffusion_operator = std::make_shared<DiffusionOperator>(lattice_2d,
-                                                                                                alpha_K, 0.0,
-                                                                                                alpha_b, 0.0,
-                                                                                                0);
+    std::shared_ptr<ShiftedLaplaceFEMOperator> shiftedlaplace_fem_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice_2d,
+                                                                                                                         alpha_K, 0.0,
+                                                                                                                         alpha_b, 0.0,
+                                                                                                                         0);
     unsigned int nrow = lattice_2d->Nvertex;
     Eigen::VectorXd u_exact(nrow);
     Eigen::VectorXd rhs_exact(nrow);
     Eigen::VectorXd rhs(nrow);
     construct_exact_solution_rhs_shiftedlaplace(lattice_2d, u_exact, rhs_exact);
-    diffusion_operator->apply(u_exact, rhs);
+    shiftedlaplace_fem_operator->apply(u_exact, rhs);
     double error = (rhs - rhs_exact).norm() / rhs.norm();
     double tolerance = 2.E-4;
     EXPECT_NEAR(error, 0.0, tolerance);
 }
 
-/* Test 3d diffusion operator */
-TEST_F(LinearOperatorTest, TestDiffusionOperator3d)
+/* Test 3d FEM shifted Laplace operator */
+TEST_F(LinearOperatorTest, TestShiftedLaplaceFEMOperator3d)
 {
     double V_cell = lattice_3d->cell_volume();
-    std::shared_ptr<DiffusionOperator> diffusion_operator = std::make_shared<DiffusionOperator>(lattice_3d,
-                                                                                                alpha_K, 0.0,
-                                                                                                alpha_b, 0.0,
-                                                                                                0);
+    std::shared_ptr<ShiftedLaplaceFEMOperator> shiftedlaplace_fem_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice_3d,
+                                                                                                                         alpha_K, 0.0,
+                                                                                                                         alpha_b, 0.0,
+                                                                                                                         0);
     unsigned int nrow = lattice_3d->Nvertex;
     Eigen::VectorXd u_exact(nrow);
     Eigen::VectorXd rhs_exact(nrow);
     Eigen::VectorXd rhs(nrow);
     construct_exact_solution_rhs_shiftedlaplace(lattice_3d, u_exact, rhs_exact);
-    diffusion_operator->apply(u_exact, rhs);
+    shiftedlaplace_fem_operator->apply(u_exact, rhs);
     double error = (rhs - rhs_exact).norm() / rhs.norm();
     double tolerance = 7.E-3;
     EXPECT_NEAR(error, 0.0, tolerance);
 }
 
-/* Test 2d shifted Laplace operator */
-TEST_F(LinearOperatorTest, TestShiftedLaplaceOperator2d)
+/* Test 2d FD shifted Laplace operator */
+TEST_F(LinearOperatorTest, TestShiftedLaplaceFDOperator2d)
 {
     double V_cell = lattice_2d->cell_volume();
-    std::shared_ptr<ShiftedLaplaceOperator> shiftedlaplace_operator = std::make_shared<ShiftedLaplaceOperator>(lattice_2d,
-                                                                                                               alpha_K,
-                                                                                                               alpha_b,
-                                                                                                               0);
+    std::shared_ptr<ShiftedLaplaceFDOperator> shiftedlaplace_fd_operator = std::make_shared<ShiftedLaplaceFDOperator>(lattice_2d,
+                                                                                                                      alpha_K,
+                                                                                                                      alpha_b,
+                                                                                                                      0);
     unsigned int nrow = lattice_2d->Nvertex;
     Eigen::VectorXd u_exact(nrow);
     Eigen::VectorXd rhs_exact(nrow);
     Eigen::VectorXd rhs(nrow);
     construct_exact_solution_rhs_shiftedlaplace(lattice_2d, u_exact, rhs_exact);
-    shiftedlaplace_operator->apply(u_exact, rhs);
+    shiftedlaplace_fd_operator->apply(u_exact, rhs);
     double error = (rhs - rhs_exact).norm() / rhs.norm();
     double tolerance = 2.E-4;
     EXPECT_NEAR(error, 0.0, tolerance);
 }
 
-/* Test 3d shifted Laplace operator */
-TEST_F(LinearOperatorTest, TestShiftedLaplaceOperator3d)
+/* Test 3d FD shifted Laplace operator */
+TEST_F(LinearOperatorTest, TestShiftedLaplaceFDOperator3d)
 {
     double V_cell = lattice_3d->cell_volume();
-    std::shared_ptr<ShiftedLaplaceOperator> shiftedlaplace_operator = std::make_shared<ShiftedLaplaceOperator>(lattice_3d,
-                                                                                                               alpha_K, alpha_b,
-                                                                                                               0);
+    std::shared_ptr<ShiftedLaplaceFDOperator> shiftedlaplace_fd_operator = std::make_shared<ShiftedLaplaceFDOperator>(lattice_3d,
+                                                                                                                      alpha_K, alpha_b,
+                                                                                                                      0);
     unsigned int nrow = lattice_3d->Nvertex;
     Eigen::VectorXd u_exact(nrow);
     Eigen::VectorXd rhs_exact(nrow);
     Eigen::VectorXd rhs(nrow);
     construct_exact_solution_rhs_shiftedlaplace(lattice_3d, u_exact, rhs_exact);
-    shiftedlaplace_operator->apply(u_exact, rhs);
+    shiftedlaplace_fd_operator->apply(u_exact, rhs);
     double error = (rhs - rhs_exact).norm() / rhs.norm();
     double tolerance = 7.E-3;
     EXPECT_NEAR(error, 0.0, tolerance);
 }
 
-/* Test 2d shifted Biharmonic operator */
-TEST_F(LinearOperatorTest, TestShiftedBiharmonicOperator2d)
+/* Test 2d FD squared shifted Laplace operator */
+TEST_F(LinearOperatorTest, TestSquaredShiftedLaplaceFDOperator2d)
 {
     double V_cell = lattice_2d->cell_volume();
-    std::shared_ptr<ShiftedBiharmonicOperator> shiftedbiharmonic_operator = std::make_shared<ShiftedBiharmonicOperator>(lattice_2d,
-                                                                                                                        alpha_K,
-                                                                                                                        alpha_b,
-                                                                                                                        0);
+    std::shared_ptr<SquaredShiftedLaplaceFDOperator> squared_shiftedlaplace_fd_operator = std::make_shared<SquaredShiftedLaplaceFDOperator>(lattice_2d,
+                                                                                                                                            alpha_K,
+                                                                                                                                            alpha_b,
+                                                                                                                                            0);
     unsigned int nrow = lattice_2d->Nvertex;
     Eigen::VectorXd u_exact(nrow);
     Eigen::VectorXd rhs_exact(nrow);
     Eigen::VectorXd rhs(nrow);
-    construct_exact_solution_rhs_shiftedbiharmonic(lattice_2d, u_exact, rhs_exact);
-    shiftedbiharmonic_operator->apply(u_exact, rhs);
+    construct_exact_solution_rhs_squared_shiftedlaplace(lattice_2d, u_exact, rhs_exact);
+    squared_shiftedlaplace_fd_operator->apply(u_exact, rhs);
     double error = (rhs - rhs_exact).norm() / (rhs).norm();
     double tolerance = 2.5E-2;
     EXPECT_NEAR(error, 0.0, tolerance);
