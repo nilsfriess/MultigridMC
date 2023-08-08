@@ -70,12 +70,7 @@ Eigen::SparseVector<double> MeasuredOperator::measurement_vector(const Eigen::Ve
     // grid spacings in all directions
     Eigen::VectorXd h(dim);
     // cell volume
-    double cell_volume = 1.0;
-    for (int d = 0; d < dim; ++d)
-    {
-        h[d] = 1. / double(shape[d]);
-        cell_volume *= h[d];
-    }
+    double cell_volume = lattice->cell_volume();
     GaussLegendreQuadrature quadrature(dim, 1);
     std::vector<double> quad_weights = quadrature.get_weights();
     std::vector<Eigen::VectorXd> quad_points = quadrature.get_points();
