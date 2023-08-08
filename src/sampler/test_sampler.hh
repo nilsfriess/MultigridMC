@@ -283,7 +283,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     measurement_locations[3] = Eigen::Vector2d({0.75, 0.75});
     for (int k = 0; k < n_meas; ++k)
     {
-        Sigma(k, k) = 1.E-2 * (1.0 + 2.0 * dist_uniform(rng));
+        Sigma(k, k) = 1.E-6 * (1.0 + 2.0 * dist_uniform(rng));
     }
     // Rotate randomly
     Eigen::MatrixXd A(Eigen::MatrixXd::Random(n_meas, n_meas)), Q;
@@ -296,6 +296,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     MeasurementParameters measurement_params;
     measurement_params.measurement_locations = measurement_locations;
     measurement_params.covariance = Sigma;
+    measurement_params.radius = 0.05;
     measurement_params.ignore_measurement_cross_correlations = false;
     measurement_params.measure_global = false;
     measurement_params.sigma_global = 0.0;
