@@ -71,6 +71,10 @@ Eigen::SparseVector<double> MeasuredOperator::measurement_vector(const Eigen::Ve
     Eigen::VectorXd h(dim);
     // cell volume
     double cell_volume = lattice->cell_volume();
+    for (int d = 0; d < dim; ++d)
+    {
+        h[d] = 1. / double(shape[d]);
+    }
     GaussLegendreQuadrature quadrature(dim, 1);
     std::vector<double> quad_weights = quadrature.get_weights();
     std::vector<Eigen::VectorXd> quad_points = quadrature.get_points();
