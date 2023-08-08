@@ -65,66 +65,87 @@ Eigen::SparseVector<double> MeasuredOperator::measurement_vector(const Eigen::Ve
     Eigen::SparseVector<double> r_meas(lattice->Nvertex);
     // dimension
     int dim = lattice->dim();
-    // shape of lattice
-    Eigen::VectorXi shape = lattice->shape();
-    // grid spacings in all directions
-    Eigen::VectorXd h(dim);
-    // cell volume
-    double cell_volume = lattice->cell_volume();
-    for (int d = 0; d < dim; ++d)
+    if (radius < 1.E-12)
     {
-        h[d] = 1. / double(shape[d]);
-    }
-    GaussLegendreQuadrature quadrature(dim, 1);
-    std::vector<double> quad_weights = quadrature.get_weights();
-    std::vector<Eigen::VectorXd> quad_points = quadrature.get_points();
-    std::vector<int> basis_idx_1d{0, 1}; // indices used to identify the basis functions
-    // Vector of all possible basis indices in d dimensions
-    std::vector<std::vector<int>> basis_idx = cartesian_product(basis_idx_1d, dim);
-
-    for (int cell_idx = 0; cell_idx < lattice->Ncell; ++cell_idx)
-    { // loop over all cells of the lattice
-        Eigen::VectorXi cell_coord = lattice->cellidx_linear2euclidean(cell_idx);
-        bool overlap = false;
-        for (auto it = basis_idx.begin(); it != basis_idx.end(); ++it)
-        { // loop over all corners of the cell and check whether one of them overlaps with
-          // a ball of radius R around the point x_0
-            Eigen::Map<Eigen::VectorXi> omega(it->data(), dim);
-            Eigen::VectorXd x_corner = h.cwiseProduct((cell_coord + omega).cast<double>());
-            if ((x_corner - x0).norm() < radius)
+        // find vertex which is closest to measurement point x0
+        double d_min = double(dim);
+        unsigned int ell_min = 0;
+        // loop over all vertices
+        for (unsigned int ell = 0; ell < lattice->Nvertex; ++ell)
+        {
+            Eigen::VectorXd x = lattice->vertex_coordinates(ell);
+            double dist = (x - x0).norm();
+            if (dist < d_min)
             {
-                overlap = true;
-                break;
+                d_min = dist;
+                ell_min = ell;
             }
         }
-        if (not overlap) // move on to next cell if there is no overlap
-            continue;
-        for (auto it = basis_idx.begin(); it != basis_idx.end(); ++it)
-        { // now loop over the basis functions associated with the corners
-          // of the cell
-            Eigen::Map<Eigen::VectorXi> alpha(it->data(), dim);
-            unsigned int ell;
-            if (lattice->corner_is_internal_vertex(cell_idx, alpha, ell))
-            { // found an interior vertex
-                double local_entry = 0.0;
-                for (int j = 0; j < quad_points.size(); ++j)
-                { // Loop over all quadrature points
-                    Eigen::VectorXd xhat = quad_points[j];
-                    // Convert integer-valued coordinates to coordinates in domain
-                    Eigen::VectorXd x = h.cwiseProduct(xhat + cell_coord.cast<double>());
-                    // evaluate basis function
-                    double xi = (x - x0).norm() / radius;
-                    if (xi < 1.0)
-                    {
-                        double phihat = f_meas(xi);
-                        for (int j = 0; j < dim; ++j)
-                        {
-                            phihat *= (alpha[j] == 0) ? (1.0 - xhat[j]) : xhat[j];
-                        }
-                        local_entry += phihat * quad_weights[j] * cell_volume;
-                    }
+        r_meas.coeffRef(ell_min) = 1.0;
+    }
+    else
+    {
+        // shape of lattice
+        Eigen::VectorXi shape = lattice->shape();
+        // grid spacings in all directions
+        Eigen::VectorXd h(dim);
+        // cell volume
+        double cell_volume = lattice->cell_volume();
+        for (int d = 0; d < dim; ++d)
+        {
+            h[d] = 1. / double(shape[d]);
+        }
+        GaussLegendreQuadrature quadrature(dim, 1);
+        std::vector<double> quad_weights = quadrature.get_weights();
+        std::vector<Eigen::VectorXd> quad_points = quadrature.get_points();
+        std::vector<int> basis_idx_1d{0, 1}; // indices used to identify the basis functions
+        // Vector of all possible basis indices in d dimensions
+        std::vector<std::vector<int>> basis_idx = cartesian_product(basis_idx_1d, dim);
+
+        for (int cell_idx = 0; cell_idx < lattice->Ncell; ++cell_idx)
+        { // loop over all cells of the lattice
+            Eigen::VectorXi cell_coord = lattice->cellidx_linear2euclidean(cell_idx);
+            bool overlap = false;
+            for (auto it = basis_idx.begin(); it != basis_idx.end(); ++it)
+            { // loop over all corners of the cell and check whether one of them overlaps with
+              // a ball of radius R around the point x_0
+                Eigen::Map<Eigen::VectorXi> omega(it->data(), dim);
+                Eigen::VectorXd x_corner = h.cwiseProduct((cell_coord + omega).cast<double>());
+                if ((x_corner - x0).norm() < radius)
+                {
+                    overlap = true;
+                    break;
                 }
-                r_meas.coeffRef(ell) += local_entry;
+            }
+            if (not overlap) // move on to next cell if there is no overlap
+                continue;
+            for (auto it = basis_idx.begin(); it != basis_idx.end(); ++it)
+            { // now loop over the basis functions associated with the corners
+              // of the cell
+                Eigen::Map<Eigen::VectorXi> alpha(it->data(), dim);
+                unsigned int ell;
+                if (lattice->corner_is_internal_vertex(cell_idx, alpha, ell))
+                { // found an interior vertex
+                    double local_entry = 0.0;
+                    for (int j = 0; j < quad_points.size(); ++j)
+                    { // Loop over all quadrature points
+                        Eigen::VectorXd xhat = quad_points[j];
+                        // Convert integer-valued coordinates to coordinates in domain
+                        Eigen::VectorXd x = h.cwiseProduct(xhat + cell_coord.cast<double>());
+                        // evaluate basis function
+                        double xi = (x - x0).norm() / radius;
+                        if (xi < 1.0)
+                        {
+                            double phihat = f_meas(xi);
+                            for (int j = 0; j < dim; ++j)
+                            {
+                                phihat *= (alpha[j] == 0) ? (1.0 - xhat[j]) : xhat[j];
+                            }
+                            local_entry += phihat * quad_weights[j] * cell_volume;
+                        }
+                    }
+                    r_meas.coeffRef(ell) += local_entry;
+                }
             }
         }
     }
