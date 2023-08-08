@@ -250,6 +250,15 @@ int main(int argc, char *argv[])
     {
         prior_operator = std::make_shared<ShiftedLaplaceFDOperator>(lattice, correlationlengthmodel, 1);
     }
+    else if (prior_params.pde_model == "squared_shiftedlaplace_fd")
+    {
+        prior_operator = std::make_shared<SquaredShiftedLaplaceFDOperator>(lattice, correlationlengthmodel, 1);
+    }
+    else
+    {
+        std::cout << "Error: invalid prior \'" << prior_params.pde_model << "\'" << std::endl;
+        exit(-1);
+    }
     std::shared_ptr<MeasuredOperator> posterior_operator = std::make_shared<MeasuredOperator>(prior_operator,
                                                                                               measurement_params);
     //   Construct samplers
