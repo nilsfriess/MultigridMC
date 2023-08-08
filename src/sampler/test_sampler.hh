@@ -283,7 +283,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     measurement_locations[3] = Eigen::Vector2d({0.75, 0.75});
     for (int k = 0; k < n_meas; ++k)
     {
-        Sigma(k, k) = 1.E-6 * (1.0 + 2.0 * dist_uniform(rng));
+        Sigma(k, k) = 1.E-4 * (1.0 + 2.0 * dist_uniform(rng));
     }
     // Rotate randomly
     Eigen::MatrixXd A(Eigen::MatrixXd::Random(n_meas, n_meas)), Q;
@@ -294,6 +294,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     std::shared_ptr<ShiftedLaplaceFEMOperator> prior_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice,
                                                                                                             correlationlengthmodel);
     MeasurementParameters measurement_params;
+    measurement_params.n = n_meas;
     measurement_params.measurement_locations = measurement_locations;
     measurement_params.covariance = Sigma;
     measurement_params.radius = 0.05;
@@ -325,7 +326,6 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
                                                                             postsampler_factory,
                                                                             intergrid_operator_factory,
                                                                             coarse_sampler_factory);
-
     const unsigned int nsamples = thorough_testing ? 2000000 : 10000;
     std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, nsamples);
     const double tolerance = thorough_testing ? 2.1E-3 : 2.E-2;

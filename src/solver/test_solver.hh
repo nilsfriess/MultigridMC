@@ -58,6 +58,7 @@ protected:
         std::shared_ptr<ShiftedLaplaceFEMOperator> prior_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice,
                                                                                                                 correlationlengthmodel);
         MeasurementParameters measurement_params;
+        measurement_params.n = n_meas;
         measurement_params.measurement_locations = measurement_locations;
         measurement_params.covariance = Sigma;
         measurement_params.radius = 0.05;
