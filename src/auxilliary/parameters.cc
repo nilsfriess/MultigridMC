@@ -103,7 +103,8 @@ void SmootherParameters::parse_config(const libconfig::Setting &root)
 {
     const libconfig::Setting &smoother = root["smoother"];
     omega = smoother.lookup("omega");
-    std::cout << "  overrelaxation factor = " << omega << std::endl;
+    std::cout << "  smoother = " << std::endl;
+    std::cout << "    overrelaxation factor = " << omega << std::endl;
 }
 
 /* parse linear solver configuration */
@@ -114,9 +115,10 @@ void IterativeSolverParameters::parse_config(const libconfig::Setting &root)
     atol = iterative_solver.lookup("atol");
     maxiter = iterative_solver.lookup("maxiter");
     verbose = iterative_solver.lookup("verbose");
-    std::cout << "   relative tolerance = " << rtol << std::endl;
-    std::cout << "   absolute tolerance = " << atol << std::endl;
-    std::cout << "   maxiter = " << maxiter << std::endl;
+    std::cout << "  iterative solver " << std::endl;
+    std::cout << "    relative tolerance = " << rtol << std::endl;
+    std::cout << "    absolute tolerance = " << atol << std::endl;
+    std::cout << "    maxiter = " << maxiter << std::endl;
 }
 
 /* parse multigrid configuration */
@@ -138,12 +140,12 @@ void MultigridParameters::parse_config(const libconfig::Setting &root)
         cycle_label = "( W-cycle )";
     }
     verbose = multigrid.lookup("verbose");
-    std::cout << "  Multigrid" << std::endl;
-    std::cout << "   levels = " << nlevel << std::endl;
-    std::cout << "   npresmooth = " << npresmooth << std::endl;
-    std::cout << "   npostsmooth = " << npostsmooth << std::endl;
-    std::cout << "   cycle = " << cycle << " " << cycle_label << std::endl;
-    std::cout << "   coarse_scaling = " << coarse_scaling << std::endl;
+    std::cout << "  multigrid" << std::endl;
+    std::cout << "    levels = " << nlevel << std::endl;
+    std::cout << "    npresmooth = " << npresmooth << std::endl;
+    std::cout << "    npostsmooth = " << npostsmooth << std::endl;
+    std::cout << "    cycle = " << cycle << " " << cycle_label << std::endl;
+    std::cout << "    coarse_scaling = " << coarse_scaling << std::endl;
 }
 
 /* parse sampling configuration */
@@ -283,16 +285,17 @@ void MeasurementParameters::parse_config(const libconfig::Setting &root)
     }
 
     // print out summary
-    std::cout << "  file with measurements = " << filename << std::endl;
-    std::cout << "  dimension of measurement locations = " << dim << std::endl;
-    std::cout << "  number of measurement points = " << n << std::endl;
-    std::cout << "  radius of individual measurements = " << radius << std::endl;
-    std::cout << "  measure global average across domain? ";
+    std::cout << "  measurements " << std::endl;
+    std::cout << "    file with measurements = " << filename << std::endl;
+    std::cout << "    dimension of measurement locations = " << dim << std::endl;
+    std::cout << "    number of measurement points = " << n << std::endl;
+    std::cout << "    radius of individual measurements = " << radius << std::endl;
+    std::cout << "    measure global average across domain? ";
     if (measure_global)
     {
         std::cout << "yes" << std::endl;
-        std::cout << "  mean of global average = " << mean_global << std::endl;
-        std::cout << "  variance of global average = " << variance_global << std::endl;
+        std::cout << "    mean of global average = " << mean_global << std::endl;
+        std::cout << "    variance of global average = " << variance_global << std::endl;
     }
     else
     {

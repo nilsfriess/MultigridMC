@@ -38,6 +38,11 @@ int main(int argc, char *argv[])
         std::cout << "Usage: " << argv[0] << " CONFIGURATIONFILE" << std::endl;
         exit(-1);
     }
+    std::cout << std::endl;
+    std::cout << "+------------------+" << std::endl;
+    std::cout << "! Multigrid solver !" << std::endl;
+    std::cout << "+------------------+" << std::endl;
+    std::cout << std::endl;
     std::string filename(argv[1]);
     std::cout << "Reading parameters from file \'" << filename << "\'" << std::endl;
     GeneralParameters general_params;
@@ -64,6 +69,24 @@ int main(int argc, char *argv[])
         std::cout << "ERROR: dimension of measurement locations differs from problem dimension" << std::endl;
         exit(-1);
     }
+#if (defined EIGEN_USE_BLAS && defined EIGEN_USE_LAPACKE)
+    std::cout << "Compiled with BLAS/LAPACK support for Eigen." << std::endl
+              << std::endl;
+#else  // EIGEN_USE_BLAS && EIGEN_USE_LAPACKE
+    std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+    std::cout << "WARNING: Compiled without BLAS/LAPACK support for Eigen." << std::endl;
+    std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+    std::cout << std::endl;
+#endif // EIGEN_USE_BLAS && EIGEN_USE_LAPACKE
+
+#ifndef NCHOLMOD
+    std::cout << "Using sparse Cholesky factorisation from CholMod." << std::endl;
+#else  // NCHOLMOD
+    std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+    std::cout << "WARNING: Falling back on Eigen's SimplicalLLT Cholesky factorisation." << std::endl;
+    std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+    std::cout << std::endl;
+#endif // NCHOLMOD
 
     // Construct lattice and linear operator
     std::shared_ptr<Lattice> lattice;

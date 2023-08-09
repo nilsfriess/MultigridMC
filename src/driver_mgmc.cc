@@ -165,6 +165,11 @@ int main(int argc, char *argv[])
         std::cout << "Usage: " << argv[0] << " CONFIGURATIONFILE" << std::endl;
         exit(-1);
     }
+    std::cout << std::endl;
+    std::cout << "+--------------------------------+" << std::endl;
+    std::cout << "! Multigrid Monte Carlo sampling !" << std::endl;
+    std::cout << "+--------------------------------+" << std::endl;
+    std::cout << std::endl;
     std::string filename(argv[1]);
     std::cout << "Reading parameters from file \'" << filename << "\'" << std::endl;
     GeneralParameters general_params;
@@ -194,7 +199,8 @@ int main(int argc, char *argv[])
         exit(-1);
     }
 #if (defined EIGEN_USE_BLAS && defined EIGEN_USE_LAPACKE)
-    std::cout << "Compiled with BLAS/LAPACK support for Eigen." << std::endl;
+    std::cout << "Compiled with BLAS/LAPACK support for Eigen." << std::endl
+              << std::endl;
 #else  // EIGEN_USE_BLAS && EIGEN_USE_LAPACKE
     std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
     std::cout << "WARNING: Compiled without BLAS/LAPACK support for Eigen." << std::endl;
@@ -210,6 +216,7 @@ int main(int argc, char *argv[])
     std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
     std::cout << std::endl;
 #endif // NCHOLMOD
+
     // Construct lattice and linear operator
     std::shared_ptr<Lattice> lattice;
     if (general_params.dim == 2)
