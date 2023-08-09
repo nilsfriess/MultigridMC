@@ -75,11 +75,11 @@ public:
         B = SparseMatrixType(nrow, 2);
         B.insert(3, 0) = 10.0;
         B.insert(4, 1) = 10.0;
-        Eigen::VectorXd Sigma_diag(2);
-        Sigma_diag[0] = 4.2;
-        Sigma_diag[1] = 9.3;
-        Sigma_inv_diag.diagonal() = Sigma_diag.cwiseInverse();
-        Sigma_inv_BT = Sigma_inv_diag * B.transpose();
+        Eigen::VectorXd variance(2);
+        variance[0] = 4.2;
+        variance[1] = 9.3;
+        Sigma_diag.diagonal() = variance;
+        Sigma_inv_BT = get_Sigma_inv() * B.transpose();
     }
 
 protected:

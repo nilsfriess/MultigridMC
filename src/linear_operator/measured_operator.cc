@@ -15,12 +15,8 @@ MeasuredOperator::MeasuredOperator(const std::shared_ptr<LinearOperator> base_op
     A_sparse = base_operator->get_sparse();
     unsigned int nrow = base_operator->get_lattice()->Nvertex;
     unsigned int n_measurements = params.measurement_locations.size();
-    Sigma_inv_diag = Eigen::DiagonalMatrix<double, Eigen::Dynamic>(n_measurements + params.measure_global);
-    Sigma_inv_diag.setZero();
-    DenseMatrixType Sigma_inv_diag_local;
-    Sigma_inv_diag_local = params.variance.cwiseInverse().asDiagonal();
-
-    Sigma_inv_diag.diagonal()(Eigen::seqN(0, n_measurements)) = Sigma_inv_diag_local;
+    Sigma_diag = Eigen::DiagonalMatrix<double, Eigen::Dynamic>(n_measurements + params.measure_global);
+    Sigma_diag.diagonal()(Eigen::seqN(0, n_measurements)) = params.variance;
     typedef Eigen::Triplet<double> T;
     std::vector<T> triplet_list;
     for (int k = 0; k < n_measurements; ++k)
@@ -46,10 +42,10 @@ MeasuredOperator::MeasuredOperator(const std::shared_ptr<LinearOperator> base_op
         {
             triplet_list.push_back(T(ell, n_measurements, cell_volume));
         }
-        Sigma_inv_diag.diagonal()(n_measurements) = 1. / params.sigma_global;
+        Sigma_diag.diagonal()(n_measurements) = params.sigma_global;
     }
     B.setFromTriplets(triplet_list.begin(), triplet_list.end());
-    Sigma_inv_BT = Sigma_inv_diag * B.transpose();
+    Sigma_inv_BT = get_Sigma_inv() * B.transpose();
 }
 
 /* Create measurement vector in dual space */

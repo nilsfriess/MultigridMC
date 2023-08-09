@@ -80,8 +80,8 @@ def average(n, mu_low, mu_high):
     return rng.uniform(size=n, low=mu_low, high=mu_high)
 
 
-def covariance_matrix(n, sigma_low, sigma_high):
-    """Create positive definite random covariance matrix
+def variance_matrix(n, sigma_low, sigma_high):
+    """Create diagonal variance
 
     The eigenvalues of the matrix are constructed such that they are
     in the range [sigma_min,sigma_max]
@@ -91,11 +91,8 @@ def covariance_matrix(n, sigma_low, sigma_high):
     :arg sigma_high: upper bound on eigenvalues
     """
     rng = np.random.default_rng(seed=2511541)
-    A_random = rng.uniform(size=(n, n))
-    Sigma_diag = np.diag(rng.uniform(low=sigma_low, high=sigma_high, size=n))
-    Q, _ = np.linalg.qr(A_random)
-    Sigma = Q @ Sigma_diag @ Q.T
-    return Sigma
+    Sigma_diag = rng.uniform(low=sigma_low, high=sigma_high, size=n)
+    return Sigma_diag
 
 
 nmeas = 8

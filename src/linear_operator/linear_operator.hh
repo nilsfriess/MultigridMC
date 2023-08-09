@@ -43,7 +43,7 @@ public:
                                                         A_sparse(lattice_->Nvertex, lattice_->Nvertex),
                                                         B(lattice_->Nvertex, m_lowrank_),
                                                         Sigma_inv_BT(m_lowrank_, lattice_->Nvertex),
-                                                        Sigma_inv_diag(m_lowrank_)
+                                                        Sigma_diag(m_lowrank_)
     {
     }
 
@@ -95,16 +95,16 @@ public:
     /** @brief Return B (in sparse storage format) */
     const SparseMatrixType &get_B() const { return B; };
 
-    /** @brief Return Sigma^{-1} (in diagonal storage format) */
-    const Eigen::DiagonalMatrix<double, Eigen::Dynamic> get_Sigma_inv() const
-    {
-        return Sigma_inv_diag;
-    };
-
     /** @brief Return Sigma (in diagonal storage format) */
     const Eigen::DiagonalMatrix<double, Eigen::Dynamic> get_Sigma() const
     {
-        return Sigma_inv_diag.diagonal().cwiseInverse().asDiagonal();
+        return Sigma_diag;
+    };
+
+    /** @brief Return Sigma^{-1} (in diagonal storage format) */
+    const Eigen::DiagonalMatrix<double, Eigen::Dynamic> get_Sigma_inv() const
+    {
+        return Sigma_diag.diagonal().cwiseInverse().asDiagonal();
     };
 
     /** @brief compute (dense) precision matrix */
@@ -127,8 +127,8 @@ protected:
     SparseMatrixType B;
     /** @brief matrix Sigma^{-1}.B^T */
     SparseMatrixType Sigma_inv_BT;
-    /** @brief diagonal of m x m matrix Sigma^{-1} */
-    Eigen::DiagonalMatrix<double, Eigen::Dynamic> Sigma_inv_diag;
+    /** @brief diagonal of m x m covariance matrix Sigma */
+    Eigen::DiagonalMatrix<double, Eigen::Dynamic> Sigma_diag;
 };
 
 #endif // LINEAR_OPERATOR_HH
