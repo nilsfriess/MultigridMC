@@ -41,8 +41,8 @@
  *       [ 0 0 0 0 1 0 ... 0 ]
  *
  *
- * with Sigma = [4.2  -1.1]
- *              [-1.1  9.3]
+ * with Sigma = [4.2  0.0]
+ *              [0.0  9.3]
  */
 class TestOperator1d : public LinearOperator
 {
@@ -75,10 +75,11 @@ public:
         B = SparseMatrixType(nrow, 2);
         B.insert(3, 0) = 10.0;
         B.insert(4, 1) = 10.0;
-        DenseMatrixType Sigma(2, 2);
-        Sigma << 4.2, -1.1, -1.1, 9.3;
-        Sigma_inv = Sigma.inverse();
-        Sigma_inv_BT = Sigma_inv.sparseView() * B.transpose();
+        Eigen::VectorXd Sigma_diag(2);
+        Sigma_diag[0] = 4.2;
+        Sigma_diag[1] = 9.3;
+        Sigma_inv_diag.diagonal() = Sigma_diag.cwiseInverse();
+        Sigma_inv_BT = Sigma_inv_diag * B.transpose();
     }
 
 protected:
@@ -275,30 +276,22 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
 
     unsigned int n_meas = 4;
     std::vector<Eigen::VectorXd> measurement_locations(n_meas);
-    Eigen::MatrixXd Sigma(n_meas, n_meas);
-    Sigma.setZero();
+    Eigen::VectorXd Sigma_diag(n_meas, n_meas);
     measurement_locations[0] = Eigen::Vector2d({0.25, 0.25});
     measurement_locations[1] = Eigen::Vector2d({0.25, 0.75});
     measurement_locations[2] = Eigen::Vector2d({0.75, 0.25});
     measurement_locations[3] = Eigen::Vector2d({0.75, 0.75});
     for (int k = 0; k < n_meas; ++k)
     {
-        Sigma(k, k) = 1.E-4 * (1.0 + 2.0 * dist_uniform(rng));
+        Sigma_diag(k) = 1.E-4 * (1.0 + 2.0 * dist_uniform(rng));
     }
-    // Rotate randomly
-    Eigen::MatrixXd A(Eigen::MatrixXd::Random(n_meas, n_meas)), Q;
-    A.setRandom();
-    Eigen::HouseholderQR<Eigen::MatrixXd> qr(A);
-    Q = qr.householderQ();
-    Sigma = Q * Sigma * Q.transpose();
     std::shared_ptr<ShiftedLaplaceFEMOperator> prior_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice,
                                                                                                             correlationlengthmodel);
     MeasurementParameters measurement_params;
     measurement_params.n = n_meas;
     measurement_params.measurement_locations = measurement_locations;
-    measurement_params.covariance = Sigma;
+    measurement_params.variance = Sigma_diag;
     measurement_params.radius = 0.05;
-    measurement_params.ignore_measurement_cross_correlations = false;
     measurement_params.measure_global = false;
     measurement_params.sigma_global = 0.0;
     measurement_params.mean_global = 0.0;

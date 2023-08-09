@@ -42,27 +42,19 @@ protected:
                                                                       correlationlengthmodel);
         unsigned int n_meas = 10;
         std::vector<Eigen::VectorXd> measurement_locations(n_meas);
-        Eigen::MatrixXd Sigma(n_meas, n_meas);
-        Sigma.setZero();
+        Eigen::VectorXd Sigma_diag(n_meas, n_meas);
         for (int k = 0; k < n_meas; ++k)
         {
             measurement_locations[k] = Eigen::Vector2d({uniform_dist(rng), uniform_dist(rng)});
-            Sigma(k, k) = 1.E-6 * (1.0 + 2.0 * uniform_dist(rng));
+            Sigma_diag(k) = 1.E-6 * (1.0 + 2.0 * uniform_dist(rng));
         }
-        // Rotate randomly
-        Eigen::MatrixXd A(Eigen::MatrixXd::Random(n_meas, n_meas)), Q;
-        A.setRandom();
-        Eigen::HouseholderQR<Eigen::MatrixXd> qr(A);
-        Q = qr.householderQ();
-        Sigma = Q * Sigma * Q.transpose();
         std::shared_ptr<ShiftedLaplaceFEMOperator> prior_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice,
                                                                                                                 correlationlengthmodel);
         MeasurementParameters measurement_params;
         measurement_params.n = n_meas;
         measurement_params.measurement_locations = measurement_locations;
-        measurement_params.covariance = Sigma;
+        measurement_params.variance = Sigma_diag;
         measurement_params.radius = 0.05;
-        measurement_params.ignore_measurement_cross_correlations = false;
         measurement_params.measure_global = false;
         measurement_params.sigma_global = 0.0;
         measurement_params.mean_global = 0.0;

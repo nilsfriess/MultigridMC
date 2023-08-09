@@ -14,7 +14,7 @@ CholeskySolver::CholeskySolver(std::shared_ptr<LinearOperator> linear_operator_)
     {
         B = linear_operator->get_B();
         LinearOperator::DenseMatrixType B_dense = B.toDense();
-        const DenseMatrixType Sigma_inv = linear_operator->get_Sigma_inv();
+        const DenseMatrixType Sigma = linear_operator->get_Sigma().toDenseMatrix();
         DenseMatrixType Ainv_B(B_dense.rows(), B_dense.cols());
         Eigen::VectorXd y(B_dense.rows());
         for (int j = 0; j < B_dense.cols(); ++j)
@@ -22,7 +22,7 @@ CholeskySolver::CholeskySolver(std::shared_ptr<LinearOperator> linear_operator_)
             solver->solve(B_dense(Eigen::seq(0, B_dense.rows() - 1), j), y);
             Ainv_B(Eigen::seq(0, B_dense.rows() - 1), j) = y;
         }
-        B_bar = Ainv_B * (Sigma_inv.inverse() + B_dense.transpose() * Ainv_B).inverse();
+        B_bar = Ainv_B * (Sigma + B_dense.transpose() * Ainv_B).inverse();
     }
 }
 

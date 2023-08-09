@@ -236,25 +236,11 @@ void MeasurementParameters::parse_config(const libconfig::Setting &root)
         mean(j) = double(s_mean[j]);
     }
     // Covariance matrix
-    const libconfig::Setting &Sigma = measurements.lookup("covariance");
-    covariance = Eigen::MatrixXd(n_meas, n_meas);
+    const libconfig::Setting &Sigma = measurements.lookup("variance");
+    variance = Eigen::VectorXd(n_meas);
     for (int j = 0; j < n_meas; ++j)
     {
-        for (int k = 0; k < n_meas; ++k)
-        {
-            covariance(j, k) = Sigma[j + n_meas * k];
-        }
-    }
-    // Ignore cross-correlations in measurements?
-    ignore_measurement_cross_correlations = measurements.lookup("ignore_measurement_cross_correlations");
-    std::cout << "  ignore correlations between measurements? ";
-    if (ignore_measurement_cross_correlations)
-    {
-        std::cout << "yes" << std::endl;
-    }
-    else
-    {
-        std::cout << "no" << std::endl;
+        variance(j) = Sigma[j];
     }
     // Sample location
     const libconfig::Setting &s_point = measurements.lookup("sample_location");

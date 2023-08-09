@@ -16,7 +16,7 @@ SORSmoother::SORSmoother(const std::shared_ptr<LinearOperator> linear_operator_,
     {
         B = linear_operator->get_B();
         LinearOperator::SparseMatrixType A_sparse = linear_operator->get_sparse();
-        LinearOperator::DenseMatrixType Sigma = linear_operator->get_Sigma_inv().inverse();
+        LinearOperator::DenseMatrixType Sigma = linear_operator->get_Sigma().toDenseMatrix();
         // Construct the matrix 1/omega * D + L + L^T
         LinearOperator::SparseMatrixType D(A_sparse.diagonal().asDiagonal());
         LinearOperator::SparseMatrixType A_sparse_diag_scaled = A_sparse + (1. - omega) / omega * D;

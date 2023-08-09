@@ -21,7 +21,7 @@
  *  A = A_0 + B \Sigma^{-1} B^T
  *
  *
- * where A, A_0 are n x n matrix, \Sigma is a m x m matrix (with m << n) and
+ * where A, A_0 are n x n matrix, \Sigma is a diagonal m x m matrix (with m << n) and
  * B is a n x m matrix.
  */
 
@@ -43,7 +43,7 @@ public:
                                                         A_sparse(lattice_->Nvertex, lattice_->Nvertex),
                                                         B(lattice_->Nvertex, m_lowrank_),
                                                         Sigma_inv_BT(m_lowrank_, lattice_->Nvertex),
-                                                        Sigma_inv(m_lowrank_, m_lowrank_)
+                                                        Sigma_inv_diag(m_lowrank_)
     {
     }
 
@@ -95,8 +95,17 @@ public:
     /** @brief Return B (in sparse storage format) */
     const SparseMatrixType &get_B() const { return B; };
 
-    /** @brief Return Sigma^{-1} (in dense storage format) */
-    const DenseMatrixType &get_Sigma_inv() const { return Sigma_inv; };
+    /** @brief Return Sigma^{-1} (in diagonal storage format) */
+    const Eigen::DiagonalMatrix<double, Eigen::Dynamic> get_Sigma_inv() const
+    {
+        return Sigma_inv_diag;
+    };
+
+    /** @brief Return Sigma (in diagonal storage format) */
+    const Eigen::DiagonalMatrix<double, Eigen::Dynamic> get_Sigma() const
+    {
+        return Sigma_inv_diag.diagonal().cwiseInverse().asDiagonal();
+    };
 
     /** @brief compute (dense) precision matrix */
     DenseMatrixType precision() const;
@@ -118,8 +127,8 @@ protected:
     SparseMatrixType B;
     /** @brief matrix Sigma^{-1}.B^T */
     SparseMatrixType Sigma_inv_BT;
-    /** @brief dense representation of m x m matrix Sigma^{-1} */
-    DenseMatrixType Sigma_inv;
+    /** @brief diagonal of m x m matrix Sigma^{-1} */
+    Eigen::DiagonalMatrix<double, Eigen::Dynamic> Sigma_inv_diag;
 };
 
 #endif // LINEAR_OPERATOR_HH

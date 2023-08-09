@@ -15,8 +15,8 @@ SparseCholeskySampler::SparseCholeskySampler(const std::shared_ptr<LinearOperato
     {
         // Add contribution from low rank correction
         const LinearOperator::SparseMatrixType &B_sparse = linear_operator->get_B();
-        const LinearOperator::DenseMatrixType &Sigma_inv = linear_operator->get_Sigma_inv();
-        const LinearOperator::SparseMatrixType B_tilde = Sigma_inv.sparseView() * B_sparse.transpose();
+        const Eigen::DiagonalMatrix<double, Eigen::Dynamic> &Sigma_inv = linear_operator->get_Sigma_inv();
+        const LinearOperator::SparseMatrixType B_tilde = Sigma_inv * B_sparse.transpose();
         A_sparse += B_sparse * B_tilde;
     }
     LLT_of_A = std::make_shared<SparseLLTType>(A_sparse, verbose_);
@@ -31,7 +31,7 @@ DenseCholeskySampler::DenseCholeskySampler(const std::shared_ptr<LinearOperator>
     {
         // Add contribution from low rank correction
         const LinearOperator::DenseMatrixType &B = linear_operator->get_B();
-        const LinearOperator::DenseMatrixType &Sigma_inv = linear_operator->get_Sigma_inv();
+        const Eigen::DiagonalMatrix<double, Eigen::Dynamic> &Sigma_inv = linear_operator->get_Sigma_inv();
         A_dense += B * Sigma_inv * B.transpose();
     }
     LLT_of_A = std::make_shared<EigenDenseLLT>(A_dense);

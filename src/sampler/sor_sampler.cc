@@ -26,10 +26,8 @@ SORSampler::SORSampler(const std::shared_ptr<LinearOperator> linear_operator_,
     smoother = std::make_shared<SORSmoother>(linear_operator, omega, direction);
     if (linear_operator->get_m_lowrank())
     {
-        Eigen::LLT<LinearOperator::DenseMatrixType,
-                   Eigen::Upper>
-            LLT_of_Sigma_inv(linear_operator->get_Sigma_inv());
-        U_lowrank = std::make_shared<LinearOperator::DenseMatrixType>(LLT_of_Sigma_inv.matrixU());
+        Eigen::VectorXd Sigma_inv_diag = linear_operator->get_Sigma_inv().diagonal();
+        Sigma_lowrank_inv_sqrt = std::make_shared<Eigen::DiagonalMatrix<double, Eigen::Dynamic>>(Sigma_inv_diag.cwiseSqrt());
     }
 }
 
@@ -50,7 +48,7 @@ void SORSampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const
         {
             xi[ell] = normal_dist(rng);
         }
-        c_rhs += B * (*U_lowrank) * xi;
+        c_rhs += B * (*Sigma_lowrank_inv_sqrt) * xi;
     }
     smoother->apply(c_rhs, x);
 }

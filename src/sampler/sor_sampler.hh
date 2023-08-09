@@ -59,8 +59,8 @@ protected:
     double *sqrt_precision_diag;
     /** @brief Underlying smoother */
     std::shared_ptr<SORSmoother> smoother;
-    /** @brief Cholesky factorisation U^T U = Sigma^{-1} of low rank covariance matrix */
-    std::shared_ptr<LinearOperator::DenseMatrixType> U_lowrank;
+    /** @brief Square root = Sigma^{-1/2} of low rank covariance matrix */
+    std::shared_ptr<Eigen::DiagonalMatrix<double, Eigen::Dynamic>> Sigma_lowrank_inv_sqrt;
 };
 
 /* ******************** factory classes ****************************** */

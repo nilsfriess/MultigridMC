@@ -17,8 +17,8 @@ LinearOperator LinearOperator::coarsen(const std::shared_ptr<IntergridOperator> 
     // Copy internal matrix representations
     lin_op.A_sparse = PT_A_P;
     lin_op.B = A_restrict * B;
-    lin_op.Sigma_inv = Sigma_inv;
-    lin_op.Sigma_inv_BT = Sigma_inv.sparseView() * lin_op.B.transpose();
+    lin_op.Sigma_inv_diag = Sigma_inv_diag;
+    lin_op.Sigma_inv_BT = Sigma_inv_diag * lin_op.B.transpose();
     return lin_op;
 }
 
@@ -28,7 +28,7 @@ LinearOperator::DenseMatrixType LinearOperator::precision() const
     DenseMatrixType Q = A_sparse.toDense();
     if (m_lowrank > 0)
     {
-        Q += B * Sigma_inv * B.transpose();
+        Q += B * Sigma_inv_diag * B.transpose();
     }
     return Q;
 }
