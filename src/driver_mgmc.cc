@@ -49,11 +49,11 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
     y(Eigen::seqN(0, measurement_params.n)) = measurement_params.mean;
     if (measurement_params.measure_global)
         y(measurement_params.n) = measurement_params.mean_global;
-    Eigen::VectorXd x_post = linear_operator->mean(xbar, y);
+    Eigen::VectorXd mean_exact = linear_operator->mean(xbar, y);
     Eigen::VectorXd x(ndof);
     Eigen::VectorXd f(ndof);
     x.setZero();
-    linear_operator->apply(x_post, f);
+    linear_operator->apply(mean_exact, f);
     for (int k = 0; k < sampling_params.nwarmup; ++k)
     {
         sampler->apply(f, x);
@@ -114,12 +114,12 @@ void posterior_statistics(std::shared_ptr<Sampler> sampler,
     y(Eigen::seqN(0, measurement_params.n)) = measurement_params.mean;
     if (measurement_params.measure_global)
         y(measurement_params.n) = measurement_params.mean_global;
-    Eigen::VectorXd x_post = linear_operator->mean(xbar, y);
+    Eigen::VectorXd mean_exact = linear_operator->mean(xbar, y);
     std::shared_ptr<Lattice> lattice = linear_operator->get_lattice();
     Eigen::VectorXd x(ndof);
     Eigen::VectorXd f(ndof);
     x.setZero();
-    linear_operator->apply(x_post, f);
+    linear_operator->apply(mean_exact, f);
     for (int k = 0; k < sampling_params.nwarmup; ++k)
     {
         sampler->apply(f, x);
@@ -143,9 +143,9 @@ void posterior_statistics(std::shared_ptr<Sampler> sampler,
     {
         vtk_writer = std::make_shared<VTKWriter3d>("posterior.vtk", lattice, 1);
     }
-    vtk_writer->add_state(x_post, "x_post");
     vtk_writer->add_state(mean, "mean");
     vtk_writer->add_state(variance - mean.cwiseProduct(mean), "variance");
+    vtk_writer->add_state(mean_exact, "mean_exact");
     vtk_writer->write();
     if (measurement_params.dim == 2)
     {
