@@ -224,8 +224,8 @@ void MeasurementParameters::parse_config(const libconfig::Setting &root)
     std::string filename = measurements.lookup("filename").c_str();
     // Sample location
     const libconfig::Setting &s_point = measurements.lookup("sample_location");
-    Eigen::VectorXd v(dim);
-    for (int d = 0; d < dim; ++d)
+    Eigen::VectorXd v(s_point.getLength());
+    for (int d = 0; d < v.size(); ++d)
     {
         v[d] = double(s_point[d]);
     }
