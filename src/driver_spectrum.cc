@@ -53,9 +53,10 @@ int main(int argc, char *argv[])
     }
     std::shared_ptr<ShiftedLaplaceFEMOperator> prior_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice,
                                                                                                             correlationlengthmodel);
-    std::shared_ptr<MeasuredOperator> linear_operator = std::make_shared<MeasuredOperator>(prior_operator,
-                                                                                           measurement_params);
-    LinearOperator::DenseMatrixType covariance = linear_operator->covariance();
+
+    std::shared_ptr<MeasuredOperator> posterior_operator = std::make_shared<MeasuredOperator>(prior_operator,
+                                                                                              measurement_params);
+    LinearOperator::DenseMatrixType covariance = posterior_operator->covariance();
     typedef Eigen::EigenSolver<LinearOperator::DenseMatrixType> EigenSolver;
     EigenSolver eigen_solver(covariance, false);
     EigenSolver::EigenvalueType eigen_values = eigen_solver.eigenvalues();

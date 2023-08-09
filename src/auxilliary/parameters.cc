@@ -53,11 +53,18 @@ void GeneralParameters::parse_config(const libconfig::Setting &root)
 {
     const libconfig::Setting &general = root["general"];
     dim = general["dim"];
+    do_cholesky = general.lookup("do_cholesky");
+    do_ssor = general.lookup("do_ssor");
+    do_multigridmc = general.lookup("do_multigridmc");
+    save_posterior_statistics = general.lookup("save_posterior_statistics");
+    operator_name = general.lookup("operator").c_str();
+    if (not((operator_name == "prior") or (operator_name == "posterior")))
+    {
+        std::cout << "ERROR: operator has to be \'prior\' or \'posterior\'" << std::endl;
+        exit(-1);
+    }
     std::cout << "  dimension = " << dim << std::endl;
-    do_cholesky = general["do_cholesky"];
-    do_ssor = general["do_ssor"];
-    do_multigridmc = general["do_multigridmc"];
-    save_posterior_statistics = general["save_posterior_statistics"];
+    std::cout << "  operator = " << operator_name << std::endl;
 }
 
 /* parse lattice configuration  */

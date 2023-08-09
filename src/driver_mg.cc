@@ -118,6 +118,20 @@ int main(int argc, char *argv[])
 
     std::shared_ptr<MeasuredOperator> posterior_operator = std::make_shared<MeasuredOperator>(prior_operator,
                                                                                               measurement_params);
+    std::shared_ptr<LinearOperator> linear_operator;
+    if (general_params.operator_name == "prior")
+    {
+        linear_operator = prior_operator;
+    }
+    else if (general_params.operator_name == "posterior")
+    {
+        linear_operator = posterior_operator;
+    }
+    else
+    {
+        std::cout << "ERROR: invalid operator : " << general_params.operator_name << std::endl;
+        exit(-1);
+    }
     //   Construct smoothers
     /* prepare measurements */
     std::shared_ptr<SmootherFactory> presmoother_factory = std::make_shared<SORSmootherFactory>(smoother_params.omega,
@@ -126,7 +140,7 @@ int main(int argc, char *argv[])
                                                                                                  backward);
     std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
     std::shared_ptr<LinearSolverFactory> coarse_solver_factory = std::make_shared<CholeskySolverFactory>();
-    std::shared_ptr<Preconditioner> multigrid_preconditioner = std::make_shared<MultigridPreconditioner>(posterior_operator,
+    std::shared_ptr<Preconditioner> multigrid_preconditioner = std::make_shared<MultigridPreconditioner>(linear_operator,
                                                                                                          multigrid_params,
                                                                                                          presmoother_factory,
                                                                                                          postsmoother_factory,
@@ -134,11 +148,11 @@ int main(int argc, char *argv[])
                                                                                                          coarse_solver_factory);
     std::cout << std::endl;
     // Run sampling experiments
-    LoopSolver solver(posterior_operator,
+    LoopSolver solver(linear_operator,
                       multigrid_preconditioner,
                       iterative_solver_params);
     // Create states
-    unsigned int ndof = posterior_operator->get_ndof();
+    unsigned int ndof = linear_operator->get_ndof();
     Eigen::VectorXd x_exact(ndof);
     Eigen::VectorXd x(ndof);
     unsigned int seed = 1482817;
@@ -157,7 +171,7 @@ int main(int argc, char *argv[])
     }
 
     Eigen::VectorXd b(ndof);
-    posterior_operator->apply(x_exact, b);
+    linear_operator->apply(x_exact, b);
     solver.apply(b, x);
     std::shared_ptr<VTKWriter> vtk_writer;
     if (general_params.dim == 2)

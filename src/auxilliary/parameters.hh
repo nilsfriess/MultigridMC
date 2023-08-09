@@ -59,6 +59,8 @@ public:
     bool do_multigridmc;
     /** @brief save posterior statistics to disk? */
     bool save_posterior_statistics;
+    /** @brief operator to use for sampling (prior or posterior)*/
+    std::string operator_name;
 };
 
 /** @brief structure for lattice parameters */
