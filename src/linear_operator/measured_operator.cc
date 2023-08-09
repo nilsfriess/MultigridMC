@@ -42,7 +42,7 @@ MeasuredOperator::MeasuredOperator(const std::shared_ptr<LinearOperator> base_op
         {
             triplet_list.push_back(T(ell, n_measurements, cell_volume));
         }
-        Sigma_diag.diagonal()(n_measurements) = params.sigma_global;
+        Sigma_diag.diagonal()(n_measurements) = params.variance_global;
     }
     B.setFromTriplets(triplet_list.begin(), triplet_list.end());
     Sigma_inv_BT = get_Sigma_inv() * B.transpose();

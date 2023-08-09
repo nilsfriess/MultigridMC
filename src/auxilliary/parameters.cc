@@ -251,14 +251,14 @@ void MeasurementParameters::parse_config(const libconfig::Setting &root)
     }
     sample_location = v;
     measure_global = measurements.lookup("measure_global");
-    sigma_global = measurements.lookup("variance_global");
+    variance_global = measurements.lookup("variance_global");
     mean_global = measurements.lookup("mean_global");
     std::cout << "  measure global average across domain? ";
     if (measure_global)
     {
         std::cout << "yes" << std::endl;
         std::cout << "  mean of global average = " << mean_global << std::endl;
-        std::cout << "  variance of global average = " << sigma_global << std::endl;
+        std::cout << "  variance of global average = " << variance_global << std::endl;
     }
     else
     {

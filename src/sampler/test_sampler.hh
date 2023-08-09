@@ -293,7 +293,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     measurement_params.variance = Sigma_diag;
     measurement_params.radius = 0.05;
     measurement_params.measure_global = false;
-    measurement_params.sigma_global = 0.0;
+    measurement_params.variance_global = 0.0;
     measurement_params.mean_global = 0.0;
     std::shared_ptr<MeasuredOperator> linear_operator = std::make_shared<MeasuredOperator>(prior_operator,
                                                                                            measurement_params);

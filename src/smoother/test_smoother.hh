@@ -49,7 +49,7 @@ protected:
         measurement_params.variance = Sigma_diag;
         measurement_params.radius = 0.05;
         measurement_params.measure_global = false;
-        measurement_params.sigma_global = 0.0;
+        measurement_params.variance_global = 0.0;
         measurement_params.mean_global = 0.0;
         linear_operator_lowrank = std::make_shared<MeasuredOperator>(prior_operator,
                                                                      measurement_params);

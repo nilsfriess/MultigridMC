@@ -251,7 +251,7 @@ public:
     /** @brief measure global average of field? */
     bool measure_global;
     /** @brief variance of global average */
-    double sigma_global;
+    double variance_global;
     /** @brief mean of global average */
     double mean_global;
 };
