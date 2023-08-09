@@ -185,26 +185,26 @@ void PriorParameters::parse_config(const libconfig::Setting &root)
 void ConstantCorrelationLengthModelParameters::parse_config(const libconfig::Setting &root)
 {
     const libconfig::Setting &model = root["constantcorrelationlengthmodel"];
-    kappa = model.lookup("kappa");
+    Lambda = model.lookup("Lambda");
     std::cout << "  constantcorrelationlengthmodel" << std::endl;
-    std::cout << "    kappa = " << kappa << std::endl;
+    std::cout << "    Lambda = " << Lambda << std::endl;
 }
 
 /* periodic correlation length model configuration */
 void PeriodicCorrelationLengthModelParameters::parse_config(const libconfig::Setting &root)
 {
     const libconfig::Setting &model = root["periodiccorrelationlengthmodel"];
-    kappa_min = model.lookup("kappa_min");
-    kappa_max = model.lookup("kappa_max");
+    Lambda_min = model.lookup("Lambda_min");
+    Lambda_max = model.lookup("Lambda_max");
     std::cout << "  periodiccorrelationlengthmodel" << std::endl;
-    std::cout << "    kappa_min = " << kappa_min << std::endl;
-    std::cout << "    kappa_max = " << kappa_max << std::endl;
-    if (not(kappa_max >= kappa_min))
+    std::cout << "    Lambda_min = " << Lambda_min << std::endl;
+    std::cout << "    Lambda_max = " << Lambda_max << std::endl;
+    if (not(Lambda_max >= Lambda_min))
     {
         std::cout << "ERROR: upper bound on correlation length has to exceed lower bound." << std::endl;
         exit(-1);
     }
-    if (not(kappa_min > 0))
+    if (not(Lambda_min > 0))
     {
         std::cout << "ERROR: lower bound on correlation length has to be positive." << std::endl;
         exit(-1);

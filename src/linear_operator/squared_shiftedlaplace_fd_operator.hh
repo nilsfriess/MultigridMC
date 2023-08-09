@@ -18,8 +18,8 @@
  *
  * Class for finite difference discretisation of shifted biharmonic operator
  *
- *     (-Laplace + kappa^{-2})^2 u
- *   = Laplace^2(u) -2 * kappa^{-2} Laplace(u) + kappa^{-4} u
+ *     (-Laplace + kappa^2)^2 u
+ *   = Laplace^2(u) -2 * kappa^2 Laplace(u) + kappa^4 u
  *
  *
  * with homogeneous Dirichlet boundary conditions u(x)=0, du/dn(x)=0 on the boundary.

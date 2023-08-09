@@ -53,7 +53,7 @@ SquaredShiftedLaplaceFDOperator::SquaredShiftedLaplaceFDOperator(const std::shar
     for (unsigned int ell = 0; ell < nrow; ++ell)
     {
         Eigen::VectorXd x = lattice->vertex_coordinates(ell);
-        double alpha_b = correlationlength_model->kappa_invsq(x);
+        double alpha_b = correlationlength_model->kappa_sq(x);
         double diagonal = (alpha_b * alpha_b - 2. * alpha_b * stencil_laplacian[0][0] + stencil_squared_laplacian[0][0]) * cell_volume;
         /* Loop over 5x5 stencil and only treat entries in this diamond:
          *

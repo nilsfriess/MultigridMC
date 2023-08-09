@@ -179,7 +179,7 @@ TEST_F(IntergridTest, TestProlongRestrict2dLinear)
 TEST_F(IntergridTest, TestCoarsenOperator2d)
 {
     ConstantCorrelationLengthModelParameters correlationmodel_params;
-    correlationmodel_params.kappa = 1.0;
+    correlationmodel_params.Lambda = 1.0;
     std::shared_ptr<CorrelationLengthModel> correlationlength_model = std::make_shared<ConstantCorrelationLengthModel>(correlationmodel_params);
     ShiftedLaplaceFEMOperator linear_operator(lattice_2d, correlationlength_model);
     ShiftedLaplaceFEMOperator coarse_operator(coarse_lattice_2d, correlationlength_model);
@@ -197,7 +197,7 @@ TEST_F(IntergridTest, TestCoarsenOperator2d)
 TEST_F(IntergridTest, TestCoarsenOperator3d)
 {
     ConstantCorrelationLengthModelParameters correlationmodel_params;
-    correlationmodel_params.kappa = 1.0;
+    correlationmodel_params.Lambda = 1.0;
     std::shared_ptr<CorrelationLengthModel> correlationlength_model = std::make_shared<ConstantCorrelationLengthModel>(correlationmodel_params);
     ShiftedLaplaceFEMOperator linear_operator(lattice_3d, correlationlength_model);
     ShiftedLaplaceFEMOperator coarse_operator(coarse_lattice_3d, correlationlength_model);

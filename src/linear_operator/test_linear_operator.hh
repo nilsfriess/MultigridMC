@@ -29,8 +29,8 @@ protected:
         nz = 64;
         lattice_3d = std::make_shared<Lattice3d>(nx, ny, nz);
         PeriodicCorrelationLengthModelParameters params;
-        params.kappa_min = 1.3;
-        params.kappa_max = 2.3;
+        params.Lambda_min = 1.3;
+        params.Lambda_max = 2.3;
         correlationlengthmodel = std::make_shared<PeriodicCorrelationLengthModel>(params);
     }
 
@@ -86,7 +86,7 @@ protected:
             {
                 u_exact[ell] *= f(x[d]);
             }
-            rhs[ell] = correlationlengthmodel->kappa_invsq(x) * u_exact[ell];
+            rhs[ell] = correlationlengthmodel->kappa_sq(x) * u_exact[ell];
             for (int j = 0; j < dim; ++j)
             {
                 double dd_u = 1.0;
@@ -158,7 +158,7 @@ protected:
         for (unsigned int ell = 0; ell < lattice->Nvertex; ++ell)
         {
             Eigen::VectorXd x = lattice->vertex_coordinates(ell);
-            double alpha_b = correlationlengthmodel->kappa_invsq(x);
+            double alpha_b = correlationlengthmodel->kappa_sq(x);
             u_exact[ell] = g(x[0]) * g(x[1]);
             rhs[ell] = (d4_g(x[0]) * g(x[1]) + 2 * d2_g(x[0]) * d2_g(x[1]) + g(x[0]) * d4_g(x[1]) - 2 * alpha_b * (d2_g(x[0]) * g(x[1]) + g(x[0]) * d2_g(x[1])) + alpha_b * alpha_b * u_exact[ell]) * volume;
         }

@@ -33,7 +33,7 @@ ShiftedLaplaceFDOperator::ShiftedLaplaceFDOperator(const std::shared_ptr<Lattice
     for (unsigned int ell = 0; ell < nrow; ++ell)
     {
         Eigen::VectorXd x = lattice->vertex_coordinates(ell);
-        double diagonal = cell_volume * correlationlength_model->kappa_invsq(x);
+        double diagonal = cell_volume * correlationlength_model->kappa_sq(x);
         for (int d = 0; d < dim; ++d) // loop over all dimensions
         {
             for (int j = 0; j < 2; ++j) // loop over all non-zero offsets

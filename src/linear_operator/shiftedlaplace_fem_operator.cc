@@ -124,7 +124,7 @@ ShiftedLaplaceFEMOperator::ShiftedLaplaceFEMOperator(const std::shared_ptr<Latti
                          *    + K(x_q) * sum_{j=0}^d h_j^{-2} * dphi_alpha(xhat_q)/dxhat_j * dphi_beta(xhat_q)/dxhat_j )
                          *        * h_0 * h_1 * ... * h_{d-1} * w_q
                          */
-                        local_matrix_entry += (correlationlength_model->kappa_invsq(x) * phi_phi[count] +
+                        local_matrix_entry += (correlationlength_model->kappa_sq(x) * phi_phi[count] +
                                                gradphi_gradphi[count]) *
                                               quad_weights[j];
                         count++;

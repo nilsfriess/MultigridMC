@@ -205,8 +205,8 @@ public:
      */
     virtual void parse_config(const libconfig::Setting &root);
 
-    /** @brief constant correlation length kappa */
-    double kappa;
+    /** @brief constant correlation length Lambda */
+    double Lambda;
 };
 
 /** @brief structure for periodic correlation length parameters
@@ -220,10 +220,10 @@ public:
      */
     virtual void parse_config(const libconfig::Setting &root);
 
-    /** @brief lower bound on correlation length kappa */
-    double kappa_min;
-    /** @brief upper bound on correlation length kappa */
-    double kappa_max;
+    /** @brief lower bound on correlation length Lambda */
+    double Lambda_min;
+    /** @brief upper bound on correlation length Lambda */
+    double Lambda_max;
 };
 
 /** @brief Structure for measurement parameters */

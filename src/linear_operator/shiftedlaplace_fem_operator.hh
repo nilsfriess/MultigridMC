@@ -20,7 +20,7 @@
  * Class for shifted Laplace operator in lowest order (multilinear)
  * finite element discretisation. In the continuum the linear operator given by
  *
- *   -( grad (u)) + kappa^{-2} u
+ *   -( grad (u)) + kappa^2 u
  *
  * with homogeneous Dirichlet boundary conditions.
  *

@@ -17,7 +17,7 @@
  *
  * Class for finite difference discretisation of shifted Laplace operator
  *
- *   -div( grad (u)) + kappa^{-2} u
+ *   -div( grad (u)) + kappa^2 u
  *
  * with homogeneous Dirichlet boundary conditions
  *

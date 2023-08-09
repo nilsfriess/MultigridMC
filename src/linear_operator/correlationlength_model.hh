@@ -24,13 +24,13 @@ public:
      *
      * @param[in] x point at which to evaluate the correlation length
      */
-    double kappa(const Eigen::VectorXd x) const { return 1. / sqrt(kappa_invsq(x)); }
+    double kappa(const Eigen::VectorXd x) const { return 1. / sqrt(kappa_sq(x)); }
 
     /** @brief compute inverse squared correlation length
      *
      * @param[in] x point at which to evaluate the correlation length
      */
-    inline virtual double kappa_invsq(const Eigen::VectorXd x) const = 0;
+    inline virtual double kappa_sq(const Eigen::VectorXd x) const = 0;
 
 protected:
     /** @brief Underlying lattice */
@@ -49,20 +49,20 @@ public:
      *
      * @param[in] params_ parameters
      */
-    ConstantCorrelationLengthModel(const ConstantCorrelationLengthModelParameters params_) : kappa_invsq_(1. / pow(params_.kappa, 2)) {}
+    ConstantCorrelationLengthModel(const ConstantCorrelationLengthModelParameters params_) : kappa_sq_(1. / pow(params_.Lambda, 2)) {}
 
-    /** @brief compute correlation length at a particular point in the domain
+    /** @brief compute squared correlation length at a particular point in the domain
      *
      * @param[in] x point at which to evaluate the correlation length
      */
-    inline virtual double kappa_invsq(const Eigen::VectorXd x) const
+    inline virtual double kappa_sq(const Eigen::VectorXd x) const
     {
-        return kappa_invsq_;
+        return kappa_sq_;
     }
 
 protected:
     /** @brief Inverse squared correlation length */
-    const double kappa_invsq_;
+    const double kappa_sq_;
 };
 
 /** @class PeriodicCorrelationLengthModel
@@ -71,13 +71,13 @@ protected:
  *
  * The correlation length is assumed to be of the form
  *
- *    kappa(x_1,x_2,...,x_d) = kappa_1 + kappa_2 * cos(pi*x_1) * cos(pi*x_2) * ... * cos(pi*x_d)
+ *    Lambda(x_1,x_2,...,x_d) = Lambda_1 + Lambda_2 * cos(pi*x_1) * cos(pi*x_2) * ... * cos(pi*x_d)
  *
  * where
  *
- *    kappa_1 = 1/2(kappa_max + kappa_min)
+ *    Lambda_1 = 1/2 * (Lambda_max + Lambda_min)
  *
- *    kappa_2 = 1/2(kappa_max - kappa_min)
+ *    Lambda_2 = 1/2 * (Lambda_max - Lambda_min)
  */
 
 class PeriodicCorrelationLengthModel : public CorrelationLengthModel
@@ -87,28 +87,28 @@ public:
      *
      * @param[in] params_ parameters
      */
-    PeriodicCorrelationLengthModel(const PeriodicCorrelationLengthModelParameters params_) : kappa_1(0.5 * (params_.kappa_max + params_.kappa_min)),
-                                                                                             kappa_2(0.5 * (params_.kappa_max - params_.kappa_min)) {}
+    PeriodicCorrelationLengthModel(const PeriodicCorrelationLengthModelParameters params_) : Lambda_1(0.5 * (params_.Lambda_max + params_.Lambda_min)),
+                                                                                             Lambda_2(0.5 * (params_.Lambda_max - params_.Lambda_min)) {}
 
-    /** @brief compute correlation length at a particular point in the domain
+    /** @brief compute inverse squadr correlation length at a particular point in the domain
      *
      * @param[in] x point at which to evaluate the correlation length
      */
-    inline virtual double kappa_invsq(const Eigen::VectorXd x) const
+    inline virtual double kappa_sq(const Eigen::VectorXd x) const
     {
         int dim = x.size();
-        double kappa_ = kappa_2;
+        double Lambda_ = Lambda_2;
         for (int d = 0; d < dim; ++d)
-            kappa_ *= cos(M_PI * x[d]);
-        kappa_ += kappa_1;
-        return 1. / (kappa_ * kappa_);
+            Lambda_ *= cos(M_PI * x[d]);
+        Lambda_ += Lambda_1;
+        return 1. / (Lambda_ * Lambda_);
     }
 
 protected:
-    /** @brief parameter kappa_1 = 1/2 * (kappa_max + kappa_min) */
-    const double kappa_1;
-    /** @brief parameter kappa_2 = 1/2 * (kappa_max - kappa_min) */
-    const double kappa_2;
+    /** @brief parameter Lambda_1 = 1/2 * (Lambda_max + Lambda_min) */
+    const double Lambda_1;
+    /** @brief parameter Lambda_2 = 1/2 * (Lambda_max - Lambda_min) */
+    const double Lambda_2;
 };
 
 #endif // CORRELATIONLENGTH_MODEL_HH
