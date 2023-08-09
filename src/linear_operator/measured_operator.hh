@@ -40,23 +40,6 @@ public:
     MeasuredOperator(const std::shared_ptr<LinearOperator> base_operator_,
                      const MeasurementParameters params_);
 
-    /** @brief Compute posterior mean
-     *
-     * @param[in] xbar prior mean
-     * @param[in] y measured values
-     */
-    Eigen::VectorXd posterior_mean(const Eigen::VectorXd &xbar,
-                                   const Eigen::VectorXd &y)
-    {
-        Eigen::SimplicialLLT<SparseMatrixType> solver;
-        solver.compute(A_sparse);
-        // Compute Bbar = Q^{-1} B
-        DenseMatrixType Bbar = solver.solve(B);
-        DenseMatrixType Sigma = get_Sigma().toDenseMatrix();
-        Eigen::VectorXd x_post = xbar + Bbar * (Sigma + B.transpose() * Bbar).inverse() * (y - B.transpose() * xbar);
-        return x_post;
-    }
-
     /** @brief Create measurement vector in dual space
      *
      * The entries of the vector are given by

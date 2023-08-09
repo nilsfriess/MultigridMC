@@ -107,6 +107,30 @@ public:
         return Sigma_diag.diagonal().cwiseInverse().asDiagonal();
     };
 
+    /** @brief Compute mean
+     *
+     * @param[in] xbar prior mean
+     * @param[in] y measured values
+     */
+    Eigen::VectorXd mean(const Eigen::VectorXd &xbar,
+                         const Eigen::VectorXd &y)
+    {
+        Eigen::SimplicialLLT<SparseMatrixType> solver;
+        if (m_lowrank > 0)
+        {
+            solver.compute(A_sparse);
+            // Compute Bbar = Q^{-1} B
+            DenseMatrixType Bbar = solver.solve(B);
+            DenseMatrixType Sigma = get_Sigma().toDenseMatrix();
+            Eigen::VectorXd x_post = xbar + Bbar * (Sigma + B.transpose() * Bbar).inverse() * (y - B.transpose() * xbar);
+            return x_post;
+        }
+        else
+        {
+            return xbar;
+        }
+    }
+
     /** @brief compute (dense) precision matrix */
     DenseMatrixType precision() const;
 

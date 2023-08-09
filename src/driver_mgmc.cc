@@ -40,7 +40,7 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
                            const MeasurementParameters &measurement_params,
                            const std::string filename)
 {
-    const std::shared_ptr<MeasuredOperator> linear_operator = std::dynamic_pointer_cast<MeasuredOperator>(sampler->get_linear_operator());
+    const std::shared_ptr<LinearOperator> linear_operator = sampler->get_linear_operator();
     unsigned int ndof = linear_operator->get_ndof();
     std::shared_ptr<Lattice> lattice = linear_operator->get_lattice();
     Eigen::VectorXd xbar(ndof);
@@ -49,7 +49,7 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
     y(Eigen::seqN(0, measurement_params.n)) = measurement_params.mean;
     if (measurement_params.measure_global)
         y(measurement_params.n) = measurement_params.mean_global;
-    Eigen::VectorXd x_post = linear_operator->posterior_mean(xbar, y);
+    Eigen::VectorXd x_post = linear_operator->mean(xbar, y);
     Eigen::VectorXd x(ndof);
     Eigen::VectorXd f(ndof);
     x.setZero();
@@ -60,8 +60,10 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
     };
     std::vector<double> data(sampling_params.nsamples);
 
-    Eigen::SparseVector<double> sample_vector = linear_operator->measurement_vector(measurement_params.sample_location,
-                                                                                    measurement_params.radius);
+    const std::shared_ptr<MeasuredOperator> measured_operator = std::make_shared<MeasuredOperator>(linear_operator,
+                                                                                                   measurement_params);
+    Eigen::SparseVector<double> sample_vector = measured_operator->measurement_vector(measurement_params.sample_location,
+                                                                                      measurement_params.radius);
 
     auto t_start = std::chrono::high_resolution_clock::now();
     for (int k = 0; k < sampling_params.nsamples; ++k)
@@ -102,7 +104,7 @@ void posterior_statistics(std::shared_ptr<Sampler> sampler,
                           const SamplingParameters &sampling_params,
                           const MeasurementParameters &measurement_params)
 {
-    const std::shared_ptr<MeasuredOperator> linear_operator = std::dynamic_pointer_cast<MeasuredOperator>(sampler->get_linear_operator());
+    const std::shared_ptr<LinearOperator> linear_operator = sampler->get_linear_operator();
     unsigned int ndof = linear_operator->get_ndof();
 
     // prior mean (set to zero)
@@ -112,7 +114,7 @@ void posterior_statistics(std::shared_ptr<Sampler> sampler,
     y(Eigen::seqN(0, measurement_params.n)) = measurement_params.mean;
     if (measurement_params.measure_global)
         y(measurement_params.n) = measurement_params.mean_global;
-    Eigen::VectorXd x_post = linear_operator->posterior_mean(xbar, y);
+    Eigen::VectorXd x_post = linear_operator->mean(xbar, y);
     std::shared_ptr<Lattice> lattice = linear_operator->get_lattice();
     Eigen::VectorXd x(ndof);
     Eigen::VectorXd f(ndof);
@@ -191,7 +193,6 @@ int main(int argc, char *argv[])
         std::cout << "ERROR: dimension of measurement locations differs from problem dimension" << std::endl;
         exit(-1);
     }
-
 #if (defined EIGEN_USE_BLAS && defined EIGEN_USE_LAPACKE)
     std::cout << "Compiled with BLAS/LAPACK support for Eigen." << std::endl;
 #else  // EIGEN_USE_BLAS && EIGEN_USE_LAPACKE
