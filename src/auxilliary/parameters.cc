@@ -208,40 +208,13 @@ void PeriodicCorrelationLengthModelParameters::parse_config(const libconfig::Set
 void MeasurementParameters::parse_config(const libconfig::Setting &root)
 {
     const libconfig::Setting &measurements = root["measurements"];
-    dim = measurements.lookup("dim");
-    unsigned int n_meas = measurements.lookup("n");
-    n = n_meas;
-    std::cout << "  dimension of measurement locations = " << dim << std::endl;
-    std::cout << "  number of measurement points = " << n << std::endl;
-    // Measurement locations
-    const libconfig::Setting &m_points = measurements.lookup("measurement_locations");
-    measurement_locations.clear();
-    for (int j = 0; j < n_meas; ++j)
-    {
-        Eigen::VectorXd v(dim);
-        for (int d = 0; d < dim; ++d)
-        {
-            v[d] = double(m_points[dim * j + d]);
-        }
-        measurement_locations.push_back(v);
-    }
-    // Radius
+    // radius
     radius = measurements.lookup("radius");
-    std::cout << "  radius of individual measurements = " << radius << std::endl;
-    // Measured averages
-    const libconfig::Setting &s_mean = measurements.lookup("mean");
-    mean = Eigen::VectorXd(n_meas);
-    for (int j = 0; j < n_meas; ++j)
-    {
-        mean(j) = double(s_mean[j]);
-    }
-    // Covariance matrix
-    const libconfig::Setting &Sigma = measurements.lookup("variance");
-    variance = Eigen::VectorXd(n_meas);
-    for (int j = 0; j < n_meas; ++j)
-    {
-        variance(j) = Sigma[j];
-    }
+    // global measurements
+    measure_global = measurements.lookup("measure_global");
+    variance_global = measurements.lookup("variance_global");
+    mean_global = measurements.lookup("mean_global");
+    std::string filename = measurements.lookup("filename").c_str();
     // Sample location
     const libconfig::Setting &s_point = measurements.lookup("sample_location");
     Eigen::VectorXd v(dim);
@@ -250,9 +223,63 @@ void MeasurementParameters::parse_config(const libconfig::Setting &root)
         v[d] = double(s_point[d]);
     }
     sample_location = v;
-    measure_global = measurements.lookup("measure_global");
-    variance_global = measurements.lookup("variance_global");
-    mean_global = measurements.lookup("mean_global");
+
+    // Read measurements from separate configuration file
+    libconfig::Config measurement_cfg;
+    try
+    {
+        measurement_cfg.readFile(filename.c_str());
+    }
+    catch (const libconfig::FileIOException &fioex)
+    {
+        std::cerr << "ERROR opening configuration file with measurements: \'" << filename << "\'." << std::endl;
+        exit(-1);
+    }
+    const libconfig::Setting &measurement_data = measurement_cfg.getRoot();
+    try
+    {
+        // dimension
+        dim = measurement_data.lookup("dim");
+        // number of measurements
+        n = measurement_data.lookup("n");
+        // Measurement locations
+        const libconfig::Setting &m_points = measurement_data.lookup("measurement_locations");
+        measurement_locations.clear();
+        for (int j = 0; j < n; ++j)
+        {
+            Eigen::VectorXd v(dim);
+            for (int d = 0; d < dim; ++d)
+            {
+                v[d] = double(m_points[dim * j + d]);
+            }
+            measurement_locations.push_back(v);
+        }
+        // Measured averages
+        const libconfig::Setting &s_mean = measurement_data.lookup("mean");
+        mean = Eigen::VectorXd(n);
+        for (int j = 0; j < n; ++j)
+        {
+            mean(j) = double(s_mean[j]);
+        }
+        // Covariance matrix
+        const libconfig::Setting &Sigma = measurement_data.lookup("variance");
+        variance = Eigen::VectorXd(n);
+        for (int j = 0; j < n; ++j)
+        {
+            variance(j) = Sigma[j];
+        }
+    }
+    catch (const libconfig::SettingException &ex)
+    {
+        std::cerr << "ERROR reading configuration file with measurements: \'" << filename << "\'." << std::endl;
+        exit(-1);
+    }
+
+    // print out summary
+    std::cout << "  file with measurements = " << filename << std::endl;
+    std::cout << "  dimension of measurement locations = " << dim << std::endl;
+    std::cout << "  number of measurement points = " << n << std::endl;
+    std::cout << "  radius of individual measurements = " << radius << std::endl;
     std::cout << "  measure global average across domain? ";
     if (measure_global)
     {
