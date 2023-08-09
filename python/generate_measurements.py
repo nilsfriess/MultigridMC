@@ -80,7 +80,7 @@ def average(n, mu_low, mu_high):
     return rng.uniform(size=n, low=mu_low, high=mu_high)
 
 
-def variance_matrix(n, sigma_low, sigma_high):
+def variance(n, sigma_low, sigma_high):
     """Create diagonal variance
 
     The eigenvalues of the matrix are constructed such that they are
@@ -123,7 +123,7 @@ args = parser.parse_args()
 
 p = np.asarray(sample_points(args.nmeas + 1, args.dim, dmin))
 mean = average(args.nmeas, 1.0, 4.0)
-Sigma = covariance_matrix(args.nmeas, 1.0e-6, 2.0e-6)
+Sigma_diag = variance(args.nmeas, 1.0e-6, 2.0e-6)
 
 # Print results in a format that can be used in the configuration file
 print("dim = ", args.dim, ";")
@@ -131,7 +131,7 @@ print("n = ", args.nmeas, ";")
 print("measurement_locations = ", repr(list(p[:-1, :].flatten())), ";")
 print("sample_location = ", repr(list(p[-1, :].flatten())), ";")
 print("mean = ", repr(list(mean.flatten())), ";")
-print("covariance = ", repr(list(Sigma.flatten())), ";")
+print("variance = ", repr(list(Sigma_diag.flatten())), ";")
 
 plt.clf()
 fig = plt.figure()
