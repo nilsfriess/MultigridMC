@@ -228,16 +228,16 @@ TEST_F(SamplerTest, TestMultigridMCSampler1d)
         multigrid_params.nlevel = 3;
         multigrid_params.npresmooth = 1;
         multigrid_params.npostsmooth = 1;
+        multigrid_params.omega = 1.0;
         multigrid_params.cycle = 1;
         multigrid_params.coarse_scaling = 1.0;
         multigrid_params.verbose = 0;
         std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
         std::mt19937_64 rng(31841287);
-        const double omega = 0.8;
         std::shared_ptr<SSORSamplerFactory> presampler_factory = std::make_shared<SSORSamplerFactory>(rng,
-                                                                                                      omega);
+                                                                                                      multigrid_params.omega);
         std::shared_ptr<SSORSamplerFactory> postsampler_factory = std::make_shared<SSORSamplerFactory>(rng,
-                                                                                                       omega);
+                                                                                                       multigrid_params.omega);
         std::shared_ptr<IntergridOperatorLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
         std::shared_ptr<SparseCholeskySamplerFactory> coarse_sampler_factory = std::make_shared<SparseCholeskySamplerFactory>(rng);
         std::shared_ptr<MultigridMCSampler> sampler = std::make_shared<MultigridMCSampler>(linear_operator,
@@ -302,14 +302,14 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     multigrid_params.nlevel = 3;
     multigrid_params.npresmooth = 1;
     multigrid_params.npostsmooth = 1;
+    multigrid_params.omega = 1.0;
     multigrid_params.cycle = 1;
     multigrid_params.coarse_scaling = 1.0;
     multigrid_params.verbose = 0;
-    const double omega = 1.0;
     std::shared_ptr<SSORSamplerFactory> presampler_factory = std::make_shared<SSORSamplerFactory>(rng,
-                                                                                                  omega);
+                                                                                                  multigrid_params.omega);
     std::shared_ptr<SSORSamplerFactory> postsampler_factory = std::make_shared<SSORSamplerFactory>(rng,
-                                                                                                   omega);
+                                                                                                   multigrid_params.omega);
     std::shared_ptr<IntergridOperatorLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
     std::shared_ptr<SparseCholeskySamplerFactory> coarse_sampler_factory = std::make_shared<SparseCholeskySamplerFactory>(rng);
     std::shared_ptr<Sampler> sampler = std::make_shared<MultigridMCSampler>(linear_operator,
