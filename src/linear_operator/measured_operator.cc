@@ -80,6 +80,7 @@ Eigen::SparseVector<double> MeasuredOperator::measurement_vector(const Eigen::Ve
         Eigen::VectorXd h(dim);
         // cell volume
         double cell_volume = lattice->cell_volume();
+        double normalisation = M_PI * radius * radius;
         for (int d = 0; d < dim; ++d)
         {
             h[d] = 1. / double(shape[d]);
@@ -130,7 +131,7 @@ Eigen::SparseVector<double> MeasuredOperator::measurement_vector(const Eigen::Ve
                             {
                                 phihat *= (alpha[j] == 0) ? (1.0 - xhat[j]) : xhat[j];
                             }
-                            local_entry += phihat * quad_weights[j] * cell_volume;
+                            local_entry += phihat * quad_weights[j] * cell_volume * normalisation;
                         }
                     }
                     r_meas.coeffRef(ell) += local_entry;
