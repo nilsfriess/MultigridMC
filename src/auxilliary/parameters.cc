@@ -229,6 +229,8 @@ void MeasurementParameters::parse_config(const libconfig::Setting &root)
     const libconfig::Setting &measurements = root["measurements"];
     // radius
     radius = measurements.lookup("radius");
+    // scaling factor for variance
+    variance_scaling = measurements.lookup("variance_scaling");
     // global measurements
     measure_global = measurements.lookup("measure_global");
     variance_global = measurements.lookup("variance_global");
@@ -300,6 +302,7 @@ void MeasurementParameters::parse_config(const libconfig::Setting &root)
     std::cout << "    dimension of measurement locations = " << dim << std::endl;
     std::cout << "    number of measurement points = " << n << std::endl;
     std::cout << "    radius of individual measurements = " << radius << std::endl;
+    std::cout << "    variance scaling = " << variance_scaling << std::endl;
     std::cout << "    measure global average across domain? ";
     if (measure_global)
     {

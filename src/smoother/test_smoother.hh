@@ -47,6 +47,7 @@ protected:
         measurement_params.n = n_meas;
         measurement_params.measurement_locations = measurement_locations;
         measurement_params.variance = Sigma_diag;
+        measurement_params.variance_scaling = 1.0;
         measurement_params.radius = 0.05;
         measurement_params.measure_global = false;
         measurement_params.variance_global = 0.0;

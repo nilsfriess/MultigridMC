@@ -254,6 +254,8 @@ public:
     Eigen::VectorXd mean;
     /** @brief diagonal of covariance matrix of measurements */
     Eigen::VectorXd variance;
+    /** @brief scaling factor to be applied to all variances */
+    double variance_scaling;
     /** @brief sample location */
     Eigen::VectorXd sample_location;
     /** @brief measure global average of field? */

@@ -16,7 +16,7 @@ MeasuredOperator::MeasuredOperator(const std::shared_ptr<LinearOperator> base_op
     unsigned int nrow = base_operator->get_lattice()->Nvertex;
     unsigned int n_measurements = params.measurement_locations.size();
     Sigma_diag = Eigen::DiagonalMatrix<double, Eigen::Dynamic>(n_measurements + params.measure_global);
-    Sigma_diag.diagonal()(Eigen::seqN(0, n_measurements)) = params.variance;
+    Sigma_diag.diagonal()(Eigen::seqN(0, n_measurements)) = params.variance_scaling * params.variance;
     typedef Eigen::Triplet<double> T;
     std::vector<T> triplet_list;
     for (int k = 0; k < n_measurements; ++k)
