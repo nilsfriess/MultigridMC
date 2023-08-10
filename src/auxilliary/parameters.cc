@@ -103,7 +103,6 @@ void SmootherParameters::parse_config(const libconfig::Setting &root)
 {
     const libconfig::Setting &smoother = root["smoother"];
     omega = smoother.lookup("omega");
-    std::cout << "  smoother = " << std::endl;
     std::cout << "    overrelaxation factor = " << omega << std::endl;
 }
 
@@ -126,6 +125,12 @@ void MultigridParameters::parse_config(const libconfig::Setting &root)
 {
     const libconfig::Setting &multigrid = root["multigrid"];
     nlevel = multigrid.lookup("nlevel");
+    smoother = multigrid.lookup("smoother").c_str();
+    if (not((smoother == "SOR") or (smoother == "SSOR")))
+    {
+        std::cout << "ERROR: invalid multigrid smoother : \'" << smoother << "\'" << std::endl;
+        exit(-1);
+    }
     npresmooth = multigrid.lookup("npresmooth");
     npostsmooth = multigrid.lookup("npostsmooth");
     cycle = multigrid.lookup("cycle");

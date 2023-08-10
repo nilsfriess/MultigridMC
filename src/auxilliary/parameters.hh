@@ -149,6 +149,8 @@ public:
 
     /** @brief Number of levels */
     unsigned int nlevel;
+    /** @brief smoother */
+    std::string smoother;
     /** @brief Number of presmoothing steps */
     unsigned int npresmooth;
     /** @brief number of postsmoothing steps */

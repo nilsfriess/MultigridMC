@@ -287,12 +287,29 @@ int main(int argc, char *argv[])
     /* prepare measurements */
     unsigned int seed = 5418513;
     std::mt19937_64 rng(seed);
-    std::shared_ptr<SamplerFactory> presampler_factory = std::make_shared<SORSamplerFactory>(rng,
-                                                                                             smoother_params.omega,
-                                                                                             forward);
-    std::shared_ptr<SamplerFactory> postsampler_factory = std::make_shared<SORSamplerFactory>(rng,
-                                                                                              smoother_params.omega,
-                                                                                              backward);
+    std::shared_ptr<SamplerFactory> presampler_factory;
+    std::shared_ptr<SamplerFactory> postsampler_factory;
+    if (multigrid_params.smoother == "SOR")
+    {
+        presampler_factory = std::make_shared<SORSamplerFactory>(rng,
+                                                                 smoother_params.omega,
+                                                                 forward);
+        postsampler_factory = std::make_shared<SORSamplerFactory>(rng,
+                                                                  smoother_params.omega,
+                                                                  backward);
+    }
+    else if (multigrid_params.smoother == "SSOR")
+    {
+        presampler_factory = std::make_shared<SSORSamplerFactory>(rng,
+                                                                  smoother_params.omega);
+        postsampler_factory = std::make_shared<SSORSamplerFactory>(rng,
+                                                                   smoother_params.omega);
+    }
+    else
+    {
+        std::cout << "ERROR: invalid sampler \'" << multigrid_params.smoother << "\'" << std::endl;
+        exit(-1);
+    }
     std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
     std::shared_ptr<SamplerFactory> coarse_sampler_factory;
     if (cholesky_params.factorisation == SparseFactorisation)
@@ -310,7 +327,9 @@ int main(int argc, char *argv[])
                                                                                         postsampler_factory,
                                                                                         intergrid_operator_factory,
                                                                                         coarse_sampler_factory);
-    std::shared_ptr<Sampler> ssor_sampler = std::make_shared<SSORSampler>(linear_operator, rng, smoother_params.omega);
+    std::shared_ptr<Sampler> ssor_sampler = std::make_shared<SSORSampler>(linear_operator,
+                                                                          rng,
+                                                                          smoother_params.omega);
     std::shared_ptr<Sampler> cholesky_sampler;
     if (general_params.do_cholesky)
     {

@@ -157,10 +157,25 @@ int main(int argc, char *argv[])
     }
     //   Construct smoothers
     /* prepare measurements */
-    std::shared_ptr<SmootherFactory> presmoother_factory = std::make_shared<SORSmootherFactory>(smoother_params.omega,
-                                                                                                forward);
-    std::shared_ptr<SmootherFactory> postsmoother_factory = std::make_shared<SORSmootherFactory>(smoother_params.omega,
-                                                                                                 backward);
+    std::shared_ptr<SmootherFactory> presmoother_factory;
+    std::shared_ptr<SmootherFactory> postsmoother_factory;
+    if (multigrid_params.smoother == "SOR")
+    {
+        presmoother_factory = std::make_shared<SORSmootherFactory>(smoother_params.omega,
+                                                                   forward);
+        postsmoother_factory = std::make_shared<SORSmootherFactory>(smoother_params.omega,
+                                                                    backward);
+    }
+    else if (multigrid_params.smoother == "SSOR")
+    {
+        presmoother_factory = std::make_shared<SSORSmootherFactory>(smoother_params.omega);
+        postsmoother_factory = std::make_shared<SSORSmootherFactory>(smoother_params.omega);
+    }
+    else
+    {
+        std::cout << "ERROR: invalid smoother \'" << multigrid_params.smoother << "\'" << std::endl;
+        exit(-1);
+    }
     std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
     std::shared_ptr<LinearSolverFactory> coarse_solver_factory = std::make_shared<CholeskySolverFactory>();
     std::shared_ptr<Preconditioner> multigrid_preconditioner = std::make_shared<MultigridPreconditioner>(linear_operator,
