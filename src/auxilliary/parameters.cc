@@ -153,6 +153,7 @@ void MultigridParameters::parse_config(const libconfig::Setting &root)
     std::cout << "    levels = " << nlevel << std::endl;
     std::cout << "    npresmooth = " << npresmooth << std::endl;
     std::cout << "    npostsmooth = " << npostsmooth << std::endl;
+    std::cout << "    smoother = " << smoother << std::endl;
     std::cout << "    overrelaxation factor = " << omega << std::endl;
     std::cout << "    cycle = " << cycle << " " << cycle_label << std::endl;
     std::cout << "    coarse_scaling = " << coarse_scaling << std::endl;
