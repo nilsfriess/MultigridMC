@@ -25,7 +25,7 @@
 inline double g(double z)
 {
 
-    return 2500 * z * z * z * z * (1 - z) * (1 - z) * exp(-8 * z);
+    return 16 * z * z * (1 - z) * (1 - z);
 }
 
 /* *********************************************************************** *
@@ -196,16 +196,13 @@ int main(int argc, char *argv[])
     unsigned int seed = 1482817;
     std::mt19937_64 rng(seed);
     std::normal_distribution<double> normal_dist(0.0, 1.0);
-    double volume = lattice->cell_volume();
-    Eigen::VectorXi shape = lattice->shape();
-    Eigen::VectorXd h_lat(2);
-    h_lat[0] = 1 / double(shape[0]);
-    h_lat[1] = 1 / double(shape[1]);
+    int dim = lattice->dim();
     for (unsigned int ell = 0; ell < lattice->Nvertex; ++ell)
     {
-        Eigen::VectorXi coord = lattice->vertexidx_linear2euclidean(ell);
-        Eigen::VectorXd x = h_lat.cwiseProduct(coord.cast<double>());
-        x_exact[ell] = g(x[0]) * g(x[1]);
+        Eigen::VectorXd x = lattice->vertex_coordinates(ell);
+        x_exact[ell] = normal_dist(rng);
+        for (int d = 0; d < dim; ++d)
+            x_exact[ell] *= g(x[d]);
     }
 
     Eigen::VectorXd b(ndof);
