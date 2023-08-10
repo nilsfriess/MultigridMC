@@ -80,7 +80,7 @@ Eigen::SparseVector<double> MeasuredOperator::measurement_vector(const Eigen::Ve
         Eigen::VectorXd h(dim);
         // cell volume
         double cell_volume = lattice->cell_volume();
-        double normalisation = M_PI * radius * radius;
+        double normalisation = 1. / (M_PI * radius * radius);
         for (int d = 0; d < dim; ++d)
         {
             h[d] = 1. / double(shape[d]);
