@@ -25,12 +25,15 @@ public:
      *
      * @param[in] linear_operator_ underlying linear operator
      * @param[in] omega_ overrelaxation factor
+     * @param[in] nsmooth_ number of smoothing steps
      */
     SSORSampler(const std::shared_ptr<LinearOperator> linear_operator_,
                 std::mt19937_64 &rng_,
-                const double omega_) : Base(linear_operator_, rng_),
-                                       sor_forward(linear_operator_, rng_, omega_, forward),
-                                       sor_backward(linear_operator_, rng_, omega_, backward){};
+                const double omega_,
+                const unsigned int nsmooth_ = 1) : Base(linear_operator_, rng_),
+                                                   nsmooth(nsmooth_),
+                                                   sor_forward(linear_operator_, rng_, omega_, forward, 1),
+                                                   sor_backward(linear_operator_, rng_, omega_, backward, 1){};
 
     /** @brief Carry out a single SOR-sweep
      *
@@ -40,6 +43,8 @@ public:
     virtual void apply(const Eigen::VectorXd &b, Eigen::VectorXd &x) const;
 
 protected:
+    /** @brief number of smoothing steps*/
+    const unsigned int nsmooth;
     /** @brief Forward smoother */
     const SORSampler sor_forward;
     /** @brief Backward smoother */

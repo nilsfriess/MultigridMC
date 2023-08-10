@@ -9,11 +9,13 @@
 SORSampler::SORSampler(const std::shared_ptr<LinearOperator> linear_operator_,
                        std::mt19937_64 &rng_,
                        const double omega_,
-                       const Direction direction_) : Base(linear_operator_, rng_),
-                                                     omega(omega_),
-                                                     direction(direction_),
-                                                     c_rhs(linear_operator_->get_ndof()),
-                                                     xi(linear_operator_->get_m_lowrank())
+                       const Direction direction_,
+                       const unsigned int nsmooth_) : Base(linear_operator_, rng_),
+                                                      omega(omega_),
+                                                      direction(direction_),
+                                                      nsmooth(nsmooth_),
+                                                      c_rhs(linear_operator_->get_ndof()),
+                                                      xi(linear_operator_->get_m_lowrank())
 {
     const LinearOperator::SparseMatrixType &A_sparse = linear_operator->get_sparse();
     unsigned int nrow = A_sparse.rows();
@@ -34,21 +36,24 @@ SORSampler::SORSampler(const std::shared_ptr<LinearOperator> linear_operator_,
 /* apply Sampler */
 void SORSampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const
 {
-    // Diagonal part
-    for (unsigned int ell = 0; ell < c_rhs.size(); ++ell)
+    for (unsigned int k = 0; k < nsmooth; ++k)
     {
-        double tmp = sqrt_precision_diag[ell];
-        c_rhs[ell] = tmp * normal_dist(rng) + f[ell];
-    }
-    // low-rank correction to covariance matrix
-    if (linear_operator->get_m_lowrank() > 0)
-    {
-        const LinearOperator::SparseMatrixType B = linear_operator->get_B();
-        for (unsigned int ell = 0; ell < xi.size(); ++ell)
+        // Diagonal part
+        for (unsigned int ell = 0; ell < c_rhs.size(); ++ell)
         {
-            xi[ell] = normal_dist(rng);
+            double tmp = sqrt_precision_diag[ell];
+            c_rhs[ell] = tmp * normal_dist(rng) + f[ell];
         }
-        c_rhs += B * (*Sigma_lowrank_inv_sqrt) * xi;
+        // low-rank correction to covariance matrix
+        if (linear_operator->get_m_lowrank() > 0)
+        {
+            const LinearOperator::SparseMatrixType B = linear_operator->get_B();
+            for (unsigned int ell = 0; ell < xi.size(); ++ell)
+            {
+                xi[ell] = normal_dist(rng);
+            }
+            c_rhs += B * (*Sigma_lowrank_inv_sqrt) * xi;
+        }
+        smoother->apply(c_rhs, x);
     }
-    smoother->apply(c_rhs, x);
 }

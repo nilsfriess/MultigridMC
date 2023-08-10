@@ -27,11 +27,14 @@ public:
      *
      * @param[in] linear_operator_ underlying linear operator
      * @param[in] rng_ random number generator
+     * @param[in] nsmooth_ number of smoothing steps
+     * @param[in] direction_ direction of sampling (forward or backward)
      */
     SORSampler(const std::shared_ptr<LinearOperator> linear_operator_,
                std::mt19937_64 &rng_,
                const double omega_,
-               const Direction direction_);
+               const Direction direction_,
+               const unsigned int nsmooth_ = 1);
 
     /** @brief destroy instance */
     ~SORSampler()
@@ -51,6 +54,8 @@ protected:
     const double omega;
     /** @brief Sweep direction */
     const Direction direction;
+    /** @brief number of smoothing steps */
+    const unsigned int nsmooth;
     /** @brief RHS sample */
     mutable Eigen::VectorXd c_rhs;
     /** @brief Low rank correction */

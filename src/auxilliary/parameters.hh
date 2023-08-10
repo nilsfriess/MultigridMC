@@ -114,6 +114,8 @@ public:
 
     /** @brief overrelaxation factor */
     double omega;
+    /** @brief number of smoothing steps */
+    unsigned int nsmooth;
 };
 
 /** @brief iterative linear solver parameters

@@ -8,6 +8,9 @@
 /** apply SSOR sampler */
 void SSORSampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const
 {
-    sor_forward.apply(f, x);
-    sor_backward.apply(f, x);
+    for (unsigned int k = 0; k < nsmooth; ++k)
+    {
+        sor_forward.apply(f, x);
+        sor_backward.apply(f, x);
+    }
 }

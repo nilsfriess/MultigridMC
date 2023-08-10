@@ -329,7 +329,8 @@ int main(int argc, char *argv[])
                                                                                         coarse_sampler_factory);
     std::shared_ptr<Sampler> ssor_sampler = std::make_shared<SSORSampler>(linear_operator,
                                                                           rng,
-                                                                          smoother_params.omega);
+                                                                          smoother_params.omega,
+                                                                          smoother_params.nsmooth);
     std::shared_ptr<Sampler> cholesky_sampler;
     if (general_params.do_cholesky)
     {

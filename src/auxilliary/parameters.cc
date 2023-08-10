@@ -103,6 +103,8 @@ void SmootherParameters::parse_config(const libconfig::Setting &root)
 {
     const libconfig::Setting &smoother = root["smoother"];
     omega = smoother.lookup("omega");
+    nsmooth = smoother.lookup("nsmooth");
+    std::cout << "    number of smoothing step = " << nsmooth << std::endl;
     std::cout << "    overrelaxation factor = " << omega << std::endl;
 }
 
