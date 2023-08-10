@@ -104,6 +104,7 @@ void SmootherParameters::parse_config(const libconfig::Setting &root)
     const libconfig::Setting &smoother = root["smoother"];
     omega = smoother.lookup("omega");
     nsmooth = smoother.lookup("nsmooth");
+    std::cout << "  smoother/Gibbs sampler " << std::endl;
     std::cout << "    number of smoothing step = " << nsmooth << std::endl;
     std::cout << "    overrelaxation factor = " << omega << std::endl;
 }
@@ -295,7 +296,7 @@ void MeasurementParameters::parse_config(const libconfig::Setting &root)
 
     // print out summary
     std::cout << "  measurements " << std::endl;
-    std::cout << "    file with measurements = " << filename << std::endl;
+    std::cout << "    file with measurements = \'" << filename << "\'" << std::endl;
     std::cout << "    dimension of measurement locations = " << dim << std::endl;
     std::cout << "    number of measurement points = " << n << std::endl;
     std::cout << "    radius of individual measurements = " << radius << std::endl;
