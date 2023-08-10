@@ -292,18 +292,18 @@ int main(int argc, char *argv[])
     if (multigrid_params.smoother == "SOR")
     {
         presampler_factory = std::make_shared<SORSamplerFactory>(rng,
-                                                                 smoother_params.omega,
+                                                                 multigrid_params.omega,
                                                                  forward);
         postsampler_factory = std::make_shared<SORSamplerFactory>(rng,
-                                                                  smoother_params.omega,
+                                                                  multigrid_params.omega,
                                                                   backward);
     }
     else if (multigrid_params.smoother == "SSOR")
     {
         presampler_factory = std::make_shared<SSORSamplerFactory>(rng,
-                                                                  smoother_params.omega);
+                                                                  multigrid_params.omega);
         postsampler_factory = std::make_shared<SSORSamplerFactory>(rng,
-                                                                   smoother_params.omega);
+                                                                   multigrid_params.omega);
     }
     else
     {

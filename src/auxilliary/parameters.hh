@@ -157,6 +157,8 @@ public:
     unsigned int npresmooth;
     /** @brief number of postsmoothing steps */
     unsigned int npostsmooth;
+    /** @brief overrelaxation factor */
+    double omega;
     /** @brief cycle type (1 = V-cycle, 2 = W-cycle)*/
     unsigned int cycle;
     /** @briaf factor with which to scale to coarse grid correction */
