@@ -64,6 +64,17 @@ protected:
      */
     inline double f_meas(const double xi) const { return 1.0; }
 
+    /** @brief volume of the R-sphere in d dimensions
+     *
+     * Uses the recursive definition for the volume V_d(R)
+     * 
+     * V_0(R) = 1, V_1(R) = 2*R, V_d(R) = 2 pi/d *R^2 * V_{d-2}(R)
+     * 
+     * @param[in] radius radius R
+     * @param[in] dim dimension d
+     */
+    double V_sphere(const double radius, const unsigned int dim) const;
+
     /** @brief Measurement parameters */
     MeasurementParameters params;
     /** @brief underlying linear operator */

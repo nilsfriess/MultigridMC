@@ -48,6 +48,23 @@ MeasuredOperator::MeasuredOperator(const std::shared_ptr<LinearOperator> base_op
     Sigma_inv_BT = get_Sigma_inv() * B.transpose();
 }
 
+/* radius of sphere */
+double MeasuredOperator::V_sphere(const double radius, const unsigned int dim) const
+{
+    if (dim == 0)
+    {
+        return 1.0;
+    }
+    else if (dim == 1)
+    {
+        return 2. * radius;
+    }
+    else
+    {
+        return 2. * M_PI / double(dim) * radius * radius * V_sphere(radius, dim - 2);
+    }
+}
+
 /* Create measurement vector in dual space */
 Eigen::SparseVector<double> MeasuredOperator::measurement_vector(const Eigen::VectorXd x0, const double radius) const
 {
@@ -80,7 +97,7 @@ Eigen::SparseVector<double> MeasuredOperator::measurement_vector(const Eigen::Ve
         Eigen::VectorXd h(dim);
         // cell volume
         double cell_volume = lattice->cell_volume();
-        double normalisation = 1. / (M_PI * radius * radius);
+        double normalisation = 1. / V_sphere(radius, dim);
         for (int d = 0; d < dim; ++d)
         {
             h[d] = 1. / double(shape[d]);
