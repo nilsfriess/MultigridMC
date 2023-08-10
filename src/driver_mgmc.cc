@@ -34,10 +34,12 @@
  * @param[in] sampling_params parameters for sampling
  * @param[in] measurement_params parameters for measurements
  * @param[in] filename name of file to write to
+ * @param[in] label tag for each output (to simplify parsing later on)
  */
 void measure_sampling_time(std::shared_ptr<Sampler> sampler,
                            const SamplingParameters &sampling_params,
                            const MeasurementParameters &measurement_params,
+                           const std::string label,
                            const std::string filename)
 {
     const std::shared_ptr<LinearOperator> linear_operator = sampler->get_linear_operator();
@@ -73,7 +75,7 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
     }
     auto t_finish = std::chrono::high_resolution_clock::now();
     double t_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(t_finish - t_start).count() / (1.0 * sampling_params.nsamples);
-    std::cout << "  time per sample = " << t_elapsed << " ms" << std::endl;
+    printf("  %12s time per sample = %12.4f ms\n", label.c_str(), t_elapsed);
     std::ofstream out;
     out.open(filename);
     for (auto it = data.begin(); it != data.end(); ++it)
@@ -88,8 +90,8 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
     }
     double variance = xsq_avg - x_avg * x_avg;
     double x_error = sqrt(variance / sampling_params.nsamples);
-    printf("  mean     = %12.4e +/- %12.4e [ignoring autocorrelations]\n", x_avg, x_error);
-    printf("  variance = %12.4e\n\n", variance);
+    printf("  %12s mean     = %12.4e +/- %12.4e [ignoring IACT]\n", label.c_str(), x_avg, x_error);
+    printf("  %12s variance = %12.4e\n\n", label.c_str(), variance);
 
     out.close();
 }
@@ -353,28 +355,31 @@ int main(int argc, char *argv[])
     // Run sampling experiments
     if (general_params.do_cholesky)
     {
-        std::cout << "Cholesky" << std::endl;
+        std::cout << "**** Cholesky ****" << std::endl;
         measure_sampling_time(cholesky_sampler,
                               sampling_params,
                               measurement_params,
+                              "Cholesky",
                               "timeseries_cholesky.txt");
         std::cout << std::endl;
     }
     if (general_params.do_ssor)
     {
-        std::cout << "SSOR" << std::endl;
+        std::cout << "**** SSOR ****" << std::endl;
         measure_sampling_time(ssor_sampler,
                               sampling_params,
                               measurement_params,
+                              "SSOR",
                               "timeseries_ssor.txt");
         std::cout << std::endl;
     }
     if (general_params.do_multigridmc)
     {
-        std::cout << "Multigrid MC" << std::endl;
+        std::cout << "**** Multigrid MC ****" << std::endl;
         measure_sampling_time(multigridmc_sampler,
                               sampling_params,
                               measurement_params,
+                              "MGMC",
                               "timeseries_multigridmc.txt");
         if (general_params.save_posterior_statistics)
         {
