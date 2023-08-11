@@ -22,12 +22,6 @@
 #include "auxilliary/vtk_writer2d.hh"
 #include "auxilliary/vtk_writer3d.hh"
 
-inline double g(double z)
-{
-
-    return 16 * z * z * (1 - z) * (1 - z);
-}
-
 /* *********************************************************************** *
  *                                M A I N
  * *********************************************************************** */
@@ -193,20 +187,15 @@ int main(int argc, char *argv[])
     unsigned int ndof = linear_operator->get_ndof();
     Eigen::VectorXd x_exact(ndof);
     Eigen::VectorXd x(ndof);
+    Eigen::VectorXd b(ndof);
     unsigned int seed = 1482817;
     std::mt19937_64 rng(seed);
     std::normal_distribution<double> normal_dist(0.0, 1.0);
     int dim = lattice->dim();
     for (unsigned int ell = 0; ell < lattice->Nvertex; ++ell)
     {
-        Eigen::VectorXd x = lattice->vertex_coordinates(ell);
-        x_exact[ell] = normal_dist(rng);
-        for (int d = 0; d < dim; ++d)
-            x_exact[ell] *= g(x[d]);
+        b[ell] = normal_dist(rng);
     }
-
-    Eigen::VectorXd b(ndof);
-    linear_operator->apply(x_exact, b);
     solver.apply(b, x);
     std::shared_ptr<VTKWriter> vtk_writer;
     if (general_params.dim == 2)
