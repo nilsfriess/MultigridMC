@@ -56,6 +56,7 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
     Eigen::VectorXd f(ndof);
     x.setZero();
     linear_operator->apply(mean_exact, f);
+    sampler->fix_rhs(f);
     for (int k = 0; k < sampling_params.nwarmup; ++k)
     {
         sampler->apply(f, x);

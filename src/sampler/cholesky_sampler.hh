@@ -39,7 +39,8 @@ public:
      */
     CholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
                     std::mt19937_64 &rng_) : Base(linear_operator_, rng_),
-                                             xi(linear_operator_->get_ndof()) {}
+                                             xi(linear_operator_->get_ndof()),
+                                             g_rhs(nullptr) {}
 
     /** @brief Draw a new sample x
      *
@@ -53,11 +54,41 @@ public:
         {
             xi[ell] = normal_dist(rng);
         }
-        /* step 2: solve U^T g = f */
-        Eigen::VectorXd g(xi.size());
-        LLT_of_A->solveL(f, g);
+        std::shared_ptr<Eigen::VectorXd> g = g_rhs;
+        if (g == nullptr)
+        {
+            /* step 2: solve U^T g = f */
+            g = std::make_shared<Eigen::VectorXd>(xi.size());
+            LLT_of_A->solveL(f, *g);
+        }
         /* step 3: solve U x = xi + g for x */
-        LLT_of_A->solveLT(xi + g, x);
+        LLT_of_A->solveLT(xi + (*g), x);
+    }
+
+    /** @brief fix the right hand side vector g from a given f
+     *
+     * Compute g from given RHS  by solving U^T g = f
+     * once. This will then avoid the repeated solution of this triangular
+     * system whenever apply() is called.
+     *
+     * @param[in] f right hand side f that appears in the exponent of the
+     *            probability density.
+     */
+    virtual void fix_rhs(const Eigen::VectorXd &f)
+    {
+        /* step 2: solve U^T g = f */
+        g_rhs = std::make_shared<Eigen::VectorXd>(f.size());
+        LLT_of_A->solveL(f, *g_rhs);
+    }
+
+    /** @brief unfix the right hand side vector g
+     *
+     * Set the pointer to zero, which will force the solve for g in every
+     * call to the apply() method.
+     */
+    virtual void unfix_rhs()
+    {
+        g_rhs = nullptr;
     }
 
 protected:
@@ -65,6 +96,8 @@ protected:
     std::shared_ptr<LLTType> LLT_of_A;
     /** @brief vector with normal random variables */
     mutable Eigen::VectorXd xi;
+    /** @brief modified right hand side vector */
+    mutable std::shared_ptr<Eigen::VectorXd> g_rhs;
 };
 
 #ifndef NCHOLMOD

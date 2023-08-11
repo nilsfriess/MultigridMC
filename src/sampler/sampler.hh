@@ -46,6 +46,22 @@ public:
         return linear_operator;
     };
 
+    /** @brief fix the right hand side vector f
+     *
+     * For some samplers this might improve performance.
+     *
+     * @param[in] f right hand side f that appears in the exponent of the
+     *            probability density.
+     */
+    virtual void fix_rhs(const Eigen::VectorXd &f) {}
+
+    /** @brief unset the right hand side vector g
+     *
+     * Set the pointer to zero, which will force the solve for g in every
+     * call to the apply() method.
+     */
+    virtual void unfix_rhs() {}
+
 protected:
     /** @brief Underlying Linear operator */
     const std::shared_ptr<LinearOperator> linear_operator;
