@@ -105,7 +105,7 @@ void SmootherParameters::parse_config(const libconfig::Setting &root)
     omega = smoother.lookup("omega");
     nsmooth = smoother.lookup("nsmooth");
     std::cout << "  smoother/Gibbs sampler " << std::endl;
-    std::cout << "    number of smoothing step = " << nsmooth << std::endl;
+    std::cout << "    number of smoothing steps = " << nsmooth << std::endl;
     std::cout << "    overrelaxation factor = " << omega << std::endl;
 }
 
