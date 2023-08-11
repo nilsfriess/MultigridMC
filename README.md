@@ -39,7 +39,7 @@ The executables are called `driver_mg` (for the deterministic multigrid solve) a
 ./bin/DRIVER CONFIG_FILE
 ```
 
-where `DRIVER` is `driver_mg` or `driver_mgmc` and `CONFIG_FILE` is the name of the file that contains the runtime configuration; an example can be found in [parameters_template.cfg](parameters_template.cfg).
+where `DRIVER` is `driver_mg` or `driver_mgmc` and `CONFIG_FILE` is the name of the file that contains the runtime configuration; an example can be found in [parameters_template.cfg](parameters_template.cfg). The location, mean and variance of the observations are defined in a measurement file, which is referenced in the `measurements` dictionary of the configurations file. An example of such a file can be found in [measurements_template.cfg](measurements_template.cfg). Measurements files can be generated with the Python script [generate_measuremenents.py](python/generate_measurements.py).
 
 ## References
 
