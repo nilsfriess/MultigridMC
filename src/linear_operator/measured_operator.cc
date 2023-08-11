@@ -113,17 +113,28 @@ Eigen::SparseVector<double> MeasuredOperator::measurement_vector(const Eigen::Ve
         { // loop over all cells of the lattice
             Eigen::VectorXi cell_coord = lattice->cellidx_linear2euclidean(cell_idx);
             bool overlap = false;
+            Eigen::VectorXd x_corner_min(dim);
+            x_corner_min.setConstant(2.0);
+            Eigen::VectorXd x_corner_max(dim);
+            x_corner_max.setConstant(-1.0);
             for (auto it = basis_idx.begin(); it != basis_idx.end(); ++it)
             { // loop over all corners of the cell and check whether one of them overlaps with
               // a ball of radius R around the point x_0
                 Eigen::Map<Eigen::VectorXi> omega(it->data(), dim);
                 Eigen::VectorXd x_corner = h.cwiseProduct((cell_coord + omega).cast<double>());
-                if ((x_corner - x0).norm() < radius)
-                {
-                    overlap = true;
-                    break;
-                }
+                x_corner_min = x_corner_min.cwiseMin(x_corner);
+                x_corner_max = x_corner_max.cwiseMax(x_corner);
+                overlap = overlap or ((x_corner - x0).norm() < radius);
             }
+            // Check whether x0 lies in a particular cell
+            bool centre_in_cell = true;
+            for (int d = 0; d < dim; ++d)
+            {
+                centre_in_cell = centre_in_cell and
+                                 (x_corner_min[d] <= x0[d]) and
+                                 (x0[d] <= x_corner_max[d]);
+            }
+            overlap = overlap or centre_in_cell;
             if (not overlap) // move on to next cell if there is no overlap
                 continue;
             for (auto it = basis_idx.begin(); it != basis_idx.end(); ++it)
