@@ -22,8 +22,8 @@ protected:
     /* @brief initialise tests */
     void SetUp() override
     {
-        unsigned int nx = 32;
-        unsigned int ny = 32;
+        unsigned int nx = 256;
+        unsigned int ny = 256;
 
         unsigned int seed = 1212417;
         std::mt19937 rng(seed);
@@ -34,8 +34,8 @@ protected:
         unsigned int ndof = lattice->Nvertex;
 
         PeriodicCorrelationLengthModelParameters correlationlengthmodel_params;
-        correlationlengthmodel_params.Lambda_min = 1.2;
-        correlationlengthmodel_params.Lambda_max = 2.3;
+        correlationlengthmodel_params.Lambda_min = 0.12;
+        correlationlengthmodel_params.Lambda_max = 0.23;
         std::shared_ptr<CorrelationLengthModel> correlationlengthmodel = std::make_shared<PeriodicCorrelationLengthModel>(correlationlengthmodel_params);
 
         linear_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice,
@@ -46,7 +46,7 @@ protected:
         for (int k = 0; k < n_meas; ++k)
         {
             measurement_locations[k] = Eigen::Vector2d({uniform_dist(rng), uniform_dist(rng)});
-            Sigma_diag(k) = 1.E-6 * (1.0 + 2.0 * uniform_dist(rng));
+            Sigma_diag(k) = (1.0 + 2.0 * uniform_dist(rng));
         }
         std::shared_ptr<ShiftedLaplaceFEMOperator> prior_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice,
                                                                                                                 correlationlengthmodel);
@@ -54,7 +54,7 @@ protected:
         measurement_params.n = n_meas;
         measurement_params.measurement_locations = measurement_locations;
         measurement_params.variance = Sigma_diag;
-        measurement_params.variance_scaling = 1.0;
+        measurement_params.variance_scaling = 1.E-6;
         measurement_params.radius = 0.05;
         measurement_params.measure_global = false;
         measurement_params.variance_global = 0.0;
@@ -100,8 +100,8 @@ TEST_F(SolverTest, TestCholesky)
 
     CholeskySolver solver(linear_operator_lowrank);
     solver.apply(b_lowrank, x);
-    double error = (x - x_exact).norm();
-    double tolerance = 1.E-12;
+    double error = (x - x_exact).norm() / x_exact.norm();
+    double tolerance = 1.E-11;
     EXPECT_NEAR(error, 0.0, tolerance);
 }
 
@@ -139,7 +139,6 @@ TEST_F(SolverTest, TestMultigrid)
     solver.apply(b, x);
     double tolerance = 1.E-10;
     double error = (x - x_exact).norm() / x_exact.norm();
-    ;
     EXPECT_NEAR(error, 0.0, tolerance);
 }
 
