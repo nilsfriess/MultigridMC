@@ -123,7 +123,7 @@ args = parser.parse_args()
 
 p = np.asarray(sample_points(args.nmeas + 1, args.dim, dmin))
 mean = average(args.nmeas, 1.0, 4.0)
-Sigma_diag = variance(args.nmeas, 1.0e-6, 2.0e-6)
+Sigma_diag = variance(args.nmeas, 1.0, 2.0)
 
 # Print results in a format that can be used in the configuration file
 print("dim = ", args.dim, ";")
@@ -155,4 +155,3 @@ else:
     except Exception:
         print("Need to install plotly for 3d visualisation...")
 plt.savefig("points.pdf", bbox_inches="tight")
-B
