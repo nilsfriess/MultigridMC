@@ -185,7 +185,6 @@ int main(int argc, char *argv[])
                       iterative_solver_params);
     // Create states
     unsigned int ndof = linear_operator->get_ndof();
-    Eigen::VectorXd x_exact(ndof);
     Eigen::VectorXd x(ndof);
     Eigen::VectorXd b(ndof);
     unsigned int seed = 1482817;
@@ -206,8 +205,6 @@ int main(int argc, char *argv[])
     {
         vtk_writer = std::make_shared<VTKWriter3d>("solution.vtk", lattice, 1);
     }
-    vtk_writer->add_state(x_exact, "exact");
     vtk_writer->add_state(x, "numerical");
-    vtk_writer->add_state(x - x_exact, "error");
     vtk_writer->write();
 }
