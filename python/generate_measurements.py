@@ -155,4 +155,3 @@ else:
     except Exception:
         print("Need to install plotly for 3d visualisation...")
 plt.savefig("points.pdf", bbox_inches="tight")
-B
