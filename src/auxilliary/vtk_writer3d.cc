@@ -46,6 +46,8 @@ void VTKWriter3d::write() const
                         p[1] = j;
                         p[2] = k;
                         data = phi[lattice->vertexidx_euclidean2linear(p)];
+                        if (abs(data) < 1.0E-20)
+                            data = 0.0;
                     }
                     out << data << std::endl;
                 }
