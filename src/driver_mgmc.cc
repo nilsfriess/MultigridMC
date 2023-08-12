@@ -1,5 +1,6 @@
 #include <iostream>
 #include <chrono>
+#include <ctime>
 #include <random>
 #include <fstream>
 #include <chrono>
@@ -168,11 +169,14 @@ int main(int argc, char *argv[])
         std::cout << "Usage: " << argv[0] << " CONFIGURATIONFILE" << std::endl;
         exit(-1);
     }
+    auto t_start = std::chrono::system_clock::now();
+    std::time_t start_time = std::chrono::system_clock::to_time_t(t_start);
     std::cout << std::endl;
     std::cout << "+--------------------------------+" << std::endl;
     std::cout << "! Multigrid Monte Carlo sampling !" << std::endl;
     std::cout << "+--------------------------------+" << std::endl;
     std::cout << std::endl;
+    std::cout << "Starting run at " << std::ctime(&start_time) << std::endl;
     std::string filename(argv[1]);
     std::cout << "Reading parameters from file \'" << filename << "\'" << std::endl;
     GeneralParameters general_params;
@@ -390,4 +394,17 @@ int main(int argc, char *argv[])
         }
         std::cout << std::endl;
     }
+    // print out total timing information
+    auto t_finish = std::chrono::system_clock::now();
+    std::time_t finish_time = std::chrono::system_clock::to_time_t(t_finish);
+    std::chrono::duration<double> t_diff = t_finish - t_start;
+    unsigned int elapsed_seconds = t_diff.count();
+    int seconds = elapsed_seconds % 60;
+    elapsed_seconds /= 60;
+    int minutes = elapsed_seconds % 60;
+    elapsed_seconds /= 60;
+    int hours = elapsed_seconds % 60;
+    std::cout << "Completed run at " << std::ctime(&finish_time);
+    printf("Total elapsed time = %3d h %2d m %2d s\n", hours, minutes, seconds);
+    std::cout << std::endl;
 }
