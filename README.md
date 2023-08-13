@@ -1,3 +1,6 @@
+![Automated testing](https://github.com/eikehmueller/MultigridMC/actions/workflows/automated_testing.yml/badge.svg?event=push)
+
+
 # Multigrid Monte Carlo
 C++ implementation of multigrid Monte Carlo (MGMC) algorithm. In addition to MGMC, the code also implements sampling based on different Cholesky factorisations as an alternative algorithm.
 
