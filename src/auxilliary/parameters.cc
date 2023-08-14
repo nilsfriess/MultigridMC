@@ -10,7 +10,7 @@
 #include <string>
 #include <typeinfo>
 #include <Eigen/Dense>
-#include "libconfig.hh"
+#include <libconfig.h++>
 
 /** @file parameters.cc
  *
