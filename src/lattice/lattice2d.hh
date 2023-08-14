@@ -1,5 +1,7 @@
 #ifndef LATTICE2D_HH
 #define LATTICE2D_HH LATTICE2D_HH
+
+#include <cassert>
 #include <memory>
 #include <iostream>
 #include <Eigen/Dense>
