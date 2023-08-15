@@ -1,5 +1,7 @@
 #include "quadrature.hh"
 
+#include <cassert>
+
 /** @file quadrature.cc
  *
  * @brief Implementation of quadrature.hh
