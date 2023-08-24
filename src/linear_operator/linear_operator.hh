@@ -107,13 +107,17 @@ public:
         return Sigma_diag.diagonal().cwiseInverse().asDiagonal();
     };
 
-    /** @brief Compute mean
+    /** @brief Compute mean field
+     *
+     * The mean is defined by
+     *
+     * x|y = xbar + A^{-1} B (Sigma + B^T A^{-1} B)^{-1} (y - B^T xbar)
      *
      * @param[in] xbar prior mean
      * @param[in] y measured values
      */
     Eigen::VectorXd mean(const Eigen::VectorXd &xbar,
-                         const Eigen::VectorXd &y)
+                         const Eigen::VectorXd &y) const
     {
         Eigen::SimplicialLLT<SparseMatrixType> solver;
         if (m_lowrank > 0)
@@ -129,6 +133,41 @@ public:
         {
             return xbar;
         }
+    }
+
+    /** @brief Compute mean and covariance for a single observation
+     *
+     * The observation is defined by z = b^T x and it has the mean and variance
+     * given by:
+     *
+     *   mean = b^T xbar + b^T A^{-1} B (Sigma + B^T Q^{-1} B)^{-1} (y - B^T xbar)
+     *
+     *   variance = b^T Q^{-1} b - b^T A^{-1} B (Sigma + B^T Q^{-1} B)^{-1} B^T A^{-1} b
+     *
+     * @param[in] xbar prior mean
+     * @param[in] y measured values
+     * @param[in] b observation vector b
+     */
+    std::pair<double, double> observed_mean_and_variance(const Eigen::VectorXd &xbar,
+                                                         const Eigen::VectorXd &y,
+                                                         const Eigen::VectorXd &b_obs) const
+    {
+        Eigen::SimplicialLLT<SparseMatrixType> solver;
+        solver.compute(A_sparse);
+        // Compute b_obs_bar = Q^{-1} b_obs
+        Eigen::VectorXd b_obs_bar = solver.solve(b_obs);
+        double mean = b_obs.dot(xbar);
+        double variance = b_obs.dot(b_obs_bar);
+        if (m_lowrank > 0)
+        {
+            // Compute B_bar = Q^{-1} B
+            DenseMatrixType B_bar = solver.solve(B);
+            DenseMatrixType Sigma = get_Sigma().toDenseMatrix();
+            DenseMatrixType Sigma_inv = (Sigma + B.transpose() * B_bar).inverse();
+            mean += b_obs_bar.dot(B * Sigma_inv * (y - B.transpose() * xbar));
+            variance -= b_obs_bar.dot(B * Sigma_inv * B.transpose() * b_obs_bar);
+        }
+        return std::make_pair(mean, variance);
     }
 
     /** @brief compute (dense) precision matrix */

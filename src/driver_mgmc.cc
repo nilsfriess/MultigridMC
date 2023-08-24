@@ -92,8 +92,13 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
     }
     double variance = xsq_avg - x_avg * x_avg;
     double x_error = sqrt(variance / sampling_params.nsamples);
+    std::pair<double, double> mean_variance_exact = measured_operator->observed_mean_and_variance(xbar,
+                                                                                                  y,
+                                                                                                  sample_vector);
     printf("  %12s mean     = %12.4e +/- %12.4e [ignoring IACT]\n", label.c_str(), x_avg, x_error);
-    printf("  %12s variance = %12.4e\n\n", label.c_str(), variance);
+    printf("  %12s mean     = %12.4e\n", "exact", mean_variance_exact.first);
+    printf("  %12s variance = %12.4e\n", label.c_str(), variance);
+    printf("  %12s variance = %12.4e\n\n", "exact", mean_variance_exact.second);
 
     out.close();
 }
