@@ -200,9 +200,11 @@ void measure_convergence(std::shared_ptr<Sampler> sampler,
 
     linear_operator->apply(mean_exact, f);
     sampler->fix_rhs(f);
-    const int n_steps = 10;
+    const int n_steps = 16;
     std::vector<double> x_avg(n_steps + 1, 0.0);
-    std::vector<double> xsq_avg(n_steps + 1, 0.0);
+    std::vector<double> x2_avg(n_steps + 1, 0.0);
+    std::vector<double> x3_avg(n_steps + 1, 0.0);
+    std::vector<double> x4_avg(n_steps + 1, 0.0);
     for (int k = 0; k < sampling_params.nsamples; ++k)
     {
         x.setZero();
@@ -211,7 +213,9 @@ void measure_convergence(std::shared_ptr<Sampler> sampler,
             sampler->apply(f, x);
             double z = sample_vector.dot(x);
             x_avg[j] += (z - x_avg[j]) / (k + 1.0);
-            xsq_avg[j] += (z * z - xsq_avg[j]) / (k + 1.0);
+            x2_avg[j] += (z * z - x2_avg[j]) / (k + 1.0);
+            x3_avg[j] += (z * z * z - x3_avg[j]) / (k + 1.0);
+            x4_avg[j] += (z * z * z * z - x4_avg[j]) / (k + 1.0);
         }
     }
     std::pair<double, double> mean_variance_exact = measured_operator->observed_mean_and_variance(xbar,
@@ -222,10 +226,12 @@ void measure_convergence(std::shared_ptr<Sampler> sampler,
     for (int j = 0; j <= n_steps; ++j)
     {
         double diff_mean = fabs(x_avg[j] - mean_variance_exact.first);
-        double diff_variance = fabs(xsq_avg[j] - x_avg[j] * x_avg[j] - mean_variance_exact.second);
+        double diff_variance = fabs(x2_avg[j] - x_avg[j] * x_avg[j] - mean_variance_exact.second);
         diff_mean_variance.push_back(std::make_pair(diff_mean, diff_variance));
-        double error_diff_mean = sqrt(1. / (sampling_params.nsamples - 1.) * (xsq_avg[j] - x_avg[j] * x_avg[j]));
-        double error_diff_variance = 0;
+        double sigma = sampling_params.nsamples / (sampling_params.nsamples - 1.) * (x2_avg[j] - x_avg[j] * x_avg[j]);
+        double error_diff_mean = sqrt(sigma / sampling_params.nsamples);
+        double mu4 = x4_avg[j] - 4 * x_avg[j] * x3_avg[j] + 6 * pow(x_avg[j], 2) * x2_avg[j] - 3 * pow(x_avg[j], 4);
+        double error_diff_variance = sqrt((mu4 - (sampling_params.nsamples - 3.) / (sampling_params.nsamples - 1.) * sigma * sigma) / sampling_params.nsamples);
         error_diff_mean_variance.push_back(std::make_pair(error_diff_mean, error_diff_variance));
     }
     std::ofstream out;
@@ -244,7 +250,7 @@ void measure_convergence(std::shared_ptr<Sampler> sampler,
             label = "variance";
         }
         char buffer[128];
-        sprintf(buffer, "  %12s   %3s : %12s %12s %12s\n", "", "k", "q_k", "q_k/q_0", "q_k/q_{k-1}");
+        sprintf(buffer, "  %12s   %3s : %12s %35s %35s\n", "", "k", "q_k", "q_k/q_0", "q_k/q_{k-1}");
         out << buffer;
         for (int j = 0; j <= n_steps; ++j)
         {
@@ -267,7 +273,7 @@ void measure_convergence(std::shared_ptr<Sampler> sampler,
             {
                 diff_0 = diff;
             }
-            sprintf(buffer, "  %12s   %3d : %12.8f +/- %12.8f %12.8f +/- %12.8f", label.c_str(), j, diff, error_diff, diff / diff_0, error_diff / diff_0);
+            sprintf(buffer, "  %12s   %3d : %12.8f +/- %12.8f       %12.8f +/- %12.8f      ", label.c_str(), j, diff, error_diff, diff / diff_0, error_diff / diff_0);
             out << buffer;
             if (j > 0)
             {
