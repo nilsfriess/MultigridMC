@@ -29,13 +29,13 @@
 #include "auxilliary/vtk_writer3d.hh"
 #include "auxilliary/statistics.hh"
 
-/** @brief generate a number of samples, meaure runtime and write timeseries to disk
+/** @brief generate a number of samples, measure runtime and write timeseries to disk
  *
  * @param[in] sampler sampler to be used
  * @param[in] sampling_params parameters for sampling
  * @param[in] measurement_params parameters for measurements
- * @param[in] filename name of file to write to
  * @param[in] label tag for each output (to simplify parsing later on)
+ * @param[in] filename name of file to write to
  */
 void measure_sampling_time(std::shared_ptr<Sampler> sampler,
                            const SamplingParameters &sampling_params,
@@ -162,6 +162,129 @@ void posterior_statistics(std::shared_ptr<Sampler> sampler,
                          measurement_params.radius,
                          "sample_location.vtk");
     }
+}
+
+/** @brief measure convergence of distribution during warmup
+ *
+ * Measure the mean mean(k) := E[z^k] and variance var(k) := Var[z^k] of
+ * the k-th sample in the chain and look at the decay of mean(k) - E[z] and
+ * var(k) - Var[z], where E[z] and Var[z] are the true posterior mean and
+ * variance.
+ *
+ * @param[in] sampler sampler to be used
+ * @param[in] sampling_params parameters for sampling
+ * @param[in] measurement_params parameters for measurements
+ * @param[in] filename name of file with the results
+ */
+void measure_convergence(std::shared_ptr<Sampler> sampler,
+                         const SamplingParameters &sampling_params,
+                         const MeasurementParameters &measurement_params,
+                         const std::string filename)
+{
+    const std::shared_ptr<LinearOperator> linear_operator = sampler->get_linear_operator();
+    unsigned int ndof = linear_operator->get_ndof();
+    std::shared_ptr<Lattice> lattice = linear_operator->get_lattice();
+    Eigen::VectorXd xbar(ndof);
+    xbar.setZero();
+    Eigen::VectorXd y(measurement_params.n + measurement_params.measure_global);
+    y(Eigen::seqN(0, measurement_params.n)) = measurement_params.mean;
+    if (measurement_params.measure_global)
+        y(measurement_params.n) = measurement_params.mean_global;
+    Eigen::VectorXd mean_exact = linear_operator->mean(xbar, y);
+    Eigen::VectorXd x(ndof);
+    Eigen::VectorXd f(ndof);
+    const std::shared_ptr<MeasuredOperator> measured_operator = std::make_shared<MeasuredOperator>(linear_operator,
+                                                                                                   measurement_params);
+    Eigen::SparseVector<double> sample_vector = measured_operator->measurement_vector(measurement_params.sample_location,
+                                                                                      measurement_params.radius);
+
+    linear_operator->apply(mean_exact, f);
+    sampler->fix_rhs(f);
+    const int n_steps = 10;
+    std::vector<double> x_avg(n_steps + 1, 0.0);
+    std::vector<double> xsq_avg(n_steps + 1, 0.0);
+    for (int k = 0; k < sampling_params.nsamples; ++k)
+    {
+        x.setZero();
+        for (int j = 1; j <= n_steps; ++j)
+        {
+            sampler->apply(f, x);
+            double z = sample_vector.dot(x);
+            x_avg[j] += (z - x_avg[j]) / (k + 1.0);
+            xsq_avg[j] += (z * z - xsq_avg[j]) / (k + 1.0);
+        }
+    }
+    std::pair<double, double> mean_variance_exact = measured_operator->observed_mean_and_variance(xbar,
+                                                                                                  y,
+                                                                                                  sample_vector);
+    std::vector<std::pair<double, double>> diff_mean_variance;
+    std::vector<std::pair<double, double>> error_diff_mean_variance;
+    for (int j = 0; j <= n_steps; ++j)
+    {
+        double diff_mean = fabs(x_avg[j] - mean_variance_exact.first);
+        double diff_variance = fabs(xsq_avg[j] - x_avg[j] * x_avg[j] - mean_variance_exact.second);
+        diff_mean_variance.push_back(std::make_pair(diff_mean, diff_variance));
+        double error_diff_mean = sqrt(1. / (sampling_params.nsamples - 1.) * (xsq_avg[j] - x_avg[j] * x_avg[j]));
+        double error_diff_variance = 0;
+        error_diff_mean_variance.push_back(std::make_pair(error_diff_mean, error_diff_variance));
+    }
+    std::ofstream out;
+    out.open(filename);
+    for (int q = 0; q < 2; ++q)
+    {
+        std::string label;
+        if (q == 0)
+        {
+            out << "**** q_k = |E[z^k] - E[z]| **** " << std::endl;
+            label = "mean";
+        }
+        else
+        {
+            out << "**** q_k = |Var[z^k] - Var[z]| **** " << std::endl;
+            label = "variance";
+        }
+        char buffer[128];
+        sprintf(buffer, "  %12s   %3s : %12s %12s %12s\n", "", "k", "q_k", "q_k/q_0", "q_k/q_{k-1}");
+        out << buffer;
+        for (int j = 0; j <= n_steps; ++j)
+        {
+            double diff;
+            double error_diff;
+            double diff_0;
+            double diff_prev;
+            double error_diff_prev;
+            if (q == 0)
+            {
+                diff = diff_mean_variance[j].first;
+                error_diff = error_diff_mean_variance[j].first;
+            }
+            else
+            {
+                diff = diff_mean_variance[j].second;
+                error_diff = error_diff_mean_variance[j].second;
+            }
+            if (j == 0)
+            {
+                diff_0 = diff;
+            }
+            sprintf(buffer, "  %12s   %3d : %12.8f +/- %12.8f %12.8f +/- %12.8f", label.c_str(), j, diff, error_diff, diff / diff_0, error_diff / diff_0);
+            out << buffer;
+            if (j > 0)
+            {
+                double rel_error = diff / diff_prev * sqrt(pow(error_diff / diff, 2) + pow(error_diff_prev / diff_prev, 2));
+                sprintf(buffer, " %12.8f +/- %12.8f \n", diff / diff_prev, rel_error);
+            }
+            else
+            {
+                sprintf(buffer, " %12s\n", "---");
+            }
+            out << buffer;
+            diff_prev = diff;
+            error_diff_prev = error_diff;
+        }
+        out << std::endl;
+    }
+    out.close();
 }
 
 /* *********************************************************************** *
@@ -371,6 +494,10 @@ int main(int argc, char *argv[])
                               measurement_params,
                               "Cholesky",
                               "timeseries_cholesky.txt");
+        measure_convergence(cholesky_sampler,
+                            sampling_params,
+                            measurement_params,
+                            "convergence_cholesky.txt");
         std::cout << std::endl;
     }
     if (general_params.do_ssor)
@@ -381,6 +508,10 @@ int main(int argc, char *argv[])
                               measurement_params,
                               "SSOR",
                               "timeseries_ssor.txt");
+        measure_convergence(ssor_sampler,
+                            sampling_params,
+                            measurement_params,
+                            "convergence_ssor.txt");
         std::cout << std::endl;
     }
     if (general_params.do_multigridmc)
@@ -391,6 +522,10 @@ int main(int argc, char *argv[])
                               measurement_params,
                               "MGMC",
                               "timeseries_multigridmc.txt");
+        measure_convergence(multigridmc_sampler,
+                            sampling_params,
+                            measurement_params,
+                            "convergence_multigridmc.txt");
         if (general_params.save_posterior_statistics)
         {
             posterior_statistics(multigridmc_sampler,
