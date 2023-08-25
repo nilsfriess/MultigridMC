@@ -9,13 +9,13 @@
 SORSampler::SORSampler(const std::shared_ptr<LinearOperator> linear_operator_,
                        std::mt19937_64 &rng_,
                        const double omega_,
-                       const Direction direction_,
-                       const unsigned int nsmooth_) : Base(linear_operator_, rng_),
-                                                      omega(omega_),
-                                                      direction(direction_),
-                                                      nsmooth(nsmooth_),
-                                                      c_rhs(linear_operator_->get_ndof()),
-                                                      xi(linear_operator_->get_m_lowrank())
+                       const unsigned int nsmooth_,
+                       const Direction direction_) : Base(linear_operator_, rng_),
+                                                     omega(omega_),
+                                                     direction(direction_),
+                                                     nsmooth(nsmooth_),
+                                                     c_rhs(linear_operator_->get_ndof()),
+                                                     xi(linear_operator_->get_m_lowrank())
 {
     const LinearOperator::SparseMatrixType &A_sparse = linear_operator->get_sparse();
     unsigned int nrow = A_sparse.rows();

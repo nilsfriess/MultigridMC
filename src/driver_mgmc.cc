@@ -454,17 +454,21 @@ int main(int argc, char *argv[])
     {
         presampler_factory = std::make_shared<SORSamplerFactory>(rng,
                                                                  multigrid_params.omega,
+                                                                 multigrid_params.npresmooth,
                                                                  forward);
         postsampler_factory = std::make_shared<SORSamplerFactory>(rng,
                                                                   multigrid_params.omega,
+                                                                  multigrid_params.npostsmooth,
                                                                   backward);
     }
     else if (multigrid_params.smoother == "SSOR")
     {
         presampler_factory = std::make_shared<SSORSamplerFactory>(rng,
-                                                                  multigrid_params.omega);
+                                                                  multigrid_params.omega,
+                                                                  multigrid_params.npresmooth);
         postsampler_factory = std::make_shared<SSORSamplerFactory>(rng,
-                                                                   multigrid_params.omega);
+                                                                   multigrid_params.omega,
+                                                                   multigrid_params.npostsmooth);
     }
     else
     {
@@ -473,13 +477,27 @@ int main(int argc, char *argv[])
     }
     std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
     std::shared_ptr<SamplerFactory> coarse_sampler_factory;
-    if (cholesky_params.factorisation == SparseFactorisation)
+    if (multigrid_params.coarse_solver == "Cholesky")
     {
-        coarse_sampler_factory = std::make_shared<SparseCholeskySamplerFactory>(rng);
+        if (cholesky_params.factorisation == SparseFactorisation)
+        {
+            coarse_sampler_factory = std::make_shared<SparseCholeskySamplerFactory>(rng);
+        }
+        else if (cholesky_params.factorisation == DenseFactorisation)
+        {
+            coarse_sampler_factory = std::make_shared<DenseCholeskySamplerFactory>(rng);
+        }
     }
-    else if (cholesky_params.factorisation == DenseFactorisation)
+    else if (multigrid_params.coarse_solver == "SSOR")
     {
-        coarse_sampler_factory = std::make_shared<DenseCholeskySamplerFactory>(rng);
+        coarse_sampler_factory = std::make_shared<SSORSamplerFactory>(rng,
+                                                                      multigrid_params.omega,
+                                                                      multigrid_params.ncoarsesmooth);
+    }
+    else
+    {
+        std::cout << "ERROR: multigrid coarse sampler \'" << multigrid_params.coarse_solver << "\'" << std::endl;
+        exit(-1);
     }
     std::shared_ptr<Sampler> multigridmc_sampler = std::make_shared<MultigridMCSampler>(linear_operator,
                                                                                         rng,

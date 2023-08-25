@@ -133,10 +133,19 @@ void MultigridParameters::parse_config(const libconfig::Setting &root)
     if (not((smoother == "SOR") or (smoother == "SSOR")))
     {
         std::cout << "ERROR: invalid multigrid smoother : \'" << smoother << "\'" << std::endl;
+        std::cout << "       must be SOR or SSOR" << std::endl;
+        exit(-1);
+    }
+    coarse_solver = multigrid.lookup("coarse_solver").c_str();
+    if (not((coarse_solver == "SSOR") or (coarse_solver == "Cholesky")))
+    {
+        std::cout << "ERROR: invalid multigrid coarse solver : \'" << smoother << "\'" << std::endl;
+        std::cout << "       must be SSOR or Cholesky" << std::endl;
         exit(-1);
     }
     npresmooth = multigrid.lookup("npresmooth");
     npostsmooth = multigrid.lookup("npostsmooth");
+    ncoarsesmooth = multigrid.lookup("ncoarsesmooth");
     cycle = multigrid.lookup("cycle");
     coarse_scaling = multigrid.lookup("coarse_scaling");
     std::string cycle_label = "";
@@ -154,7 +163,9 @@ void MultigridParameters::parse_config(const libconfig::Setting &root)
     std::cout << "    levels = " << nlevel << std::endl;
     std::cout << "    npresmooth = " << npresmooth << std::endl;
     std::cout << "    npostsmooth = " << npostsmooth << std::endl;
+    std::cout << "    ncoarsesmooth = " << ncoarsesmooth << std::endl;
     std::cout << "    smoother = " << smoother << std::endl;
+    std::cout << "    coarse solver = " << coarse_solver << std::endl;
     std::cout << "    overrelaxation factor = " << omega << std::endl;
     std::cout << "    cycle = " << cycle << " " << cycle_label << std::endl;
     std::cout << "    coarse_scaling = " << coarse_scaling << std::endl;

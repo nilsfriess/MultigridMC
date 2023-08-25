@@ -27,14 +27,15 @@ public:
      *
      * @param[in] linear_operator_ underlying linear operator
      * @param[in] rng_ random number generator
+     * @param[in] omega_ overrelaxation factor
      * @param[in] nsmooth_ number of smoothing steps
      * @param[in] direction_ direction of sampling (forward or backward)
      */
     SORSampler(const std::shared_ptr<LinearOperator> linear_operator_,
                std::mt19937_64 &rng_,
                const double omega_,
-               const Direction direction_,
-               const unsigned int nsmooth_ = 1);
+               const unsigned int nsmooth_,
+               const Direction direction_);
 
     /** @brief destroy instance */
     ~SORSampler()
@@ -78,12 +79,15 @@ public:
      *
      * @param[in] rng_ random number generator
      * @param[in] omega_ overrelaxation parameter
+     * @param[in] nsmooth_ number of sweeps
      * @param[in] direction_ sweeping direction (forward or backward)
      */
     SORSamplerFactory(std::mt19937_64 &rng_,
                       const double omega_,
+                      const int nsmooth_,
                       const Direction direction_) : rng(rng_),
                                                     omega(omega_),
+                                                    nsmooth(nsmooth_),
                                                     direction(direction_) {}
 
     /** @brief extract a sampler for a given linear operator
@@ -92,7 +96,7 @@ public:
      */
     virtual std::shared_ptr<Sampler> get(std::shared_ptr<LinearOperator> linear_operator)
     {
-        return std::make_shared<SORSampler>(linear_operator, rng, omega, direction);
+        return std::make_shared<SORSampler>(linear_operator, rng, omega, nsmooth, direction);
     };
 
 protected:
@@ -100,6 +104,8 @@ protected:
     std::mt19937_64 &rng;
     /** @brief Overrelaxation factor */
     const double omega;
+    /** @brief number of sweeps */
+    const int nsmooth;
     /** @brief Sweep direction */
     const Direction direction;
 };

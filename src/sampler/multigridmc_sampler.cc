@@ -66,10 +66,7 @@ void MultigridMCSampler::sample(const unsigned int level) const
         for (int j = 0; j < cycle_; ++j)
         {
             // Presampler
-            for (unsigned int k = 0; k < params.npresmooth; ++k)
-            {
-                presamplers[level]->apply(f_ell[level], x_ell[level]);
-            }
+            presamplers[level]->apply(f_ell[level], x_ell[level]);
             // Compute residual
             linear_operators[level]->apply(x_ell[level], r_ell[level]);
             r_ell[level] = f_ell[level] - r_ell[level];
@@ -80,10 +77,7 @@ void MultigridMCSampler::sample(const unsigned int level) const
             // Prolongate and add
             intergrid_operators[level]->prolongate_add(params.coarse_scaling, x_ell[level + 1], x_ell[level]);
             // Postsmooth
-            for (unsigned int k = 0; k < params.npostsmooth; ++k)
-            {
-                postsamplers[level]->apply(f_ell[level], x_ell[level]);
-            }
+            postsamplers[level]->apply(f_ell[level], x_ell[level]);
         }
     }
 }

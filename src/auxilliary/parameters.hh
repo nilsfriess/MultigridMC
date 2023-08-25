@@ -155,10 +155,14 @@ public:
     unsigned int nlevel;
     /** @brief smoother */
     std::string smoother;
+    /** @brief coarse solver */
+    std::string coarse_solver;
     /** @brief Number of presmoothing steps */
     unsigned int npresmooth;
     /** @brief number of postsmoothing steps */
     unsigned int npostsmooth;
+    /** @brief number of coarse smoothing steps (if using SSOR)*/
+    unsigned int ncoarsesmooth;
     /** @brief overrelaxation factor */
     double omega;
     /** @brief cycle type (1 = V-cycle, 2 = W-cycle)*/

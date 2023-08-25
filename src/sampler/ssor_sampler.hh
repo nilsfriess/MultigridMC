@@ -30,10 +30,10 @@ public:
     SSORSampler(const std::shared_ptr<LinearOperator> linear_operator_,
                 std::mt19937_64 &rng_,
                 const double omega_,
-                const unsigned int nsmooth_ = 1) : Base(linear_operator_, rng_),
-                                                   nsmooth(nsmooth_),
-                                                   sor_forward(linear_operator_, rng_, omega_, forward, 1),
-                                                   sor_backward(linear_operator_, rng_, omega_, backward, 1){};
+                const unsigned int nsmooth_) : Base(linear_operator_, rng_),
+                                               nsmooth(nsmooth_),
+                                               sor_forward(linear_operator_, rng_, omega_, 1, forward),
+                                               sor_backward(linear_operator_, rng_, omega_, 1, backward){};
 
     /** @brief Carry out a single SOR-sweep
      *
@@ -61,10 +61,13 @@ public:
      *
      * @param[in] rng_ random number generator
      * @param[in] omega_ overrelaxation parameter
+     * @param[in] nsmooth_ number of sweeps
      */
     SSORSamplerFactory(std::mt19937_64 &rng_,
-                       const double omega_) : rng(rng_),
-                                              omega(omega_) {}
+                       const double omega_,
+                       const int nsmooth_) : rng(rng_),
+                                             omega(omega_),
+                                             nsmooth(nsmooth_) {}
 
     /** @brief extract a sampler for a given linear operator
      *
@@ -72,7 +75,7 @@ public:
      */
     virtual std::shared_ptr<Sampler> get(std::shared_ptr<LinearOperator> linear_operator)
     {
-        return std::make_shared<SSORSampler>(linear_operator, rng, omega);
+        return std::make_shared<SSORSampler>(linear_operator, rng, omega, nsmooth);
     };
 
 protected:
@@ -80,6 +83,8 @@ protected:
     std::mt19937_64 &rng;
     /** @brief Overrelaxation factor */
     const double omega;
+    /** @brief number of applications */
+    const int nsmooth;
 };
 
 #endif // SSOR_SAMPLER_HH
