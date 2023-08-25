@@ -114,24 +114,17 @@ TEST_F(SolverTest, TestMultigrid)
 {
     MultigridParameters multigrid_params;
     multigrid_params.nlevel = 5;
+    multigrid_params.smoother = "SSOR";
+    multigrid_params.coarse_solver = "Cholesky";
     multigrid_params.npresmooth = 1;
     multigrid_params.npostsmooth = 1;
+    multigrid_params.ncoarsesmooth = 1;
     multigrid_params.omega = 1.0;
     multigrid_params.coarse_scaling = 1.0;
     multigrid_params.cycle = 1;
     multigrid_params.verbose = 0;
-    std::shared_ptr<SSORSmootherFactory> presmoother_factory = std::make_shared<SSORSmootherFactory>(multigrid_params.omega,
-                                                                                                     multigrid_params.npresmooth);
-    std::shared_ptr<SSORSmootherFactory> postsmoother_factory = std::make_shared<SSORSmootherFactory>(multigrid_params.omega,
-                                                                                                      multigrid_params.npostsmooth);
-    std::shared_ptr<IntergridOperatorLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
-    std::shared_ptr<CholeskySolverFactory> coarse_solver_factory = std::make_shared<CholeskySolverFactory>();
     std::shared_ptr<MultigridPreconditioner> prec = std::make_shared<MultigridPreconditioner>(linear_operator,
-                                                                                              multigrid_params,
-                                                                                              presmoother_factory,
-                                                                                              postsmoother_factory,
-                                                                                              intergrid_operator_factory,
-                                                                                              coarse_solver_factory);
+                                                                                              multigrid_params);
     IterativeSolverParameters solver_params;
     solver_params.rtol = 1.0E-13;
     solver_params.atol = 1.0E-12;
@@ -153,24 +146,17 @@ TEST_F(SolverTest, TestMultigridLowRank)
 {
     MultigridParameters multigrid_params;
     multigrid_params.nlevel = 5;
+    multigrid_params.smoother = "SSOR";
+    multigrid_params.coarse_solver = "Cholesky";
     multigrid_params.npresmooth = 1;
     multigrid_params.npostsmooth = 1;
+    multigrid_params.ncoarsesmooth = 1;
     multigrid_params.omega = 1.0;
     multigrid_params.coarse_scaling = 1.0;
     multigrid_params.cycle = 1;
     multigrid_params.verbose = 0;
-    std::shared_ptr<SSORSmootherFactory> presmoother_factory = std::make_shared<SSORSmootherFactory>(multigrid_params.omega,
-                                                                                                     multigrid_params.npresmooth);
-    std::shared_ptr<SSORSmootherFactory> postsmoother_factory = std::make_shared<SSORSmootherFactory>(multigrid_params.omega,
-                                                                                                      multigrid_params.npostsmooth);
-    std::shared_ptr<IntergridOperatorLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
-    std::shared_ptr<CholeskySolverFactory> coarse_solver_factory = std::make_shared<CholeskySolverFactory>();
     std::shared_ptr<MultigridPreconditioner> prec = std::make_shared<MultigridPreconditioner>(linear_operator_lowrank,
-                                                                                              multigrid_params,
-                                                                                              presmoother_factory,
-                                                                                              postsmoother_factory,
-                                                                                              intergrid_operator_factory,
-                                                                                              coarse_solver_factory);
+                                                                                              multigrid_params);
     IterativeSolverParameters solver_params;
     solver_params.rtol = 1.0E-13;
     solver_params.atol = 1.0E-11;

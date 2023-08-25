@@ -6,21 +6,44 @@
 
 /** Create a new instance */
 MultigridPreconditioner::MultigridPreconditioner(std::shared_ptr<LinearOperator> linear_operator_,
-                                                 const MultigridParameters params_,
-                                                 std::shared_ptr<SmootherFactory> presmoother_factory_,
-                                                 std::shared_ptr<SmootherFactory> postsmoother_factory_,
-                                                 std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory_,
-                                                 std::shared_ptr<LinearSolverFactory> coarse_solver_factory_) : Preconditioner(linear_operator_),
-                                                                                                                params(params_),
-                                                                                                                presmoother_factory(presmoother_factory_),
-                                                                                                                postsmoother_factory(postsmoother_factory_),
-                                                                                                                intergrid_operator_factory(intergrid_operator_factory_),
-                                                                                                                coarse_solver_factory(coarse_solver_factory_)
+                                                 const MultigridParameters params_) : Preconditioner(linear_operator_),
+                                                                                      params(params_)
 {
     // Extract underlying fine lattice
     std::shared_ptr<Lattice> lattice = linear_operator->get_lattice();
     // Linear operator on a given level
     std::shared_ptr<LinearOperator> lin_op = linear_operator;
+    std::shared_ptr<SmootherFactory> presmoother_factory;
+    std::shared_ptr<SmootherFactory> postsmoother_factory;
+    if (params.smoother == "SOR")
+    {
+        presmoother_factory = std::make_shared<SORSmootherFactory>(params.omega,
+                                                                   params.npresmooth,
+                                                                   forward);
+        postsmoother_factory = std::make_shared<SORSmootherFactory>(params.omega,
+                                                                    params.npostsmooth,
+                                                                    backward);
+    }
+    else if (params.smoother == "SSOR")
+    {
+        presmoother_factory = std::make_shared<SSORSmootherFactory>(params.omega,
+                                                                    params.npresmooth);
+        postsmoother_factory = std::make_shared<SSORSmootherFactory>(params.omega,
+                                                                     params.npostsmooth);
+    }
+    else
+    {
+        std::cout << "ERROR: invalid smoother \'" << params.smoother << "\'" << std::endl;
+        exit(-1);
+    }
+    std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
+
+    std::shared_ptr<LinearSolverFactory> coarse_solver_factory = std::make_shared<CholeskySolverFactory>();
+    if (params.coarse_solver != "Cholesky")
+    {
+        std::cout << "WARNING: ignoring coarse solver setting \'" << params.coarse_solver << "\', using Choleksy." << std::endl;
+    }
+
     for (int level = 0; level < params.nlevel; ++level)
     {
         if (params.verbose > 0)

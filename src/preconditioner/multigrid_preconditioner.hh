@@ -6,9 +6,13 @@
 #include "auxilliary/parameters.hh"
 #include "linear_operator/linear_operator.hh"
 #include "intergrid/intergrid_operator.hh"
+#include "intergrid/intergrid_operator_linear.hh"
 #include "solver/linear_solver.hh"
+#include "solver/cholesky_solver.hh"
 #include "preconditioner.hh"
 #include "smoother/smoother.hh"
+#include "smoother/sor_smoother.hh"
+#include "smoother/ssor_smoother.hh"
 
 /** @file multigrid_preconditioner.hh
  *
@@ -26,17 +30,9 @@ public:
      *
      * @param[in] linear_operator_ underlying linear operator
      * @param[in] params_ multigrid parameters
-     * @param[in] presmoother_factory_ factory for presmoothers on each level
-     * @param[in] postsmoother_factory_ factory for postsmoothers on each level
-     * @param[in] intergrid_operator_factory_ factory for intergrid operators on each level
-     * @param[in] coarse_solver_factory_ factory for coarse solver
      */
     MultigridPreconditioner(std::shared_ptr<LinearOperator> linear_operator_,
-                            const MultigridParameters params_,
-                            std::shared_ptr<SmootherFactory> presmoother_factory_,
-                            std::shared_ptr<SmootherFactory> postsmoother_factory_,
-                            std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory_,
-                            std::shared_ptr<LinearSolverFactory> coarse_solver_factory_);
+                            const MultigridParameters params_);
 
     /** @brief Solve the linear system Ax = b
      *
@@ -54,14 +50,6 @@ protected:
 
     /** @brief parameters */
     const MultigridParameters params;
-    /** @brief presmoother factory on each level */
-    std::shared_ptr<SmootherFactory> presmoother_factory;
-    /** @brief postsmoother factory on each level */
-    std::shared_ptr<SmootherFactory> postsmoother_factory;
-    /** @brief intergrid operator factory on each level */
-    std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory;
-    /** @brief factory for coarse solver */
-    std::shared_ptr<LinearSolverFactory> coarse_solver_factory;
     /** @brief coarse level solver */
     std::shared_ptr<LinearSolver> coarse_solver;
     /** @brief linear operators on all levels */

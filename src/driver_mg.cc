@@ -151,37 +151,8 @@ int main(int argc, char *argv[])
     }
     //   Construct smoothers
     /* prepare measurements */
-    std::shared_ptr<SmootherFactory> presmoother_factory;
-    std::shared_ptr<SmootherFactory> postsmoother_factory;
-    if (multigrid_params.smoother == "SOR")
-    {
-        presmoother_factory = std::make_shared<SORSmootherFactory>(multigrid_params.omega,
-                                                                   multigrid_params.npresmooth,
-                                                                   forward);
-        postsmoother_factory = std::make_shared<SORSmootherFactory>(multigrid_params.omega,
-                                                                    multigrid_params.npostsmooth,
-                                                                    backward);
-    }
-    else if (multigrid_params.smoother == "SSOR")
-    {
-        presmoother_factory = std::make_shared<SSORSmootherFactory>(multigrid_params.omega,
-                                                                    multigrid_params.npresmooth);
-        postsmoother_factory = std::make_shared<SSORSmootherFactory>(multigrid_params.omega,
-                                                                     multigrid_params.npostsmooth);
-    }
-    else
-    {
-        std::cout << "ERROR: invalid smoother \'" << multigrid_params.smoother << "\'" << std::endl;
-        exit(-1);
-    }
-    std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
-    std::shared_ptr<LinearSolverFactory> coarse_solver_factory = std::make_shared<CholeskySolverFactory>();
     std::shared_ptr<Preconditioner> multigrid_preconditioner = std::make_shared<MultigridPreconditioner>(linear_operator,
-                                                                                                         multigrid_params,
-                                                                                                         presmoother_factory,
-                                                                                                         postsmoother_factory,
-                                                                                                         intergrid_operator_factory,
-                                                                                                         coarse_solver_factory);
+                                                                                                         multigrid_params);
     std::cout << std::endl;
     // Run sampling experiments
     LoopSolver solver(linear_operator,
