@@ -156,14 +156,18 @@ int main(int argc, char *argv[])
     if (multigrid_params.smoother == "SOR")
     {
         presmoother_factory = std::make_shared<SORSmootherFactory>(multigrid_params.omega,
+                                                                   multigrid_params.npresmooth,
                                                                    forward);
         postsmoother_factory = std::make_shared<SORSmootherFactory>(multigrid_params.omega,
+                                                                    multigrid_params.npostsmooth,
                                                                     backward);
     }
     else if (multigrid_params.smoother == "SSOR")
     {
-        presmoother_factory = std::make_shared<SSORSmootherFactory>(multigrid_params.omega);
-        postsmoother_factory = std::make_shared<SSORSmootherFactory>(multigrid_params.omega);
+        presmoother_factory = std::make_shared<SSORSmootherFactory>(multigrid_params.omega,
+                                                                    multigrid_params.npresmooth);
+        postsmoother_factory = std::make_shared<SSORSmootherFactory>(multigrid_params.omega,
+                                                                     multigrid_params.npostsmooth);
     }
     else
     {

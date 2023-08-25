@@ -50,10 +50,12 @@ public:
      *
      * @param[in] linear_operator_ underlying linear operator
      * @param[in] omega_ overrelaxation factor
+     * @param[in] nsmooth_ number of smoothing steps
      * @param[in] direction_ sweep direction (forward or backward)
      */
     SORSmoother(const std::shared_ptr<LinearOperator> linear_operator_,
                 const double omega_,
+                const int nsmooth_,
                 const Direction direction_);
 
     /** @brief Carry out a single SOR-sweep
@@ -73,6 +75,8 @@ public:
 protected:
     /** @brief Overrelaxation factor */
     const double omega;
+    /** @brief Number of smoothing steps */
+    const int nsmooth;
     /** @brief Sweep direction */
     const Direction direction;
     /** @brief the matrix B that arises in the low-rank update of the linear operator */
@@ -90,10 +94,14 @@ public:
     /** @brief Create new instance
      *
      * @param[in] omega_ overrelaxation parameter
+     * @param[in] nsmooth_ number of smoothing steps
      * @param[in] direction_ sweep direction (forward or backward)
      */
     SORSmootherFactory(const double omega_,
-                       const Direction direction_) : omega(omega_), direction(direction_) {}
+                       const int nsmooth_,
+                       const Direction direction_) : omega(omega_),
+                                                     nsmooth(nsmooth_),
+                                                     direction(direction_) {}
 
     /** @brief Destructor */
     virtual ~SORSmootherFactory() {}
@@ -104,12 +112,14 @@ public:
      */
     virtual std::shared_ptr<Smoother> get(std::shared_ptr<LinearOperator> linear_operator)
     {
-        return std::make_shared<SORSmoother>(linear_operator, omega, direction);
+        return std::make_shared<SORSmoother>(linear_operator, omega, nsmooth, direction);
     }
 
 private:
     /** @brief overrelaxation parameter */
     const double omega;
+    /** @brief number of smoothing steps */
+    const int nsmooth;
     /** @brief sweep direction */
     const Direction direction;
 };

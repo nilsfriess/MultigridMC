@@ -25,7 +25,7 @@ SORSampler::SORSampler(const std::shared_ptr<LinearOperator> linear_operator_,
     {
         sqrt_precision_diag[ell] = sqrt(diag[ell] * (2. - omega) / omega);
     }
-    smoother = std::make_shared<SORSmoother>(linear_operator, omega, direction);
+    smoother = std::make_shared<SORSmoother>(linear_operator, omega, 1, direction);
     if (linear_operator->get_m_lowrank())
     {
         Eigen::VectorXd Sigma_inv_diag = linear_operator->get_Sigma_inv().diagonal();

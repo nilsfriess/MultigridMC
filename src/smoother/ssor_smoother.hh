@@ -38,11 +38,15 @@ public:
      *
      * @param[in] linear_operator_ underlying linear operator
      * @param[in] omega_ overrelaxation factor
+     * @param[in] nsmooth_ number of smoothing steps
+     *
      */
     SSORSmoother(const std::shared_ptr<LinearOperator> linear_operator_,
-                 const double omega_) : Base(linear_operator_),
-                                        sor_forward(linear_operator_, omega_, forward),
-                                        sor_backward(linear_operator_, omega_, backward){};
+                 const double omega_,
+                 const int nsmooth_) : Base(linear_operator_),
+                                       nsmooth(nsmooth_),
+                                       sor_forward(linear_operator_, omega_, 1, forward),
+                                       sor_backward(linear_operator_, omega_, 1, backward){};
 
     /** @brief Carry out a single SOR-sweep
      *
@@ -52,6 +56,8 @@ public:
     virtual void apply(const Eigen::VectorXd &b, Eigen::VectorXd &x) const;
 
 protected:
+    /** @brief number of sweeps */
+    const int nsmooth;
     /** @brief Forward smoother */
     const SORSmoother sor_forward;
     /** @brief Backward smoother */
@@ -67,8 +73,11 @@ public:
     /** @brief Create new instance
      *
      * @param[in] omega_ overrelaxation parameter
+     * @param[in] nsmooth_ number of sweeps
      */
-    SSORSmootherFactory(const double omega_) : omega(omega_) {}
+    SSORSmootherFactory(const double omega_,
+                        const int nsmooth_) : omega(omega_),
+                                              nsmooth(nsmooth_) {}
 
     /** @brief Destructor */
     virtual ~SSORSmootherFactory() {}
@@ -79,12 +88,14 @@ public:
      */
     virtual std::shared_ptr<Smoother> get(std::shared_ptr<LinearOperator> linear_operator)
     {
-        return std::make_shared<SSORSmoother>(linear_operator, omega);
+        return std::make_shared<SSORSmoother>(linear_operator, omega, nsmooth);
     }
 
 private:
     /** @brief overrelaxation parameter */
     const double omega;
+    /** @brief number of sweeps*/
+    const int nsmooth;
 };
 
 #endif // SSOR_SMOOTHER_HH

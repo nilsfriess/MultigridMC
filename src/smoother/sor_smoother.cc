@@ -8,8 +8,10 @@
 /* Construct a new instance */
 SORSmoother::SORSmoother(const std::shared_ptr<LinearOperator> linear_operator_,
                          const double omega_,
+                         const int nsmooth_,
                          const Direction direction_) : Base(linear_operator_),
                                                        omega(omega_),
+                                                       nsmooth(nsmooth_),
                                                        direction(direction_)
 {
     if (linear_operator->get_m_lowrank() > 0)
@@ -38,12 +40,15 @@ SORSmoother::SORSmoother(const std::shared_ptr<LinearOperator> linear_operator_,
 /** apply SOR smoother */
 void SORSmoother::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x) const
 {
-    apply_sparse(b, x);
-    // Low rank update (apply only if necessary)
-    if (linear_operator->get_m_lowrank() > 0)
+    for (int k = 0; k < nsmooth; ++k)
     {
-        auto BT_x = B.transpose() * x;
-        x -= (*B_bar) * BT_x;
+        apply_sparse(b, x);
+        // Low rank update (apply only if necessary)
+        if (linear_operator->get_m_lowrank() > 0)
+        {
+            auto BT_x = B.transpose() * x;
+            x -= (*B_bar) * BT_x;
+        }
     }
 }
 
@@ -56,15 +61,18 @@ void SORSmoother::apply_sparse(const Eigen::VectorXd &b, Eigen::VectorXd &x) con
     const auto val_ptr = A_sparse.valuePtr();
     const auto diag_ptr = A_sparse.diagonal();
     unsigned int nrow = A_sparse.rows();
-    for (unsigned int ell_ = 0; ell_ < nrow; ++ell_)
+    for (int k = 0; k < nsmooth; ++k)
     {
-        unsigned int ell = (direction == forward) ? ell_ : nrow - 1 - ell_;
-        double residual = 0.0;
-        for (int k = row_ptr[ell]; k < row_ptr[ell + 1]; ++k)
+        for (unsigned int ell_ = 0; ell_ < nrow; ++ell_)
         {
-            unsigned int ell_prime = col_ptr[k];
-            residual += val_ptr[k] * x[ell_prime];
+            unsigned int ell = (direction == forward) ? ell_ : nrow - 1 - ell_;
+            double residual = 0.0;
+            for (int k = row_ptr[ell]; k < row_ptr[ell + 1]; ++k)
+            {
+                unsigned int ell_prime = col_ptr[k];
+                residual += val_ptr[k] * x[ell_prime];
+            }
+            x[ell] += omega * (b[ell] - residual) / diag_ptr[ell];
         }
-        x[ell] += omega * (b[ell] - residual) / diag_ptr[ell];
     }
 }

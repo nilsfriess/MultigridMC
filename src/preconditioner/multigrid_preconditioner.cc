@@ -62,10 +62,7 @@ void MultigridPreconditioner::solve(const unsigned int level)
         for (int j = 0; j < cycle_; ++j)
         {
             // Presmooth
-            for (unsigned int k = 0; k < params.npresmooth; ++k)
-            {
-                presmoothers[level]->apply(b_ell[level], x_ell[level]);
-            }
+            presmoothers[level]->apply(b_ell[level], x_ell[level]);
             // Compute residual
             linear_operators[level]->apply(x_ell[level], r_ell[level]);
             r_ell[level] = b_ell[level] - r_ell[level];
@@ -75,10 +72,7 @@ void MultigridPreconditioner::solve(const unsigned int level)
             // Prolongate and add
             intergrid_operators[level]->prolongate_add(params.coarse_scaling, x_ell[level + 1], x_ell[level]);
             // Postsmooth
-            for (unsigned int k = 0; k < params.npostsmooth; ++k)
-            {
-                postsmoothers[level]->apply(b_ell[level], x_ell[level]);
-            }
+            postsmoothers[level]->apply(b_ell[level], x_ell[level]);
         }
     }
 }

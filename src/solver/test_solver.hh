@@ -120,8 +120,10 @@ TEST_F(SolverTest, TestMultigrid)
     multigrid_params.coarse_scaling = 1.0;
     multigrid_params.cycle = 1;
     multigrid_params.verbose = 0;
-    std::shared_ptr<SSORSmootherFactory> presmoother_factory = std::make_shared<SSORSmootherFactory>(multigrid_params.omega);
-    std::shared_ptr<SSORSmootherFactory> postsmoother_factory = std::make_shared<SSORSmootherFactory>(multigrid_params.omega);
+    std::shared_ptr<SSORSmootherFactory> presmoother_factory = std::make_shared<SSORSmootherFactory>(multigrid_params.omega,
+                                                                                                     multigrid_params.npresmooth);
+    std::shared_ptr<SSORSmootherFactory> postsmoother_factory = std::make_shared<SSORSmootherFactory>(multigrid_params.omega,
+                                                                                                      multigrid_params.npostsmooth);
     std::shared_ptr<IntergridOperatorLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
     std::shared_ptr<CholeskySolverFactory> coarse_solver_factory = std::make_shared<CholeskySolverFactory>();
     std::shared_ptr<MultigridPreconditioner> prec = std::make_shared<MultigridPreconditioner>(linear_operator,
@@ -157,8 +159,10 @@ TEST_F(SolverTest, TestMultigridLowRank)
     multigrid_params.coarse_scaling = 1.0;
     multigrid_params.cycle = 1;
     multigrid_params.verbose = 0;
-    std::shared_ptr<SSORSmootherFactory> presmoother_factory = std::make_shared<SSORSmootherFactory>(multigrid_params.omega);
-    std::shared_ptr<SSORSmootherFactory> postsmoother_factory = std::make_shared<SSORSmootherFactory>(multigrid_params.omega);
+    std::shared_ptr<SSORSmootherFactory> presmoother_factory = std::make_shared<SSORSmootherFactory>(multigrid_params.omega,
+                                                                                                     multigrid_params.npresmooth);
+    std::shared_ptr<SSORSmootherFactory> postsmoother_factory = std::make_shared<SSORSmootherFactory>(multigrid_params.omega,
+                                                                                                      multigrid_params.npostsmooth);
     std::shared_ptr<IntergridOperatorLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
     std::shared_ptr<CholeskySolverFactory> coarse_solver_factory = std::make_shared<CholeskySolverFactory>();
     std::shared_ptr<MultigridPreconditioner> prec = std::make_shared<MultigridPreconditioner>(linear_operator_lowrank,

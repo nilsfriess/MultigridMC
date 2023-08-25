@@ -8,6 +8,9 @@
 /** apply SSOR smoother */
 void SSORSmoother::apply(const Eigen::VectorXd &b, Eigen::VectorXd &x) const
 {
-    sor_forward.apply(b, x);
-    sor_backward.apply(b, x);
+    for (int k = 0; k < nsmooth; ++k)
+    {
+        sor_forward.apply(b, x);
+        sor_backward.apply(b, x);
+    }
 }
