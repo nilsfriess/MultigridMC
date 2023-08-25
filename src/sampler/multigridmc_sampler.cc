@@ -8,15 +8,9 @@
 MultigridMCSampler::MultigridMCSampler(std::shared_ptr<LinearOperator> linear_operator_,
                                        std::mt19937_64 &rng_,
                                        const MultigridParameters params_,
-                                       std::shared_ptr<SamplerFactory> presampler_factory_,
-                                       std::shared_ptr<SamplerFactory> postsampler_factory_,
-                                       std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory_,
-                                       std::shared_ptr<SamplerFactory> coarse_sampler_factory_) : Sampler(linear_operator_, rng_),
-                                                                                                  params(params_),
-                                                                                                  presampler_factory(presampler_factory_),
-                                                                                                  postsampler_factory(postsampler_factory_),
-                                                                                                  intergrid_operator_factory(intergrid_operator_factory_),
-                                                                                                  coarse_sampler_factory(coarse_sampler_factory_)
+                                       const CholeskyParameters cholesky_params_) : Sampler(linear_operator_, rng_),
+                                                                                    params(params_),
+                                                                                    cholesky_params(cholesky_params_)
 {
     // Extract underlying fine lattice
     std::shared_ptr<Lattice> lattice = linear_operator->get_lattice();
@@ -26,6 +20,59 @@ MultigridMCSampler::MultigridMCSampler(std::shared_ptr<LinearOperator> linear_op
     {
         std::cout << "Setting up Multilevel MC sampler " << std::endl;
     }
+
+    std::shared_ptr<SamplerFactory> presampler_factory;
+    std::shared_ptr<SamplerFactory> postsampler_factory;
+    if (params.smoother == "SOR")
+    {
+        presampler_factory = std::make_shared<SORSamplerFactory>(rng,
+                                                                 params.omega,
+                                                                 params.npresmooth,
+                                                                 forward);
+        postsampler_factory = std::make_shared<SORSamplerFactory>(rng,
+                                                                  params.omega,
+                                                                  params.npostsmooth,
+                                                                  backward);
+    }
+    else if (params.smoother == "SSOR")
+    {
+        presampler_factory = std::make_shared<SSORSamplerFactory>(rng,
+                                                                  params.omega,
+                                                                  params.npresmooth);
+        postsampler_factory = std::make_shared<SSORSamplerFactory>(rng,
+                                                                   params.omega,
+                                                                   params.npostsmooth);
+    }
+    else
+    {
+        std::cout << "ERROR: invalid sampler \'" << params.smoother << "\'" << std::endl;
+        exit(-1);
+    }
+    std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
+    std::shared_ptr<SamplerFactory> coarse_sampler_factory;
+    if (params.coarse_solver == "Cholesky")
+    {
+        if (cholesky_params.factorisation == SparseFactorisation)
+        {
+            coarse_sampler_factory = std::make_shared<SparseCholeskySamplerFactory>(rng);
+        }
+        else if (cholesky_params.factorisation == DenseFactorisation)
+        {
+            coarse_sampler_factory = std::make_shared<DenseCholeskySamplerFactory>(rng);
+        }
+    }
+    else if (params.coarse_solver == "SSOR")
+    {
+        coarse_sampler_factory = std::make_shared<SSORSamplerFactory>(rng,
+                                                                      params.omega,
+                                                                      params.ncoarsesmooth);
+    }
+    else
+    {
+        std::cout << "ERROR: multigrid coarse sampler \'" << params.coarse_solver << "\'" << std::endl;
+        exit(-1);
+    }
+
     for (int level = 0; level < params.nlevel; ++level)
     {
         if (params.verbose > 0)

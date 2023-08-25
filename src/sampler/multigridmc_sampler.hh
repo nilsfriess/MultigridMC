@@ -5,8 +5,12 @@
 #include <Eigen/Dense>
 #include "linear_operator/linear_operator.hh"
 #include "intergrid/intergrid_operator.hh"
+#include "intergrid/intergrid_operator_linear.hh"
 #include "auxilliary/parameters.hh"
 #include "sampler.hh"
+#include "sor_sampler.hh"
+#include "ssor_sampler.hh"
+#include "cholesky_sampler.hh"
 
 /** @file multigridmc_sampler.hh
  *
@@ -25,18 +29,12 @@ public:
      * @param[in] linear_operator_ underlying linear operator
      * @param[in] rng_ random number generator
      * @param[in] params_ multigrid Monte Carlo parameters
-     * @param[in] presampler_factory_ factory for presampler on each level
-     * @param[in] postsampler_factory_ factory for postsampler on each level
-     * @param[in] intergrid_operator_factory_ factory for intergrid operators on each level
-     * @param[in] coarse_sampler_factory_ factory for coarse solver
+     * @param[in] cholesky_params_ Cholesky parameters (for coarse level Cholesky sampler)
      */
     MultigridMCSampler(std::shared_ptr<LinearOperator> linear_operator_,
                        std::mt19937_64 &rng_,
                        const MultigridParameters params_,
-                       std::shared_ptr<SamplerFactory> presampler_factory_,
-                       std::shared_ptr<SamplerFactory> postsampler_factory_,
-                       std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory_,
-                       std::shared_ptr<SamplerFactory> coarse_sampler_factory_);
+                       const CholeskyParameters cholesky_params_);
 
     /** @brief Draw a new sample
      *
@@ -54,14 +52,8 @@ protected:
 
     /** @brief parameters */
     const MultigridParameters params;
-    /** @brief presampler factory on each level */
-    std::shared_ptr<SamplerFactory> presampler_factory;
-    /** @brief postsmoother factory on each level */
-    std::shared_ptr<SamplerFactory> postsampler_factory;
-    /** @brief intergrid operator factory on each level */
-    std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory;
-    /** @brief factory for coarse sampler */
-    std::shared_ptr<SamplerFactory> coarse_sampler_factory;
+    /** @brief Cholesky parameters (for coarse sampler )*/
+    const CholeskyParameters cholesky_params;
     /** @brief coarse level solver */
     std::shared_ptr<Sampler> coarse_sampler;
     /** @brief linear operators on all levels */

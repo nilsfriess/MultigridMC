@@ -227,29 +227,24 @@ TEST_F(SamplerTest, TestMultigridMCSampler1d)
     {
         MultigridParameters multigrid_params;
         multigrid_params.nlevel = 3;
+        multigrid_params.smoother = "SSOR";
+        multigrid_params.coarse_solver = "Cholesky";
         multigrid_params.npresmooth = 1;
         multigrid_params.npostsmooth = 1;
+        multigrid_params.ncoarsesmooth = 1;
         multigrid_params.omega = 1.0;
         multigrid_params.cycle = 1;
         multigrid_params.coarse_scaling = 1.0;
         multigrid_params.verbose = 0;
+        CholeskyParameters cholesky_params;
+        cholesky_params.factorisation = SparseFactorisation;
+
         std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
         std::mt19937_64 rng(31841287);
-        std::shared_ptr<SSORSamplerFactory> presampler_factory = std::make_shared<SSORSamplerFactory>(rng,
-                                                                                                      multigrid_params.omega,
-                                                                                                      multigrid_params.npresmooth);
-        std::shared_ptr<SSORSamplerFactory> postsampler_factory = std::make_shared<SSORSamplerFactory>(rng,
-                                                                                                       multigrid_params.omega,
-                                                                                                       multigrid_params.npostsmooth);
-        std::shared_ptr<IntergridOperatorLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
-        std::shared_ptr<SparseCholeskySamplerFactory> coarse_sampler_factory = std::make_shared<SparseCholeskySamplerFactory>(rng);
         std::shared_ptr<MultigridMCSampler> sampler = std::make_shared<MultigridMCSampler>(linear_operator,
                                                                                            rng,
                                                                                            multigrid_params,
-                                                                                           presampler_factory,
-                                                                                           postsampler_factory,
-                                                                                           intergrid_operator_factory,
-                                                                                           coarse_sampler_factory);
+                                                                                           cholesky_params);
         std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, 500000);
         const double tolerance = 2.E-3;
         EXPECT_NEAR(error.first, 0.0, tolerance);
@@ -304,27 +299,22 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
 
     MultigridParameters multigrid_params;
     multigrid_params.nlevel = 3;
+    multigrid_params.smoother = "SSOR";
+    multigrid_params.coarse_solver = "Cholesky";
     multigrid_params.npresmooth = 1;
     multigrid_params.npostsmooth = 1;
+    multigrid_params.ncoarsesmooth = 1;
     multigrid_params.omega = 1.0;
     multigrid_params.cycle = 1;
     multigrid_params.coarse_scaling = 1.0;
     multigrid_params.verbose = 0;
-    std::shared_ptr<SSORSamplerFactory> presampler_factory = std::make_shared<SSORSamplerFactory>(rng,
-                                                                                                  multigrid_params.omega,
-                                                                                                  multigrid_params.npresmooth);
-    std::shared_ptr<SSORSamplerFactory> postsampler_factory = std::make_shared<SSORSamplerFactory>(rng,
-                                                                                                   multigrid_params.omega,
-                                                                                                   multigrid_params.npostsmooth);
-    std::shared_ptr<IntergridOperatorLinearFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
-    std::shared_ptr<SparseCholeskySamplerFactory> coarse_sampler_factory = std::make_shared<SparseCholeskySamplerFactory>(rng);
+    CholeskyParameters cholesky_params;
+    cholesky_params.factorisation = SparseFactorisation;
+
     std::shared_ptr<Sampler> sampler = std::make_shared<MultigridMCSampler>(linear_operator,
                                                                             rng,
                                                                             multigrid_params,
-                                                                            presampler_factory,
-                                                                            postsampler_factory,
-                                                                            intergrid_operator_factory,
-                                                                            coarse_sampler_factory);
+                                                                            cholesky_params);
     const unsigned int nsamples = thorough_testing ? 2000000 : 10000;
     std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, nsamples);
     const double tolerance = thorough_testing ? 2.2E-3 : 2.E-2;

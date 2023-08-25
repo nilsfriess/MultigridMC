@@ -444,68 +444,13 @@ int main(int argc, char *argv[])
         std::cout << "ERROR: invalid operator : " << general_params.operator_name << std::endl;
         exit(-1);
     }
-    //   Construct samplers
-    /* prepare measurements */
+    // Construct samplers
     unsigned int seed = 5418513;
     std::mt19937_64 rng(seed);
-    std::shared_ptr<SamplerFactory> presampler_factory;
-    std::shared_ptr<SamplerFactory> postsampler_factory;
-    if (multigrid_params.smoother == "SOR")
-    {
-        presampler_factory = std::make_shared<SORSamplerFactory>(rng,
-                                                                 multigrid_params.omega,
-                                                                 multigrid_params.npresmooth,
-                                                                 forward);
-        postsampler_factory = std::make_shared<SORSamplerFactory>(rng,
-                                                                  multigrid_params.omega,
-                                                                  multigrid_params.npostsmooth,
-                                                                  backward);
-    }
-    else if (multigrid_params.smoother == "SSOR")
-    {
-        presampler_factory = std::make_shared<SSORSamplerFactory>(rng,
-                                                                  multigrid_params.omega,
-                                                                  multigrid_params.npresmooth);
-        postsampler_factory = std::make_shared<SSORSamplerFactory>(rng,
-                                                                   multigrid_params.omega,
-                                                                   multigrid_params.npostsmooth);
-    }
-    else
-    {
-        std::cout << "ERROR: invalid sampler \'" << multigrid_params.smoother << "\'" << std::endl;
-        exit(-1);
-    }
-    std::shared_ptr<IntergridOperatorFactory> intergrid_operator_factory = std::make_shared<IntergridOperatorLinearFactory>();
-    std::shared_ptr<SamplerFactory> coarse_sampler_factory;
-    if (multigrid_params.coarse_solver == "Cholesky")
-    {
-        if (cholesky_params.factorisation == SparseFactorisation)
-        {
-            coarse_sampler_factory = std::make_shared<SparseCholeskySamplerFactory>(rng);
-        }
-        else if (cholesky_params.factorisation == DenseFactorisation)
-        {
-            coarse_sampler_factory = std::make_shared<DenseCholeskySamplerFactory>(rng);
-        }
-    }
-    else if (multigrid_params.coarse_solver == "SSOR")
-    {
-        coarse_sampler_factory = std::make_shared<SSORSamplerFactory>(rng,
-                                                                      multigrid_params.omega,
-                                                                      multigrid_params.ncoarsesmooth);
-    }
-    else
-    {
-        std::cout << "ERROR: multigrid coarse sampler \'" << multigrid_params.coarse_solver << "\'" << std::endl;
-        exit(-1);
-    }
     std::shared_ptr<Sampler> multigridmc_sampler = std::make_shared<MultigridMCSampler>(linear_operator,
                                                                                         rng,
                                                                                         multigrid_params,
-                                                                                        presampler_factory,
-                                                                                        postsampler_factory,
-                                                                                        intergrid_operator_factory,
-                                                                                        coarse_sampler_factory);
+                                                                                        cholesky_params);
     std::shared_ptr<Sampler> ssor_sampler = std::make_shared<SSORSampler>(linear_operator,
                                                                           rng,
                                                                           smoother_params.omega,
