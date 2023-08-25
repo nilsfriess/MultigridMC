@@ -147,17 +147,21 @@ public:
      * @param[in] xbar prior mean
      * @param[in] y measured values
      * @param[in] b observation vector b
+     * @param[out] mean observed mean
+     * @param[out] variance observed variance
      */
-    std::pair<double, double> observed_mean_and_variance(const Eigen::VectorXd &xbar,
-                                                         const Eigen::VectorXd &y,
-                                                         const Eigen::VectorXd &b_obs) const
+    void observed_mean_and_variance(const Eigen::VectorXd &xbar,
+                                    const Eigen::VectorXd &y,
+                                    const Eigen::VectorXd &b_obs,
+                                    double &mean,
+                                    double &variance) const
     {
         Eigen::SimplicialLLT<SparseMatrixType> solver;
         solver.compute(A_sparse);
         // Compute b_obs_bar = Q^{-1} b_obs
         Eigen::VectorXd b_obs_bar = solver.solve(b_obs);
-        double mean = b_obs.dot(xbar);
-        double variance = b_obs.dot(b_obs_bar);
+        mean = b_obs.dot(xbar);
+        variance = b_obs.dot(b_obs_bar);
         if (m_lowrank > 0)
         {
             // Compute B_bar = Q^{-1} B
@@ -167,7 +171,6 @@ public:
             mean += b_obs_bar.dot(B * Sigma_inv * (y - B.transpose() * xbar));
             variance -= b_obs_bar.dot(B * Sigma_inv * B.transpose() * b_obs_bar);
         }
-        return std::make_pair(mean, variance);
     }
 
     /** @brief compute (dense) precision matrix */

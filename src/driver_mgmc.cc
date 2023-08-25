@@ -52,11 +52,11 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
     y(Eigen::seqN(0, measurement_params.n)) = measurement_params.mean;
     if (measurement_params.measure_global)
         y(measurement_params.n) = measurement_params.mean_global;
-    Eigen::VectorXd mean_exact = linear_operator->mean(xbar, y);
+    Eigen::VectorXd mean_x_exact = linear_operator->mean(xbar, y);
     Eigen::VectorXd x(ndof);
     Eigen::VectorXd f(ndof);
     x.setZero();
-    linear_operator->apply(mean_exact, f);
+    linear_operator->apply(mean_x_exact, f);
     sampler->fix_rhs(f);
     for (int k = 0; k < sampling_params.nwarmup; ++k)
     {
@@ -92,18 +92,24 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
     }
     double variance = xsq_avg - x_avg * x_avg;
     double x_error = sqrt(variance / sampling_params.nsamples);
-    std::pair<double, double> mean_variance_exact = measured_operator->observed_mean_and_variance(xbar,
-                                                                                                  y,
-                                                                                                  sample_vector);
+    double mean_exact, variance_exact;
+    measured_operator->observed_mean_and_variance(xbar,
+                                                  y,
+                                                  sample_vector,
+                                                  mean_exact,
+                                                  variance_exact);
     printf("  %12s mean     = %12.4e +/- %12.4e [ignoring IACT]\n", label.c_str(), x_avg, x_error);
-    printf("  %12s mean     = %12.4e\n", "exact", mean_variance_exact.first);
+    printf("  %12s mean     = %12.4e\n", "exact", mean_exact);
     printf("  %12s variance = %12.4e\n", label.c_str(), variance);
-    printf("  %12s variance = %12.4e\n\n", "exact", mean_variance_exact.second);
+    printf("  %12s variance = %12.4e\n\n", "exact", variance_exact);
 
     out.close();
 }
 
-/** @brief compute mean and variance field
+/** @brief Compute mean and variance field
+ *
+ * The mean and variance field are computed with MCMC sampling and
+ * written to a vtk file.
  *
  * @param[in] sampler sampler to be used
  * @param[in] sampling_params parameters for sampling
@@ -123,12 +129,12 @@ void posterior_statistics(std::shared_ptr<Sampler> sampler,
     y(Eigen::seqN(0, measurement_params.n)) = measurement_params.mean;
     if (measurement_params.measure_global)
         y(measurement_params.n) = measurement_params.mean_global;
-    Eigen::VectorXd mean_exact = linear_operator->mean(xbar, y);
+    Eigen::VectorXd mean_x_exact = linear_operator->mean(xbar, y);
     std::shared_ptr<Lattice> lattice = linear_operator->get_lattice();
     Eigen::VectorXd x(ndof);
     Eigen::VectorXd f(ndof);
     x.setZero();
-    linear_operator->apply(mean_exact, f);
+    linear_operator->apply(mean_x_exact, f);
     for (int k = 0; k < sampling_params.nwarmup; ++k)
     {
         sampler->apply(f, x);
@@ -154,7 +160,7 @@ void posterior_statistics(std::shared_ptr<Sampler> sampler,
     }
     vtk_writer->add_state(mean, "mean");
     vtk_writer->add_state(variance - mean.cwiseProduct(mean), "variance");
-    vtk_writer->add_state(mean_exact, "mean_exact");
+    vtk_writer->add_state(mean_x_exact, "mean_exact");
     vtk_writer->write();
     if (measurement_params.dim == 2)
     {
@@ -170,6 +176,9 @@ void posterior_statistics(std::shared_ptr<Sampler> sampler,
  * the k-th sample in the chain and look at the decay of mean(k) - E[z] and
  * var(k) - Var[z], where E[z] and Var[z] are the true posterior mean and
  * variance.
+ *
+ * This subroutine writes a table of the quantities mean(k) - E[z] and var(k) - Var[z]
+ * to disk together with error estimators.
  *
  * @param[in] sampler sampler to be used
  * @param[in] sampling_params parameters for sampling
@@ -190,7 +199,7 @@ void measure_convergence(std::shared_ptr<Sampler> sampler,
     y(Eigen::seqN(0, measurement_params.n)) = measurement_params.mean;
     if (measurement_params.measure_global)
         y(measurement_params.n) = measurement_params.mean_global;
-    Eigen::VectorXd mean_exact = linear_operator->mean(xbar, y);
+    Eigen::VectorXd mean_x_exact = linear_operator->mean(xbar, y);
     Eigen::VectorXd x(ndof);
     Eigen::VectorXd f(ndof);
     const std::shared_ptr<MeasuredOperator> measured_operator = std::make_shared<MeasuredOperator>(linear_operator,
@@ -198,9 +207,11 @@ void measure_convergence(std::shared_ptr<Sampler> sampler,
     Eigen::SparseVector<double> sample_vector = measured_operator->measurement_vector(measurement_params.sample_location,
                                                                                       measurement_params.radius);
 
-    linear_operator->apply(mean_exact, f);
+    linear_operator->apply(mean_x_exact, f);
     sampler->fix_rhs(f);
     const int n_steps = 16;
+    // compute the sample average of (z^k)^alpha for alpha = 1,2,3,4, where z^k is
+    // the observed quantity at the k-th step of the chain
     std::vector<double> x_avg(n_steps + 1, 0.0);
     std::vector<double> x2_avg(n_steps + 1, 0.0);
     std::vector<double> x3_avg(n_steps + 1, 0.0);
@@ -218,21 +229,30 @@ void measure_convergence(std::shared_ptr<Sampler> sampler,
             x4_avg[j] += (z * z * z * z - x4_avg[j]) / (k + 1.0);
         }
     }
-    std::pair<double, double> mean_variance_exact = measured_operator->observed_mean_and_variance(xbar,
-                                                                                                  y,
-                                                                                                  sample_vector);
-    std::vector<std::pair<double, double>> diff_mean_variance;
-    std::vector<std::pair<double, double>> error_diff_mean_variance;
+    // compute exact mean and variance in the stationary chain
+    double mean_exact, variance_exact;
+    measured_operator->observed_mean_and_variance(xbar,
+                                                  y,
+                                                  sample_vector,
+                                                  mean_exact,
+                                                  variance_exact);
+    // difference between true mean/variance and sample mean/variance at step k of the chain
+    std::vector<double> diff_mean;
+    std::vector<double> diff_variance;
+    // statistical errors of diff_mean and diff_variance
+    std::vector<double> error_diff_mean;
+    std::vector<double> error_diff_variance;
+
     for (int j = 0; j <= n_steps; ++j)
     {
-        double diff_mean = fabs(x_avg[j] - mean_variance_exact.first);
-        double diff_variance = fabs(x2_avg[j] - x_avg[j] * x_avg[j] - mean_variance_exact.second);
-        diff_mean_variance.push_back(std::make_pair(diff_mean, diff_variance));
-        double sigma = sampling_params.nsamples / (sampling_params.nsamples - 1.) * (x2_avg[j] - x_avg[j] * x_avg[j]);
-        double error_diff_mean = sqrt(sigma / sampling_params.nsamples);
+        diff_mean.push_back(fabs(x_avg[j] - mean_exact));
+        diff_variance.push_back(fabs(x2_avg[j] - x_avg[j] * x_avg[j] - variance_exact));
+        // unbiased estimator for variance
+        double sigma_sq = sampling_params.nsamples / (sampling_params.nsamples - 1.) * (x2_avg[j] - x_avg[j] * x_avg[j]);
+        // fourth central moment
         double mu4 = x4_avg[j] - 4 * x_avg[j] * x3_avg[j] + 6 * pow(x_avg[j], 2) * x2_avg[j] - 3 * pow(x_avg[j], 4);
-        double error_diff_variance = sqrt((mu4 - (sampling_params.nsamples - 3.) / (sampling_params.nsamples - 1.) * sigma * sigma) / sampling_params.nsamples);
-        error_diff_mean_variance.push_back(std::make_pair(error_diff_mean, error_diff_variance));
+        error_diff_mean.push_back(sqrt(sigma_sq / sampling_params.nsamples));
+        error_diff_variance.push_back(sqrt((mu4 - (sampling_params.nsamples - 3.) / (sampling_params.nsamples - 1.) * sigma_sq * sigma_sq) / sampling_params.nsamples));
     }
     std::ofstream out;
     out.open(filename);
@@ -261,13 +281,13 @@ void measure_convergence(std::shared_ptr<Sampler> sampler,
             double error_diff_prev;
             if (q == 0)
             {
-                diff = diff_mean_variance[j].first;
-                error_diff = error_diff_mean_variance[j].first;
+                diff = diff_mean[j];
+                error_diff = error_diff_mean[j];
             }
             else
             {
-                diff = diff_mean_variance[j].second;
-                error_diff = error_diff_mean_variance[j].second;
+                diff = diff_variance[j];
+                error_diff = error_diff_variance[j];
             }
             if (j == 0)
             {
