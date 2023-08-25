@@ -59,6 +59,8 @@ public:
     bool do_multigridmc;
     /** @brief save posterior statistics to disk? */
     bool save_posterior_statistics;
+    /** @brief measure convergence for the SSOR and MGMC samplers? */
+    bool measure_convergence;
     /** @brief operator to use for sampling (prior or posterior)*/
     std::string operator_name;
 };
@@ -181,6 +183,10 @@ public:
     unsigned int nsamples;
     /** @brief number of warmup samples */
     unsigned int nwarmup;
+    /** @brief number of samples used in convergence test */
+    unsigned int nsamplesconvergence;
+    /** @brief number of steps used in convergence test */
+    unsigned int nstepsconvergence;
 };
 
 /** @brief structure for prior parameters

@@ -53,6 +53,11 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
     if (measurement_params.measure_global)
         y(measurement_params.n) = measurement_params.mean_global;
     Eigen::VectorXd mean_x_exact = linear_operator->mean(xbar, y);
+    const std::shared_ptr<MeasuredOperator> measured_operator = std::make_shared<MeasuredOperator>(linear_operator,
+                                                                                                   measurement_params);
+    Eigen::SparseVector<double> sample_vector = measured_operator->measurement_vector(measurement_params.sample_location,
+                                                                                      measurement_params.radius);
+
     Eigen::VectorXd x(ndof);
     Eigen::VectorXd f(ndof);
     x.setZero();
@@ -63,11 +68,6 @@ void measure_sampling_time(std::shared_ptr<Sampler> sampler,
         sampler->apply(f, x);
     };
     std::vector<double> data(sampling_params.nsamples);
-
-    const std::shared_ptr<MeasuredOperator> measured_operator = std::make_shared<MeasuredOperator>(linear_operator,
-                                                                                                   measurement_params);
-    Eigen::SparseVector<double> sample_vector = measured_operator->measurement_vector(measurement_params.sample_location,
-                                                                                      measurement_params.radius);
 
     auto t_start = std::chrono::high_resolution_clock::now();
     for (int k = 0; k < sampling_params.nsamples; ++k)
@@ -209,17 +209,17 @@ void measure_convergence(std::shared_ptr<Sampler> sampler,
 
     linear_operator->apply(mean_x_exact, f);
     sampler->fix_rhs(f);
-    const int n_steps = 16;
     // compute the sample average of (z^k)^alpha for alpha = 1,2,3,4, where z^k is
     // the observed quantity at the k-th step of the chain
-    std::vector<double> x_avg(n_steps + 1, 0.0);
-    std::vector<double> x2_avg(n_steps + 1, 0.0);
-    std::vector<double> x3_avg(n_steps + 1, 0.0);
-    std::vector<double> x4_avg(n_steps + 1, 0.0);
-    for (int k = 0; k < sampling_params.nsamples; ++k)
+    std::vector<double> x_avg(sampling_params.nstepsconvergence + 1, 0.0);
+    std::vector<double> x2_avg(sampling_params.nstepsconvergence + 1, 0.0);
+    std::vector<double> x3_avg(sampling_params.nstepsconvergence + 1, 0.0);
+    std::vector<double> x4_avg(sampling_params.nstepsconvergence + 1, 0.0);
+    unsigned int nsamples = sampling_params.nsamplesconvergence;
+    for (int k = 0; k < nsamples; ++k)
     {
         x.setZero();
-        for (int j = 1; j <= n_steps; ++j)
+        for (int j = 1; j <= sampling_params.nstepsconvergence; ++j)
         {
             sampler->apply(f, x);
             double z = sample_vector.dot(x);
@@ -243,16 +243,16 @@ void measure_convergence(std::shared_ptr<Sampler> sampler,
     std::vector<double> error_diff_mean;
     std::vector<double> error_diff_variance;
 
-    for (int j = 0; j <= n_steps; ++j)
+    for (int j = 0; j <= sampling_params.nstepsconvergence; ++j)
     {
         diff_mean.push_back(fabs(x_avg[j] - mean_exact));
         diff_variance.push_back(fabs(x2_avg[j] - x_avg[j] * x_avg[j] - variance_exact));
         // unbiased estimator for variance
-        double sigma_sq = sampling_params.nsamples / (sampling_params.nsamples - 1.) * (x2_avg[j] - x_avg[j] * x_avg[j]);
+        double sigma_sq = nsamples / (nsamples - 1.) * (x2_avg[j] - x_avg[j] * x_avg[j]);
         // fourth central moment
         double mu4 = x4_avg[j] - 4 * x_avg[j] * x3_avg[j] + 6 * pow(x_avg[j], 2) * x2_avg[j] - 3 * pow(x_avg[j], 4);
-        error_diff_mean.push_back(sqrt(sigma_sq / sampling_params.nsamples));
-        error_diff_variance.push_back(sqrt((mu4 - (sampling_params.nsamples - 3.) / (sampling_params.nsamples - 1.) * sigma_sq * sigma_sq) / sampling_params.nsamples));
+        error_diff_mean.push_back(sqrt(sigma_sq / nsamples));
+        error_diff_variance.push_back(sqrt((mu4 - (nsamples - 3.) / (nsamples - 1.) * sigma_sq * sigma_sq) / nsamples));
     }
     std::ofstream out;
     out.open(filename);
@@ -272,7 +272,7 @@ void measure_convergence(std::shared_ptr<Sampler> sampler,
         char buffer[128];
         sprintf(buffer, "  %12s   %3s : %12s %35s %35s\n", "", "k", "q_k", "q_k/q_0", "q_k/q_{k-1}");
         out << buffer;
-        for (int j = 0; j <= n_steps; ++j)
+        for (int j = 0; j <= sampling_params.nstepsconvergence; ++j)
         {
             double diff;
             double error_diff;
@@ -520,10 +520,6 @@ int main(int argc, char *argv[])
                               measurement_params,
                               "Cholesky",
                               "timeseries_cholesky.txt");
-        measure_convergence(cholesky_sampler,
-                            sampling_params,
-                            measurement_params,
-                            "convergence_cholesky.txt");
         std::cout << std::endl;
     }
     if (general_params.do_ssor)
