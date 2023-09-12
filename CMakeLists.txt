@@ -36,6 +36,14 @@ endif(USE_CHOLMOD)
 # Find libconfig library
 include(FindLibConfig)
 
+# Find OpenMP
+find_package(OpenMP REQUIRED)
+
+if(OpenMP_CXX_FOUND)
+  link_libraries(OpenMP::OpenMP_CXX)
+  add_link_options(${OpenMP_CXX_FLAGS})
+endif()
+
 # Initialize global list of cc files
 set(SOURCES "" CACHE INTERNAL "sources")
 

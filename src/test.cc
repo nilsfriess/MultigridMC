@@ -3,6 +3,7 @@
 #include "auxilliary/test_quadrature.hh"
 #include "auxilliary/test_cholesky_wrapper.hh"
 #include "auxilliary/test_statistics.hh"
+#include "auxilliary/test_random.hh"
 #include "lattice/test_lattice.hh"
 #include "linear_operator/test_linear_operator.hh"
 #include "intergrid/test_intergrid.hh"

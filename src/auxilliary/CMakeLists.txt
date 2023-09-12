@@ -1,6 +1,7 @@
 set(SOURCES
-${CMAKE_CURRENT_SOURCE_DIR}/common.cc
-${CMAKE_CURRENT_SOURCE_DIR}/quadrature.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/common.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/parallel_random.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/quadrature.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/parameters.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/statistics.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/vtk_writer.cc
