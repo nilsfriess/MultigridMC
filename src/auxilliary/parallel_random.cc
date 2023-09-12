@@ -38,7 +38,7 @@ CombinedLinearCongruentialGenerator::CombinedLinearCongruentialGenerator() : a1(
 /* draw integer random number */
 int64_t CombinedLinearCongruentialGenerator::draw_int()
 {
-    int64_t x = (y1 - y2 + m1) % (m1 - 1);
+    int64_t x = (y1 - y2 + m1 - 1) % (m1 - 1);
     y1 = (a1_multistep * y1) % m1;
     y2 = (a2_multistep * y2) % m2;
     return x;
