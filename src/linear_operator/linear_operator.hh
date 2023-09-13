@@ -50,6 +50,18 @@ public:
     /** @brief destructor */
     virtual ~LinearOperator() = default;
 
+    /** @brief deep copy */
+    std::shared_ptr<LinearOperator> deep_copy()
+    {
+        std::shared_ptr<Lattice> lattice_ = lattice->deep_copy();
+        std::shared_ptr<LinearOperator> lin_op = std::make_shared<LinearOperator>(lattice_, m_lowrank);
+        lin_op->A_sparse = A_sparse;
+        lin_op->B = B;
+        lin_op->Sigma_inv_BT = Sigma_inv_BT;
+        lin_op->Sigma_diag = Sigma_diag;
+        return lin_op;
+    }
+
     /** @brief Extract underlying lattice */
     std::shared_ptr<Lattice> get_lattice() const
     {

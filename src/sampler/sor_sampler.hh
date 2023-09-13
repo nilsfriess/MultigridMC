@@ -43,6 +43,22 @@ public:
         delete[] sqrt_precision_diag;
     }
 
+    /** @brief deep copy
+     *
+     * Create a deep copy of object, while using a specified random number generator
+     *
+     * @param[in] random number generator to use
+     */
+    virtual std::shared_ptr<Sampler> deep_copy(std::mt19937_64 &rng)
+    {
+        std::shared_ptr<LinearOperator> linear_operator_ = linear_operator->deep_copy();
+        return std::make_shared<SORSampler>(linear_operator_,
+                                            rng,
+                                            omega,
+                                            nsmooth,
+                                            direction);
+    };
+
     /** @brief Carry out a single Gibbs-sweep
      *
      * @param[in] f right hand side

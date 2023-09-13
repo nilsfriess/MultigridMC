@@ -42,6 +42,18 @@ public:
                                              xi(linear_operator_->get_ndof()),
                                              g_rhs(nullptr) {}
 
+    /** @brief deep copy
+     *
+     * Create a deep copy of object, while using a specified random number generator
+     *
+     * @param[in] random number generator to use
+     */
+    virtual std::shared_ptr<Sampler> deep_copy(std::mt19937_64 &rng)
+    {
+        const std::shared_ptr<LinearOperator> linear_operator_ = linear_operator->deep_copy();
+        return std::make_shared<CholeskySampler>(linear_operator_, rng);
+    };
+
     /** @brief Draw a new sample x
      *
      * @param[in] f right hand side

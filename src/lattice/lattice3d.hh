@@ -76,6 +76,12 @@ public:
                                       hz(1. / double(nz_)),
                                       Lattice(nx_ * ny_ * nz_, (nx_ - 1) * (ny_ - 1) * (nz_ - 1)) {}
 
+  /** @brief deep copy */
+  virtual std::shared_ptr<Lattice> deep_copy()
+  {
+    return std::make_shared<Lattice3d>(nx, ny, nz);
+  };
+
   /** @brief Convert linear index to Euclidean index
    *
    * @param[in] ell linear index to be converted

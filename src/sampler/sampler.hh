@@ -33,12 +33,21 @@ public:
                                      rng(rng_),
                                      normal_dist(0.0, 1.0) {}
 
+    /** @brief deep copy
+     *
+     * Create a deep copy of object, while using a specified random number generator
+     *
+     * @param[in] random number generator to use
+     */
+    virtual std::shared_ptr<Sampler> deep_copy(std::mt19937_64 &rng) = 0;
+
     /** @brief Draw a new sample x
      *
      * @param[in] f right hand side
      * @param[inout] x new sample
      */
-    virtual void apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const = 0;
+    virtual void
+    apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const = 0;
 
     /** @brief return pointer to underlying linear operator */
     std::shared_ptr<LinearOperator> get_linear_operator() const

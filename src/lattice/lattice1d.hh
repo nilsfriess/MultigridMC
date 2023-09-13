@@ -33,6 +33,12 @@ public:
    */
   Lattice1d(const unsigned int n_) : n(n_), h(1. / double(n_)), Lattice(n_, n_ - 1) {}
 
+  /** @brief deep copy */
+  virtual std::shared_ptr<Lattice> deep_copy()
+  {
+    return std::make_shared<Lattice1d>(n);
+  };
+
   /** @brief Convert linear cell index to Euclidean index
    *
    * @param[in] ell linear index to be converted

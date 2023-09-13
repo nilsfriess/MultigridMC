@@ -27,6 +27,9 @@ public:
           const unsigned int Nvertex_) : Ncell(Ncell_),
                                          Nvertex(Nvertex_) {}
 
+  /** @brief deep copy */
+  virtual std::shared_ptr<Lattice> deep_copy() = 0;
+
   /** @brief cell volume */
   double cell_volume() const
   {

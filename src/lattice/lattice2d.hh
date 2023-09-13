@@ -54,6 +54,12 @@ public:
                                                               hy(1. / double(ny_)),
                                                               Lattice(nx_ * ny_, (nx_ - 1) * (ny_ - 1)) {}
 
+  /** @brief deep copy */
+  virtual std::shared_ptr<Lattice> deep_copy()
+  {
+    return std::make_shared<Lattice2d>(nx, ny);
+  };
+
   /** @brief Convert linear index to Euclidean index
    *
    * @param[in] ell linear index to be converted

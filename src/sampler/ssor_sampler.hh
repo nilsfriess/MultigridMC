@@ -31,9 +31,25 @@ public:
                 std::mt19937_64 &rng_,
                 const double omega_,
                 const unsigned int nsmooth_) : Base(linear_operator_, rng_),
+                                               omega(omega_),
                                                nsmooth(nsmooth_),
                                                sor_forward(linear_operator_, rng_, omega_, 1, forward),
                                                sor_backward(linear_operator_, rng_, omega_, 1, backward){};
+
+    /** @brief deep copy
+     *
+     * Create a deep copy of object, while using a specified random number generator
+     *
+     * @param[in] random number generator to use
+     */
+    virtual std::shared_ptr<Sampler> deep_copy(std::mt19937_64 &rng)
+    {
+        std::shared_ptr<LinearOperator> linear_operator_ = linear_operator->deep_copy();
+        return std::make_shared<SSORSampler>(linear_operator_,
+                                             rng,
+                                             omega,
+                                             nsmooth);
+    };
 
     /** @brief Carry out a single SOR-sweep
      *
@@ -43,6 +59,8 @@ public:
     virtual void apply(const Eigen::VectorXd &b, Eigen::VectorXd &x) const;
 
 protected:
+    /** @brief smoothing parameter */
+    const double omega;
     /** @brief number of smoothing steps*/
     const unsigned int nsmooth;
     /** @brief Forward smoother */

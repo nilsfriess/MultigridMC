@@ -36,6 +36,21 @@ public:
                        const MultigridParameters params_,
                        const CholeskyParameters cholesky_params_);
 
+    /** @brief deep copy
+     *
+     * Create a deep copy of object, while using a specified random number generator
+     *
+     * @param[in] random number generator to use
+     */
+    virtual std::shared_ptr<Sampler> deep_copy(std::mt19937_64 &rng)
+    {
+        std::shared_ptr<LinearOperator> linear_operator_ = linear_operator->deep_copy();
+        return std::make_shared<MultigridMCSampler>(linear_operator_,
+                                                    rng,
+                                                    params,
+                                                    cholesky_params);
+    };
+
     /** @brief Draw a new sample
      *
      * @param[in] f right hand side b
