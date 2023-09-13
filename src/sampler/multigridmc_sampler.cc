@@ -16,6 +16,7 @@ MultigridMCSampler::MultigridMCSampler(std::shared_ptr<LinearOperator> linear_op
     std::shared_ptr<Lattice> lattice = linear_operator->get_lattice();
     // Linear operator on a given level
     std::shared_ptr<LinearOperator> lin_op = linear_operator;
+#pragma omp master
     if (params.verbose > 0)
     {
         std::cout << "Setting up Multilevel MC sampler " << std::endl;
@@ -75,6 +76,7 @@ MultigridMCSampler::MultigridMCSampler(std::shared_ptr<LinearOperator> linear_op
 
     for (int level = 0; level < params.nlevel; ++level)
     {
+#pragma omp master
         if (params.verbose > 0)
         {
             std::cout << "  level " << level << " lattice : " << lattice->get_info() << std::endl;

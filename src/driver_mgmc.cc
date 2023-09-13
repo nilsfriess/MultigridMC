@@ -200,33 +200,61 @@ void measure_convergence(std::shared_ptr<Sampler> sampler,
     if (measurement_params.measure_global)
         y(measurement_params.n) = measurement_params.mean_global;
     Eigen::VectorXd mean_x_exact = linear_operator->mean(xbar, y);
-    Eigen::VectorXd x(ndof);
-    Eigen::VectorXd f(ndof);
     const std::shared_ptr<MeasuredOperator> measured_operator = std::make_shared<MeasuredOperator>(linear_operator,
                                                                                                    measurement_params);
     Eigen::SparseVector<double> sample_vector = measured_operator->measurement_vector(measurement_params.sample_location,
                                                                                       measurement_params.radius);
-
-    linear_operator->apply(mean_x_exact, f);
-    sampler->fix_rhs(f);
-    // compute the sample average of (z^k)^alpha for alpha = 1,2,3,4, where z^k is
-    // the observed quantity at the k-th step of the chain
-    std::vector<double> x_avg(sampling_params.nstepsconvergence + 1, 0.0);
-    std::vector<double> x2_avg(sampling_params.nstepsconvergence + 1, 0.0);
-    std::vector<double> x3_avg(sampling_params.nstepsconvergence + 1, 0.0);
-    std::vector<double> x4_avg(sampling_params.nstepsconvergence + 1, 0.0);
     unsigned int nsamples = sampling_params.nsamplesconvergence;
-    for (int k = 0; k < nsamples; ++k)
+    unsigned int nsteps = sampling_params.nstepsconvergence;
+    std::vector<double> x_avg(nsteps + 1, 0.0);
+    std::vector<double> x2_avg(nsteps + 1, 0.0);
+    std::vector<double> x3_avg(nsteps + 1, 0.0);
+    std::vector<double> x4_avg(nsteps + 1, 0.0);
+#pragma omp parallel default(none), shared(nsamples, nsteps, sample_vector, mean_x_exact, sampler, ndof, linear_operator, x_avg, x2_avg, x3_avg, x4_avg)
     {
-        x.setZero();
-        for (int j = 1; j <= sampling_params.nstepsconvergence; ++j)
+        int thread_id = omp_get_thread_num();
+        int nthreads = omp_get_num_threads();
+        std::vector<double> x_avg_thread_local(nsteps + 1, 0.0);
+        std::vector<double> x2_avg_thread_local(nsteps + 1, 0.0);
+        std::vector<double> x3_avg_thread_local(nsteps + 1, 0.0);
+        std::vector<double> x4_avg_thread_local(nsteps + 1, 0.0);
+        std::shared_ptr<CLCGenerator> thread_local_rng = std::make_shared<CLCGenerator>();
+        std::shared_ptr<Sampler> thread_local_sampler = sampler->deep_copy(thread_local_rng);
+        Eigen::VectorXd x(ndof);
+        Eigen::VectorXd f(ndof);
+        linear_operator->apply(mean_x_exact, f);
+        thread_local_sampler->fix_rhs(f);
+        // compute the sample average of (z^k)^alpha for alpha = 1,2,3,4, where z^k is
+        // the observed quantity at the k-th step of the chain
+        int k_min = thread_id * (nsamples / nthreads);
+        int k_max = (thread_id == nthreads - 1) ? nsamples : (thread_id + 1) * (nsamples / nthreads);
+        int nsamples_thread_local = k_max - k_min;
+        for (int k = 0; k < nsamples_thread_local; ++k)
         {
-            sampler->apply(f, x);
-            double z = sample_vector.dot(x);
-            x_avg[j] += (z - x_avg[j]) / (k + 1.0);
-            x2_avg[j] += (z * z - x2_avg[j]) / (k + 1.0);
-            x3_avg[j] += (z * z * z - x3_avg[j]) / (k + 1.0);
-            x4_avg[j] += (z * z * z * z - x4_avg[j]) / (k + 1.0);
+            x.setZero();
+            for (int j = 1; j <= nsteps; ++j)
+            {
+                thread_local_sampler->apply(f, x);
+                double z = sample_vector.dot(x);
+                x_avg_thread_local[j] += (z - x_avg_thread_local[j]) / (k + 1.0);
+                x2_avg_thread_local[j] += (z * z - x2_avg_thread_local[j]) / (k + 1.0);
+                x3_avg_thread_local[j] += (z * z * z - x3_avg_thread_local[j]) / (k + 1.0);
+                x4_avg_thread_local[j] += (z * z * z * z - x4_avg_thread_local[j]) / (k + 1.0);
+            }
+        }
+        // Combine the thread-local averages into a global average
+        for (int j = 0; j <= nsteps; ++j)
+        {
+            // weighting factor of thread-local sum
+            double rho = nsamples_thread_local / double(nsamples);
+#pragma omp atomic
+            x_avg[j] += rho * x_avg_thread_local[j];
+#pragma omp atomic
+            x2_avg[j] += rho * x2_avg_thread_local[j];
+#pragma omp atomic
+            x3_avg[j] += rho * x3_avg_thread_local[j];
+#pragma omp atomic
+            x4_avg[j] += rho * x4_avg_thread_local[j];
         }
     }
     // compute exact mean and variance in the stationary chain
