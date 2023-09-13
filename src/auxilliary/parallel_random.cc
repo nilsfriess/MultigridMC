@@ -8,24 +8,38 @@
 /* draw Gaussian real random number */
 double RandomGenerator::draw_normal()
 {
-    double u1, u2;
-    do
+    if (box_muller_redraw)
     {
-        u1 = draw_uniform_real();
-    } while (u1 <= epsilon);
-    u2 = draw_uniform_real();
-    return sqrt(-2.0 * log(u1)) * cos(two_pi * u2);
+        double u1, u2;
+        double s;
+        do
+        {
+            u1 = 2. * draw_uniform_real() - 1.;
+            u2 = 2. * draw_uniform_real() - 1.;
+            s = u1 * u1 + u2 * u2;
+        } while ((s == 0) or (s >= 1));
+        double L = sqrt(-2 * log(s) / s);
+        z_1 = L * u1;
+        z_2 = L * u2;
+        box_muller_redraw = false;
+        return z_1;
+    }
+    else
+    {
+        box_muller_redraw = true;
+        return z_2;
+    }
 }
 
 /* Constructor */
 CLCGenerator::CLCGenerator() : a1(40014LL),
-                                                                             m1(2147483563LL),
-                                                                             m1_inv(1. / 2147483563.),
-                                                                             seed1(1LL),
-                                                                             a2(40692LL),
-                                                                             m2(2147483399LL),
-                                                                             seed2(1LL),
-                                                                             x_max(double(m1 - 1) / double(m1))
+                               m1(2147483563LL),
+                               m1_inv(1. / 2147483563.),
+                               seed1(1LL),
+                               a2(40692LL),
+                               m2(2147483399LL),
+                               seed2(1LL),
+                               x_max(double(m1 - 1) / double(m1))
 {
     int n_threads = omp_get_num_threads();
     int thread_id = omp_get_thread_num();
