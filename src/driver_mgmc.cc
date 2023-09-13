@@ -445,8 +445,7 @@ int main(int argc, char *argv[])
         exit(-1);
     }
     // Construct samplers
-    unsigned int seed = 5418513;
-    std::mt19937_64 rng(seed);
+    std::shared_ptr<CombinedLinearCongruentialGenerator> rng = std::make_shared<CombinedLinearCongruentialGenerator>();
     std::shared_ptr<Sampler> multigridmc_sampler = std::make_shared<MultigridMCSampler>(linear_operator,
                                                                                         rng,
                                                                                         multigrid_params,

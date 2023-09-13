@@ -2,6 +2,7 @@
 #define CHOLESKY_SAMPLER_HH CHOLESKY_SAMPLER_HH
 #include <random>
 #include <Eigen/Dense>
+#include "auxilliary/parallel_random.hh"
 #include "auxilliary/cholesky_wrapper.hh"
 #include "linear_operator/linear_operator.hh"
 #include "sampler.hh"
@@ -38,9 +39,9 @@ public:
      * @param[in] rng_ random number generator
      */
     CholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
-                    std::mt19937_64 &rng_) : Base(linear_operator_, rng_),
-                                             xi(linear_operator_->get_ndof()),
-                                             g_rhs(nullptr) {}
+                    std::shared_ptr<RandomGenerator> rng_) : Base(linear_operator_, rng_),
+                                                             xi(linear_operator_->get_ndof()),
+                                                             g_rhs(nullptr) {}
 
     /** @brief deep copy
      *
@@ -48,7 +49,7 @@ public:
      *
      * @param[in] random number generator to use
      */
-    virtual std::shared_ptr<Sampler> deep_copy(std::mt19937_64 &rng)
+    virtual std::shared_ptr<Sampler> deep_copy(std::shared_ptr<RandomGenerator> rng)
     {
         const std::shared_ptr<LinearOperator> linear_operator_ = linear_operator->deep_copy();
         return std::make_shared<CholeskySampler>(linear_operator_, rng);
@@ -64,7 +65,7 @@ public:
         /* step 1: draw sample xi from normal distribution with zero mean and unit covariance*/
         for (unsigned int ell = 0; ell < xi.size(); ++ell)
         {
-            xi[ell] = normal_dist(rng);
+            xi[ell] = rng->draw_normal();
         }
         std::shared_ptr<Eigen::VectorXd> g = g_rhs;
         if (g == nullptr)
@@ -131,7 +132,7 @@ public:
      * @param[in] verbose_ print out additional information?
      */
     SparseCholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
-                          std::mt19937_64 &rng_,
+                          std::shared_ptr<RandomGenerator> rng_,
                           const bool verbose_ = false);
 
 protected:
@@ -154,7 +155,7 @@ public:
      * @param[in] rng_ random number generator
      */
     DenseCholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
-                         std::mt19937_64 &rng_);
+                         std::shared_ptr<RandomGenerator> rng_);
 };
 
 /* ******************** factory classes ****************************** */
@@ -167,7 +168,7 @@ public:
      *
      * @param[in] rng_ random number generator
      */
-    SparseCholeskySamplerFactory(std::mt19937_64 &rng_) : rng(rng_) {}
+    SparseCholeskySamplerFactory(std::shared_ptr<RandomGenerator> rng_) : rng(rng_) {}
 
     /** @brief extract a sampler for a given linear operator
      *
@@ -180,7 +181,7 @@ public:
 
 protected:
     /** @brief random number generator */
-    std::mt19937_64 &rng;
+    std::shared_ptr<RandomGenerator> rng;
 };
 
 /** @brief Cholesky sampler factory */
@@ -191,7 +192,7 @@ public:
      *
      * @param[in] rng_ random number generator
      */
-    DenseCholeskySamplerFactory(std::mt19937_64 &rng_) : rng(rng_) {}
+    DenseCholeskySamplerFactory(std::shared_ptr<RandomGenerator> rng_) : rng(rng_) {}
 
     /** @brief extract a sampler for a given linear operator
      *
@@ -204,7 +205,7 @@ public:
 
 protected:
     /** @brief random number generator */
-    std::mt19937_64 &rng;
+    std::shared_ptr<RandomGenerator> rng;
 };
 
 #endif // CHOLESKY_SAMPLER_HH

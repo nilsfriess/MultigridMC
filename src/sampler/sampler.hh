@@ -1,7 +1,7 @@
 #ifndef SAMPLER_HH
 #define SAMPLER_HH SAMPLER_HH
-#include <random>
 #include <Eigen/Dense>
+#include "auxilliary/parallel_random.hh"
 #include "linear_operator/linear_operator.hh"
 #include "smoother/smoother.hh"
 
@@ -29,9 +29,8 @@ public:
      * @param[in] rng_ random number generator
      */
     Sampler(const std::shared_ptr<LinearOperator> linear_operator_,
-            std::mt19937_64 &rng_) : linear_operator(linear_operator_),
-                                     rng(rng_),
-                                     normal_dist(0.0, 1.0) {}
+            std::shared_ptr<RandomGenerator> rng_) : linear_operator(linear_operator_),
+                                                     rng(rng_) {}
 
     /** @brief deep copy
      *
@@ -39,7 +38,7 @@ public:
      *
      * @param[in] random number generator to use
      */
-    virtual std::shared_ptr<Sampler> deep_copy(std::mt19937_64 &rng) = 0;
+    virtual std::shared_ptr<Sampler> deep_copy(std::shared_ptr<RandomGenerator> rng) = 0;
 
     /** @brief Draw a new sample x
      *
@@ -75,9 +74,7 @@ protected:
     /** @brief Underlying Linear operator */
     const std::shared_ptr<LinearOperator> linear_operator;
     /** @brief random number generator */
-    std::mt19937_64 &rng;
-    /** @brief normal distribution for Gibbs-sweep */
-    mutable std::normal_distribution<double> normal_dist;
+    std::shared_ptr<RandomGenerator> rng;
 };
 
 /* ******************** factory classes ****************************** */

@@ -2,6 +2,7 @@
 #define SOR_SAMPLER_HH SOR_SAMPLER_HH
 #include <random>
 #include <Eigen/Dense>
+#include "auxilliary/parallel_random.hh"
 #include "linear_operator/linear_operator.hh"
 #include "smoother/sor_smoother.hh"
 #include "sampler.hh"
@@ -32,7 +33,7 @@ public:
      * @param[in] direction_ direction of sampling (forward or backward)
      */
     SORSampler(const std::shared_ptr<LinearOperator> linear_operator_,
-               std::mt19937_64 &rng_,
+               std::shared_ptr<RandomGenerator> rng_,
                const double omega_,
                const unsigned int nsmooth_,
                const Direction direction_);
@@ -49,7 +50,7 @@ public:
      *
      * @param[in] random number generator to use
      */
-    virtual std::shared_ptr<Sampler> deep_copy(std::mt19937_64 &rng)
+    virtual std::shared_ptr<Sampler> deep_copy(std::shared_ptr<RandomGenerator> rng)
     {
         std::shared_ptr<LinearOperator> linear_operator_ = linear_operator->deep_copy();
         return std::make_shared<SORSampler>(linear_operator_,
@@ -98,7 +99,7 @@ public:
      * @param[in] nsmooth_ number of sweeps
      * @param[in] direction_ sweeping direction (forward or backward)
      */
-    SORSamplerFactory(std::mt19937_64 &rng_,
+    SORSamplerFactory(std::shared_ptr<RandomGenerator> rng_,
                       const double omega_,
                       const int nsmooth_,
                       const Direction direction_) : rng(rng_),
@@ -117,7 +118,7 @@ public:
 
 protected:
     /** @brief random number generator */
-    std::mt19937_64 &rng;
+    std::shared_ptr<RandomGenerator> rng;
     /** @brief Overrelaxation factor */
     const double omega;
     /** @brief number of sweeps */

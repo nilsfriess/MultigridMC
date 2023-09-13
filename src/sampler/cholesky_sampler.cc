@@ -7,7 +7,7 @@
 
 /* Create a new instance */
 SparseCholeskySampler::SparseCholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
-                                             std::mt19937_64 &rng_,
+                                             std::shared_ptr<RandomGenerator> rng_,
                                              const bool verbose_) : Base(linear_operator_, rng_)
 {
     LinearOperator::SparseMatrixType A_sparse = linear_operator->get_sparse();
@@ -24,7 +24,7 @@ SparseCholeskySampler::SparseCholeskySampler(const std::shared_ptr<LinearOperato
 
 /* Create a new instance */
 DenseCholeskySampler::DenseCholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
-                                           std::mt19937_64 &rng_) : Base(linear_operator_, rng_)
+                                           std::shared_ptr<RandomGenerator> rng_) : Base(linear_operator_, rng_)
 {
     LinearOperator::DenseMatrixType A_dense = LinearOperator::DenseMatrixType(linear_operator->get_sparse());
     if (linear_operator->get_m_lowrank() > 0)

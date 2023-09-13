@@ -2,6 +2,7 @@
 #define SSOR_SAMPLER_HH SSOR_SAMPLER_HH
 #include <random>
 #include <Eigen/Dense>
+#include "auxilliary/parallel_random.hh"
 #include "linear_operator/linear_operator.hh"
 #include "smoother/sor_smoother.hh"
 #include "sampler.hh"
@@ -28,7 +29,7 @@ public:
      * @param[in] nsmooth_ number of smoothing steps
      */
     SSORSampler(const std::shared_ptr<LinearOperator> linear_operator_,
-                std::mt19937_64 &rng_,
+                std::shared_ptr<RandomGenerator> rng_,
                 const double omega_,
                 const unsigned int nsmooth_) : Base(linear_operator_, rng_),
                                                omega(omega_),
@@ -42,7 +43,7 @@ public:
      *
      * @param[in] random number generator to use
      */
-    virtual std::shared_ptr<Sampler> deep_copy(std::mt19937_64 &rng)
+    virtual std::shared_ptr<Sampler> deep_copy(std::shared_ptr<RandomGenerator> rng)
     {
         std::shared_ptr<LinearOperator> linear_operator_ = linear_operator->deep_copy();
         return std::make_shared<SSORSampler>(linear_operator_,
@@ -81,7 +82,7 @@ public:
      * @param[in] omega_ overrelaxation parameter
      * @param[in] nsmooth_ number of sweeps
      */
-    SSORSamplerFactory(std::mt19937_64 &rng_,
+    SSORSamplerFactory(std::shared_ptr<RandomGenerator> rng_,
                        const double omega_,
                        const int nsmooth_) : rng(rng_),
                                              omega(omega_),
@@ -98,7 +99,7 @@ public:
 
 protected:
     /** @brief random number generator */
-    std::mt19937_64 &rng;
+    std::shared_ptr<RandomGenerator> rng;
     /** @brief Overrelaxation factor */
     const double omega;
     /** @brief number of applications */

@@ -165,7 +165,7 @@ TEST_F(SamplerTest, TestSparseCholeskySampler1d)
     for (bool lowrank_correction : {false, true})
     {
         std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
-        std::mt19937_64 rng(31841287);
+        std::shared_ptr<CombinedLinearCongruentialGenerator> rng = std::make_shared<CombinedLinearCongruentialGenerator>();
         std::shared_ptr<SparseCholeskySampler> sampler = std::make_shared<SparseCholeskySampler>(linear_operator, rng);
         std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, 500000);
         const double tolerance = 2.E-3;
@@ -184,7 +184,7 @@ TEST_F(SamplerTest, TestDenseCholeskySampler1d)
     for (bool lowrank_correction : {false, true})
     {
         std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
-        std::mt19937_64 rng(31841287);
+        std::shared_ptr<CombinedLinearCongruentialGenerator> rng = std::make_shared<CombinedLinearCongruentialGenerator>();
         std::shared_ptr<DenseCholeskySampler> sampler = std::make_shared<DenseCholeskySampler>(linear_operator, rng);
         std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, 500000);
         const double tolerance = 2.E-3;
@@ -203,7 +203,7 @@ TEST_F(SamplerTest, TestSSORSampler1d)
     for (bool lowrank_correction : {false, true})
     {
         std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
-        std::mt19937_64 rng(31841287);
+        std::shared_ptr<CombinedLinearCongruentialGenerator> rng = std::make_shared<CombinedLinearCongruentialGenerator>();
         const double omega = 0.8;
         std::shared_ptr<SSORSampler> sampler = std::make_shared<SSORSampler>(linear_operator,
                                                                              rng,
@@ -240,12 +240,12 @@ TEST_F(SamplerTest, TestMultigridMCSampler1d)
         cholesky_params.factorisation = SparseFactorisation;
 
         std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
-        std::mt19937_64 rng(31841287);
+        std::shared_ptr<CombinedLinearCongruentialGenerator> rng = std::make_shared<CombinedLinearCongruentialGenerator>();
         std::shared_ptr<MultigridMCSampler> sampler = std::make_shared<MultigridMCSampler>(linear_operator,
                                                                                            rng,
                                                                                            multigrid_params,
                                                                                            cholesky_params);
-        std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, 500000);
+        std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, 1000000);
         const double tolerance = 2.E-3;
         EXPECT_NEAR(error.first, 0.0, tolerance);
         EXPECT_NEAR(error.second, 0.0, tolerance);
@@ -260,8 +260,7 @@ TEST_F(SamplerTest, TestMultigridMCSampler1d)
 TEST_F(SamplerTest, TestMultigridMCSampler2d)
 {
     unsigned int seed = 1212417;
-    std::mt19937_64 rng(seed);
-    std::normal_distribution<double> dist_normal(0.0, 1.0);
+    std::mt19937_64 rng_sigma(seed);
     std::uniform_real_distribution<double> dist_uniform(0.0, 1.0);
     int nx = thorough_testing ? 16 : 8;
     int ny = thorough_testing ? 16 : 8;
@@ -281,8 +280,9 @@ TEST_F(SamplerTest, TestMultigridMCSampler2d)
     measurement_locations[3] = Eigen::Vector2d({0.75, 0.75});
     for (int k = 0; k < n_meas; ++k)
     {
-        Sigma_diag(k) = (1.0 + 2.0 * dist_uniform(rng));
+        Sigma_diag(k) = (1.0 + 2.0 * dist_uniform(rng_sigma));
     }
+    std::shared_ptr<CombinedLinearCongruentialGenerator> rng = std::make_shared<CombinedLinearCongruentialGenerator>();
     std::shared_ptr<ShiftedLaplaceFEMOperator> prior_operator = std::make_shared<ShiftedLaplaceFEMOperator>(lattice,
                                                                                                             correlationlengthmodel);
     MeasurementParameters measurement_params;

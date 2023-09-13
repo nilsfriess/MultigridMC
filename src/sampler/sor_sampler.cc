@@ -7,7 +7,7 @@
 
 /* Create a new instance */
 SORSampler::SORSampler(const std::shared_ptr<LinearOperator> linear_operator_,
-                       std::mt19937_64 &rng_,
+                       std::shared_ptr<RandomGenerator> rng_,
                        const double omega_,
                        const unsigned int nsmooth_,
                        const Direction direction_) : Base(linear_operator_, rng_),
@@ -42,7 +42,7 @@ void SORSampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const
         for (unsigned int ell = 0; ell < c_rhs.size(); ++ell)
         {
             double tmp = sqrt_precision_diag[ell];
-            c_rhs[ell] = tmp * normal_dist(rng) + f[ell];
+            c_rhs[ell] = tmp * rng->draw_normal() + f[ell];
         }
         // low-rank correction to covariance matrix
         if (linear_operator->get_m_lowrank() > 0)
@@ -50,7 +50,7 @@ void SORSampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const
             const LinearOperator::SparseMatrixType B = linear_operator->get_B();
             for (unsigned int ell = 0; ell < xi.size(); ++ell)
             {
-                xi[ell] = normal_dist(rng);
+                xi[ell] = rng->draw_normal();
             }
             c_rhs += B * (*Sigma_lowrank_inv_sqrt) * xi;
         }

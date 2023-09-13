@@ -6,7 +6,7 @@
 
 /** Create a new instance */
 MultigridMCSampler::MultigridMCSampler(std::shared_ptr<LinearOperator> linear_operator_,
-                                       std::mt19937_64 &rng_,
+                                       std::shared_ptr<RandomGenerator> rng_,
                                        const MultigridParameters params_,
                                        const CholeskyParameters cholesky_params_) : Sampler(linear_operator_, rng_),
                                                                                     params(params_),

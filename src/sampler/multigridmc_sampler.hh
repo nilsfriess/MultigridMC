@@ -6,6 +6,7 @@
 #include "linear_operator/linear_operator.hh"
 #include "intergrid/intergrid_operator.hh"
 #include "intergrid/intergrid_operator_linear.hh"
+#include "auxilliary/parallel_random.hh"
 #include "auxilliary/parameters.hh"
 #include "sampler.hh"
 #include "sor_sampler.hh"
@@ -32,7 +33,7 @@ public:
      * @param[in] cholesky_params_ Cholesky parameters (for coarse level Cholesky sampler)
      */
     MultigridMCSampler(std::shared_ptr<LinearOperator> linear_operator_,
-                       std::mt19937_64 &rng_,
+                       std::shared_ptr<RandomGenerator> rng_,
                        const MultigridParameters params_,
                        const CholeskyParameters cholesky_params_);
 
@@ -42,7 +43,7 @@ public:
      *
      * @param[in] random number generator to use
      */
-    virtual std::shared_ptr<Sampler> deep_copy(std::mt19937_64 &rng)
+    virtual std::shared_ptr<Sampler> deep_copy(std::shared_ptr<RandomGenerator> rng)
     {
         std::shared_ptr<LinearOperator> linear_operator_ = linear_operator->deep_copy();
         return std::make_shared<MultigridMCSampler>(linear_operator_,
