@@ -187,6 +187,8 @@ public:
     unsigned int nsamples;
     /** @brief number of warmup samples */
     unsigned int nwarmup;
+    /** @brief number of OpenMP threads using in convergence test */
+    unsigned int nthreadsconvergence;
     /** @brief number of samples used in convergence test */
     unsigned int nsamplesconvergence;
     /** @brief number of steps used in convergence test */

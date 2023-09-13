@@ -210,10 +210,12 @@ void measure_convergence(std::shared_ptr<Sampler> sampler,
     std::vector<double> x2_avg(nsteps + 1, 0.0);
     std::vector<double> x3_avg(nsteps + 1, 0.0);
     std::vector<double> x4_avg(nsteps + 1, 0.0);
-#pragma omp parallel default(none), shared(nsamples, nsteps, sample_vector, mean_x_exact, sampler, ndof, linear_operator, x_avg, x2_avg, x3_avg, x4_avg)
+#pragma omp parallel num_threads(sampling_params.nthreadsconvergence), default(none), shared(nsamples, nsteps, sample_vector, mean_x_exact, sampler, ndof, linear_operator, x_avg, x2_avg, x3_avg, x4_avg)
     {
         int thread_id = omp_get_thread_num();
         int nthreads = omp_get_num_threads();
+#pragma omp master
+        printf("Running convergence experiment on %d threads\n", nthreads);
         std::vector<double> x_avg_thread_local(nsteps + 1, 0.0);
         std::vector<double> x2_avg_thread_local(nsteps + 1, 0.0);
         std::vector<double> x3_avg_thread_local(nsteps + 1, 0.0);

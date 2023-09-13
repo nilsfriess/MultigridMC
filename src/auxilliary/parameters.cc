@@ -181,8 +181,10 @@ void SamplingParameters::parse_config(const libconfig::Setting &root)
     nwarmup = timeseries.lookup("nwarmup");
     nstepsconvergence = convergence.lookup("nsteps");
     nsamplesconvergence = convergence.lookup("nsamples");
+    nthreadsconvergence = convergence.lookup("nthreads");
     std::cout << "  timeseries: number of samples         = " << nsamples << std::endl;
     std::cout << "  timeseries: number of warmup samples  = " << nwarmup << std::endl;
+    std::cout << "  convergence test: OpenMP threads      = " << nthreadsconvergence << std::endl;
     std::cout << "  convergence test: number of steps     = " << nstepsconvergence << std::endl;
     std::cout << "  convergence test: number of samples   = " << nsamplesconvergence << std::endl;
 }
