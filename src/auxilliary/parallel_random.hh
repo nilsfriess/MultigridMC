@@ -12,6 +12,42 @@
 #include <utility>
 #include "omp.h"
 
+/** @class RandomGenerator
+ *
+ * @brief base class for random number generation
+ */
+
+class RandomGenerator
+{
+public:
+    /** @brief Constructor */
+    RandomGenerator() : epsilon(std::numeric_limits<double>::epsilon()),
+                        two_pi(2.0 * M_PI) {}
+    /** @brief draw integer random number */
+    virtual int64_t draw_int() = 0;
+
+    /** @brief draw uniform real random number
+     *
+     * Return a uniformly distributed number from the interval ]0,1[
+     * (not including the end points)
+     */
+    virtual double draw_uniform_real() = 0;
+
+    /** @brief draw normal real random number
+     *
+     * Return a random number from the normal distribution N(0,1) with density
+     *
+     *    rho(x) = 1/sqrt(2*pi)*exp(-x^2/2)
+     */
+    double draw_normal();
+
+protected:
+    /** @brief machine epsilon */
+    const double epsilon;
+    /** @brief 2*pi */
+    const double two_pi;
+};
+
 /** @class CombinedLinearCongruentialGenerator
  *
  * @brief Thread-safe Combined Linear congruential generator
@@ -35,7 +71,7 @@
  *      http://www.iro.umontreal.ca/~lecuyer/myftp/papers/cacm88.pdf
  *
  */
-class CombinedLinearCongruentialGenerator
+class CombinedLinearCongruentialGenerator : public RandomGenerator
 {
 public:
     /** @brief Constructor
@@ -50,22 +86,14 @@ public:
     CombinedLinearCongruentialGenerator();
 
     /** @brief draw integer random number */
-    int64_t draw_int();
+    virtual int64_t draw_int();
 
     /** @brief draw uniform real random number
      *
      * Return a uniformly distributed number from the interval ]0,1[
      * (not including the end points)
      */
-    double draw_uniform_real();
-
-    /** @brief draw normal real random number
-     *
-     * Return a random number from the normal distribution N(0,1) with density
-     *
-     *    rho(x) = 1/sqrt(2*pi)*exp(-x^2/2)
-     */
-    double draw_normal();
+    virtual double draw_uniform_real();
 
     /** @brief state y_{1,n} of first LCG */
     int64_t y1;
@@ -91,10 +119,6 @@ public:
     int64_t a2_multistep;
     /** @brief largest random number when drawing from interval ]0,1[; x_max = (m_1-1)/m_1*/
     const double x_max;
-    /** @brief machine epsilon */
-    const double epsilon;
-    /** @brief 2*pi */
-    const double two_pi;
 };
 
 #endif // PARALLEL_RANDOM_HH

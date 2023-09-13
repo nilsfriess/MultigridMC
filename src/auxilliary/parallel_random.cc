@@ -5,6 +5,18 @@
  * @brief Implementation of parallel_random.hh
  * */
 
+/* draw Gaussian real random number */
+double RandomGenerator::draw_normal()
+{
+    double u1, u2;
+    do
+    {
+        u1 = draw_uniform_real();
+    } while (u1 <= epsilon);
+    u2 = draw_uniform_real();
+    return sqrt(-2.0 * log(u1)) * cos(two_pi * u2);
+}
+
 /* Constructor */
 CombinedLinearCongruentialGenerator::CombinedLinearCongruentialGenerator() : a1(40014LL),
                                                                              m1(2147483563LL),
@@ -13,9 +25,7 @@ CombinedLinearCongruentialGenerator::CombinedLinearCongruentialGenerator() : a1(
                                                                              a2(40692LL),
                                                                              m2(2147483399LL),
                                                                              seed2(1LL),
-                                                                             x_max(double(m1 - 1) / double(m1)),
-                                                                             epsilon(std::numeric_limits<double>::epsilon()),
-                                                                             two_pi(2.0 * M_PI)
+                                                                             x_max(double(m1 - 1) / double(m1))
 {
     int n_threads = omp_get_num_threads();
     int thread_id = omp_get_thread_num();
@@ -56,16 +66,4 @@ double CombinedLinearCongruentialGenerator::draw_uniform_real()
     {
         return x * m1_inv;
     }
-}
-
-/* draw Gaussian real random number */
-double CombinedLinearCongruentialGenerator::draw_normal()
-{
-    double u1, u2;
-    do
-    {
-        u1 = draw_uniform_real();
-    } while (u1 <= epsilon);
-    u2 = draw_uniform_real();
-    return sqrt(-2.0 * log(u1)) * cos(two_pi * u2);
 }
