@@ -27,7 +27,7 @@ protected:
 TEST_F(RandomTest, TestParallelConsistent)
 {
     const int n_samples = 64;
-    CombinedLinearCongruentialGenerator rng_sequential;
+    CLCGenerator rng_sequential;
     std::vector<int> a_sequential(n_samples);
     std::vector<int> a_parallel(n_samples);
     for (int j = 0; j < n_samples; ++j)
@@ -43,7 +43,7 @@ TEST_F(RandomTest, TestParallelConsistent)
                 std::cout << "Warning: running on one thread only!" << std::endl;
             }
         }
-        CombinedLinearCongruentialGenerator rng_parallel;
+        CLCGenerator rng_parallel;
         for (int j = thread_id; j < n_samples; j += n_threads)
             a_parallel[j] = rng_parallel.draw_int();
     }
@@ -55,7 +55,7 @@ TEST_F(RandomTest, TestUniform)
 {
     const int n_samples = 1 << 24;
     const int n_bins = 32;
-    CombinedLinearCongruentialGenerator rng;
+    CLCGenerator rng;
     std::vector<double> histogram(n_bins);
     double x_min = 1.1;
     double x_max = 3.4;
@@ -84,7 +84,7 @@ TEST_F(RandomTest, TestNormal)
 {
     const int n_samples = 1 << 24;
     const int n_bins = 64;
-    CombinedLinearCongruentialGenerator rng;
+    CLCGenerator rng;
     std::vector<double> histogram(n_bins);
     double x_min = -10.0;
     double x_max = +10.0;

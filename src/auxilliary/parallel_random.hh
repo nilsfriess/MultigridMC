@@ -71,7 +71,7 @@ protected:
  *      http://www.iro.umontreal.ca/~lecuyer/myftp/papers/cacm88.pdf
  *
  */
-class CombinedLinearCongruentialGenerator : public RandomGenerator
+class CLCGenerator : public RandomGenerator
 {
 public:
     /** @brief Constructor
@@ -83,7 +83,7 @@ public:
      * @param[in] m2 period in update rule of second LCG
      * @param[in] seed2 seed of second LCG
      */
-    CombinedLinearCongruentialGenerator();
+    CLCGenerator();
 
     /** @brief draw integer random number */
     virtual int64_t draw_int();

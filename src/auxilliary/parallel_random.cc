@@ -18,7 +18,7 @@ double RandomGenerator::draw_normal()
 }
 
 /* Constructor */
-CombinedLinearCongruentialGenerator::CombinedLinearCongruentialGenerator() : a1(40014LL),
+CLCGenerator::CLCGenerator() : a1(40014LL),
                                                                              m1(2147483563LL),
                                                                              m1_inv(1. / 2147483563.),
                                                                              seed1(1LL),
@@ -46,7 +46,7 @@ CombinedLinearCongruentialGenerator::CombinedLinearCongruentialGenerator() : a1(
 }
 
 /* draw integer random number */
-int64_t CombinedLinearCongruentialGenerator::draw_int()
+int64_t CLCGenerator::draw_int()
 {
     int64_t x = (y1 - y2 + m1 - 1) % (m1 - 1);
     y1 = (a1_multistep * y1) % m1;
@@ -55,7 +55,7 @@ int64_t CombinedLinearCongruentialGenerator::draw_int()
 }
 
 /* draw uniform real random number */
-double CombinedLinearCongruentialGenerator::draw_uniform_real()
+double CLCGenerator::draw_uniform_real()
 {
     int64_t x = draw_int();
     if (x == 0LL)

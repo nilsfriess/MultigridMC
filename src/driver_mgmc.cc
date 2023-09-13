@@ -445,7 +445,7 @@ int main(int argc, char *argv[])
         exit(-1);
     }
     // Construct samplers
-    std::shared_ptr<CombinedLinearCongruentialGenerator> rng = std::make_shared<CombinedLinearCongruentialGenerator>();
+    std::shared_ptr<CLCGenerator> rng = std::make_shared<CLCGenerator>();
     std::shared_ptr<Sampler> multigridmc_sampler = std::make_shared<MultigridMCSampler>(linear_operator,
                                                                                         rng,
                                                                                         multigrid_params,
