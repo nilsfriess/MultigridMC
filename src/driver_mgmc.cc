@@ -522,10 +522,13 @@ int main(int argc, char *argv[])
                               measurement_params,
                               "SSOR",
                               "timeseries_ssor.txt");
-        measure_convergence(ssor_sampler,
-                            sampling_params,
-                            measurement_params,
-                            "convergence_ssor.txt");
+        if (general_params.measure_convergence)
+        {
+            measure_convergence(ssor_sampler,
+                                sampling_params,
+                                measurement_params,
+                                "convergence_ssor.txt");
+        }
         std::cout << std::endl;
     }
     if (general_params.do_multigridmc)
@@ -536,10 +539,13 @@ int main(int argc, char *argv[])
                               measurement_params,
                               "MGMC",
                               "timeseries_multigridmc.txt");
-        measure_convergence(multigridmc_sampler,
-                            sampling_params,
-                            measurement_params,
-                            "convergence_multigridmc.txt");
+        if (general_params.measure_convergence)
+        {
+            measure_convergence(multigridmc_sampler,
+                                sampling_params,
+                                measurement_params,
+                                "convergence_multigridmc.txt");
+        }
         if (general_params.save_posterior_statistics)
         {
             posterior_statistics(multigridmc_sampler,
