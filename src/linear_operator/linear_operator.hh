@@ -180,8 +180,11 @@ public:
             DenseMatrixType B_bar = solver.solve(B);
             DenseMatrixType Sigma = get_Sigma().toDenseMatrix();
             DenseMatrixType Sigma_inv = (Sigma + B.transpose() * B_bar).inverse();
-            mean += b_obs_bar.dot(B * Sigma_inv * (y - B.transpose() * xbar));
-            variance -= b_obs_bar.dot(B * Sigma_inv * B.transpose() * b_obs_bar);
+
+            Eigen::VectorXd z1 = Sigma_inv * (y - B.transpose() * xbar);
+            mean += b_obs_bar.dot(B * z1);
+            Eigen::VectorXd z2 = B.transpose() * b_obs_bar;
+            variance -= z2.dot(Sigma_inv * z2);
         }
     }
 
