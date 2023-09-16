@@ -299,7 +299,7 @@ void measure_convergence(std::shared_ptr<Sampler> sampler,
             out << "**** q_k = |Var[z^k] - Var[z]| **** " << std::endl;
             label = "variance";
         }
-        char buffer[128];
+        char buffer[256];
         sprintf(buffer, "  %12s   %3s : %12s %35s %35s\n", "", "k", "q_k", "q_k/q_0", "q_k/q_{k-1}");
         out << buffer;
         for (int j = 0; j <= sampling_params.nstepsconvergence; ++j)
