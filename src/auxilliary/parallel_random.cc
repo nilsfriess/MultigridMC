@@ -32,27 +32,27 @@ double RandomGenerator::draw_normal()
 }
 
 /* Constructor */
-CLCGenerator::CLCGenerator() : a1(40014LL),
-                               m1(2147483563LL),
+CLCGenerator::CLCGenerator() : a1(40014),
+                               m1(2147483563),
                                m1_inv(1. / 2147483563.),
-                               seed1(1LL),
-                               a2(40692LL),
-                               m2(2147483399LL),
-                               seed2(1LL),
+                               seed1(1),
+                               a2(40692),
+                               m2(2147483399),
+                               seed2(1),
                                x_max(double(m1 - 1) / double(m1))
 {
     int n_threads = omp_get_num_threads();
     int thread_id = omp_get_thread_num();
-    a1_multistep = a1;
-    a2_multistep = a2;
+    a1_multistep = (int64_t)a1;
+    a2_multistep = (int64_t)a2;
     y1 = seed1;
     y2 = seed2;
     for (int j = 1; j < n_threads; ++j)
     {
         if (j <= thread_id)
         {
-            y1 = (a1 * y1) % m1;
-            y2 = (a2 * y2) % m2;
+            y1 = ((int64_t)a1 * y1) % m1;
+            y2 = ((int64_t)a2 * y2) % m2;
         }
         a1_multistep = (a1_multistep * a1) % m1;
         a2_multistep = (a2_multistep * a2) % m2;
@@ -60,9 +60,11 @@ CLCGenerator::CLCGenerator() : a1(40014LL),
 }
 
 /* draw integer random number */
-int64_t CLCGenerator::draw_int()
+int32_t CLCGenerator::draw_int()
 {
-    int64_t x = (y1 - y2 + m1 - 1) % (m1 - 1);
+    int32_t x = y1 - y2;
+    if (x < 1)
+        x += m1 - 1;
     y1 = (a1_multistep * y1) % m1;
     y2 = (a2_multistep * y2) % m2;
     return x;
@@ -71,13 +73,6 @@ int64_t CLCGenerator::draw_int()
 /* draw uniform real random number */
 double CLCGenerator::draw_uniform_real()
 {
-    int64_t x = draw_int();
-    if (x == 0LL)
-    {
-        return x_max;
-    }
-    else
-    {
-        return x * m1_inv;
-    }
+    int32_t x = draw_int();
+    return x * m1_inv;
 }

@@ -25,7 +25,7 @@ public:
                         two_pi(2.0 * M_PI),
                         box_muller_redraw(true) {}
     /** @brief draw integer random number */
-    virtual int64_t draw_int() = 0;
+    virtual int32_t draw_int() = 0;
 
     /** @brief draw uniform real random number
      *
@@ -93,7 +93,7 @@ public:
     CLCGenerator();
 
     /** @brief draw integer random number */
-    virtual int64_t draw_int();
+    virtual int32_t draw_int();
 
     /** @brief draw uniform real random number
      *
@@ -103,23 +103,23 @@ public:
     virtual double draw_uniform_real();
 
     /** @brief state y_{1,n} of first LCG */
-    int64_t y1;
+    int32_t y1;
     /** @brief state y_{2,n} of second LCG */
-    int64_t y2;
+    int32_t y2;
     /** @brief multiplier a_1 of first LCG */
-    const int64_t a1;
+    const int32_t a1;
     /** @brief period m_1 of first LCG */
-    const int64_t m1;
+    const int32_t m1;
     /** @brief inverse 1/m_1 of m_1*/
     const double m1_inv;
     /** @brief seed y_{1,0} of first LCG */
-    const int64_t seed1;
+    const int32_t seed1;
     /** @brief multiplier a_1 of second LCG */
-    const int64_t a2;
+    const int32_t a2;
     /** @brief period m_2 of second LCG */
-    const int64_t m2;
+    const int32_t m2;
     /** @brief seed y_{2,0} of second LCG */
-    const int64_t seed2;
+    const int32_t seed2;
     /** @brief multiplier a_1^{n_threads} mod m_1 for first LCG in parallel case */
     int64_t a1_multistep;
     /** @brief multiplier a_2^{n_threads} mod m_2 for second LCG in parallel case */
