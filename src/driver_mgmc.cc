@@ -233,15 +233,17 @@ void measure_convergence(std::shared_ptr<Sampler> sampler,
         int nsamples_thread_local = k_max - k_min;
         for (int k = 0; k < nsamples_thread_local; ++k)
         {
+
             x.setZero();
-            for (int j = 1; j <= nsteps; ++j)
+            for (int j = 0; j <= nsteps; ++j)
             {
-                thread_local_sampler->apply(f, x);
                 double z = sample_vector.dot(x);
                 x_avg_thread_local[j] += (z - x_avg_thread_local[j]) / (k + 1.0);
                 x2_avg_thread_local[j] += (z * z - x2_avg_thread_local[j]) / (k + 1.0);
                 x3_avg_thread_local[j] += (z * z * z - x3_avg_thread_local[j]) / (k + 1.0);
                 x4_avg_thread_local[j] += (z * z * z * z - x4_avg_thread_local[j]) / (k + 1.0);
+                if (j < nsteps)
+                    thread_local_sampler->apply(f, x);
             }
         }
         // Combine the thread-local averages into a global average
@@ -261,11 +263,11 @@ void measure_convergence(std::shared_ptr<Sampler> sampler,
     }
     // compute exact mean and variance in the stationary chain
     double mean_exact, variance_exact;
-    measured_operator->observed_mean_and_variance(xbar,
-                                                  y,
-                                                  sample_vector,
-                                                  mean_exact,
-                                                  variance_exact);
+    linear_operator->observed_mean_and_variance(xbar,
+                                                y,
+                                                sample_vector,
+                                                mean_exact,
+                                                variance_exact);
     // difference between true mean/variance and sample mean/variance at step k of the chain
     std::vector<double> diff_mean;
     std::vector<double> diff_variance;
