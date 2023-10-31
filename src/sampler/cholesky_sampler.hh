@@ -43,18 +43,6 @@ public:
                                                              xi(linear_operator_->get_ndof()),
                                                              g_rhs(nullptr) {}
 
-    /** @brief deep copy
-     *
-     * Create a deep copy of object, while using a specified random number generator
-     *
-     * @param[in] random number generator to use
-     */
-    virtual std::shared_ptr<Sampler> deep_copy(std::shared_ptr<RandomGenerator> rng)
-    {
-        const std::shared_ptr<LinearOperator> linear_operator_ = linear_operator->deep_copy();
-        return std::make_shared<CholeskySampler>(linear_operator_, rng);
-    };
-
     /** @brief Draw a new sample x
      *
      * @param[in] f right hand side
@@ -135,6 +123,18 @@ public:
                           std::shared_ptr<RandomGenerator> rng_,
                           const bool verbose_ = false);
 
+    /** @brief deep copy
+     *
+     * Create a deep copy of object, while using a specified random number generator
+     *
+     * @param[in] random number generator to use
+     */
+    virtual std::shared_ptr<Sampler> deep_copy(std::shared_ptr<RandomGenerator> rng)
+    {
+        const std::shared_ptr<LinearOperator> linear_operator_ = linear_operator->deep_copy();
+        return std::make_shared<SparseCholeskySampler>(linear_operator_, rng);
+    };
+
 protected:
     using Base::xi;
 };
@@ -156,6 +156,18 @@ public:
      */
     DenseCholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
                          std::shared_ptr<RandomGenerator> rng_);
+
+    /** @brief deep copy
+     *
+     * Create a deep copy of object, while using a specified random number generator
+     *
+     * @param[in] random number generator to use
+     */
+    virtual std::shared_ptr<Sampler> deep_copy(std::shared_ptr<RandomGenerator> rng)
+    {
+        const std::shared_ptr<LinearOperator> linear_operator_ = linear_operator->deep_copy();
+        return std::make_shared<DenseCholeskySampler>(linear_operator_, rng);
+    };
 };
 
 /* ******************** factory classes ****************************** */

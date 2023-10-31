@@ -233,7 +233,6 @@ void measure_convergence(std::shared_ptr<Sampler> sampler,
         int nsamples_thread_local = k_max - k_min;
         for (int k = 0; k < nsamples_thread_local; ++k)
         {
-
             x.setZero();
             for (int j = 0; j <= nsteps; ++j)
             {
@@ -515,6 +514,13 @@ int main(int argc, char *argv[])
                               "Cholesky",
                               "timeseries_cholesky.txt");
         std::cout << std::endl;
+        if (general_params.measure_convergence)
+        {
+            measure_convergence(cholesky_sampler,
+                                sampling_params,
+                                measurement_params,
+                                "convergence_cholesky.txt");
+        }
     }
     if (general_params.do_ssor)
     {
