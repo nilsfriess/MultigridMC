@@ -112,3 +112,18 @@ void LowRankCholeskySampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x)
     /* ==== Step 6 ==== solve U x = xi for x */
     LLT_of_A->solveLT(xi, x);
 }
+
+/* fix the right hand side vector g from a given f */
+void LowRankCholeskySampler::fix_rhs(const Eigen::VectorXd &f)
+{
+
+    g_rhs = std::make_shared<Eigen::VectorXd>(f.size());
+    // ==== Step 1 ==== solve U^T g = f
+    LLT_of_A->solveL(f, *g_rhs);
+    // ==== Step 2 ==== Set g -> g + Q (W-Id) (Q^T g)
+    if (linear_operator->get_m_lowrank())
+    {
+        Eigen::VectorXd Q_Tg = Q->transpose() * (*g_rhs);
+        (*g_rhs) += (*Q_W) * Q_Tg;
+    }
+}

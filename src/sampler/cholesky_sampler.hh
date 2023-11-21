@@ -204,7 +204,7 @@ public:
      */
     LowRankCholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
                            std::shared_ptr<RandomGenerator> rng_,
-                           const bool verbose_);
+                           const bool verbose_ = false);
 
     /** @brief Draw a new sample x
      *
@@ -222,19 +222,7 @@ public:
      * @param[in] f right hand side f that appears in the exponent of the
      *            probability density.
      */
-    virtual void fix_rhs(const Eigen::VectorXd &f)
-    {
-
-        g_rhs = std::make_shared<Eigen::VectorXd>(f.size());
-        // ==== Step 1 ==== solve U^T g = f
-        LLT_of_A->solveL(f, *g_rhs);
-        // ==== Step 2 ==== Set g -> g + Q (W-Id) (Q^T g)
-        if (linear_operator->get_m_lowrank())
-        {
-            Eigen::VectorXd Q_Tg = Q->transpose() * (*g_rhs);
-            (*g_rhs) += (*Q_W) * Q_Tg;
-        }
-    }
+    virtual void fix_rhs(const Eigen::VectorXd &f);
 
     /** @brief unfix the right hand side vector g
      *
@@ -245,6 +233,18 @@ public:
     {
         g_rhs = nullptr;
     }
+
+    /** @brief deep copy
+     *
+     * Create a deep copy of object, while using a specified random number generator
+     *
+     * @param[in] random number generator to use
+     */
+    virtual std::shared_ptr<Sampler> deep_copy(std::shared_ptr<RandomGenerator> rng)
+    {
+        const std::shared_ptr<LinearOperator> linear_operator_ = linear_operator->deep_copy();
+        return std::make_shared<LowRankCholeskySampler>(linear_operator_, rng);
+    };
 
 protected:
     /** @brief Cholesky factorisation */
