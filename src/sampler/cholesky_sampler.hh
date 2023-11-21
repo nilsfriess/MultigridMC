@@ -170,6 +170,102 @@ public:
     };
 };
 
+/** @class LowRankCholeskySampler
+ *
+ * @brief Class for sampler based on Cholesky factorisation with low-rank correction
+ *
+ *  Setup:
+ *      1. Compute the (sparse) Cholesky factorisation U^T U = A of the system matrix A
+ *      2. Compute the n x m matrix V by solving U^T V = B
+ *      3. Compute the QR decomposition V = QR of V where Q is a n x m matrix with
+ *         orthonormal columns and R is a m x m matrix
+ *      4. Compute the m x m matrix Lambda = R ( Sigma + V^T V)^{-1} R^T
+ *      5. Compute the (dense) Cholesky factorisation W^T W = Id - Lambda of Id - Lambda
+ *
+ *  Computation of RHS (can be done in setup if f is fixed):
+ *      1. Given the RHS f, solve the triangular U^T g = f for g
+ *      2. Compute zeta = g + Q_{W} (Q^T g) with Q_{W} := Q (W - Id)
+ *
+ *  Sampling:
+ *      1. Draw multivariate normal xi ~ N(zeta, Id)
+ *      2. Set eta = xi + Q_{W^T} (Q^T xi) with Q_{W^T} := Q (W^T - Id)
+ *      3. Solve the triangular system U x = eta for x
+ */
+
+class LowRankCholeskySampler : public Sampler
+{
+public:
+    /** @brief Base type*/
+    typedef Sampler Base;
+    /** @brief Create a new instance
+     *
+     * @param[in] linear_operator_ underlying linear operator
+     * @param[in] rng_ random number generator
+     */
+    LowRankCholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
+                           std::shared_ptr<RandomGenerator> rng_,
+                           const bool verbose_);
+
+    /** @brief Draw a new sample x
+     *
+     * @param[in] f right hand side
+     * @param[inout] x new sample
+     */
+    virtual void apply(const Eigen::VectorXd &f, Eigen::VectorXd &x) const;
+
+    /** @brief fix the right hand side vector g from a given f
+     *
+     * Compute g from given RHS  by solving U^T g = f
+     * once. This will then avoid the repeated solution of this triangular
+     * system whenever apply() is called.
+     *
+     * @param[in] f right hand side f that appears in the exponent of the
+     *            probability density.
+     */
+    virtual void fix_rhs(const Eigen::VectorXd &f)
+    {
+
+        g_rhs = std::make_shared<Eigen::VectorXd>(f.size());
+        // ==== Step 1 ==== solve U^T g = f
+        LLT_of_A->solveL(f, *g_rhs);
+        // ==== Step 2 ==== Set g -> g + Q (W-Id) (Q^T g)
+        if (linear_operator->get_m_lowrank())
+        {
+            Eigen::VectorXd Q_Tg = Q->transpose() * (*g_rhs);
+            (*g_rhs) += (*Q_W) * Q_Tg;
+        }
+    }
+
+    /** @brief unfix the right hand side vector g
+     *
+     * Set the pointer to zero, which will force the solve for g in every
+     * call to the apply() method.
+     */
+    virtual void unfix_rhs()
+    {
+        g_rhs = nullptr;
+    }
+
+protected:
+    /** @brief Cholesky factorisation */
+    std::shared_ptr<SparseLLTType> LLT_of_A;
+    /** @brief vector with normal random variables */
+    mutable Eigen::VectorXd xi;
+    /** @brief first modified right hand side vector */
+    mutable std::shared_ptr<Eigen::VectorXd> g_rhs;
+    /** @brief second modified right hand side vector */
+    mutable std::shared_ptr<Eigen::VectorXd> zeta;
+    /** @brief the small m x m matrix that arises in the QR factorisation of V = U^{-T} B*/
+    std::shared_ptr<LinearOperator::DenseMatrixType> R;
+    /** @brief the n x m matrix that arises in the QR factorisation of V = U^{-T} B;
+     * the columns of Q form an orthonormal system */
+    std::shared_ptr<LinearOperator::DenseMatrixType> Q;
+    /** @brief the matrix Q (W^T - Id) */
+    std::shared_ptr<LinearOperator::DenseMatrixType> Q_W_T;
+    /** @brief the matrix Q (W - Id) */
+    std::shared_ptr<LinearOperator::DenseMatrixType> Q_W;
+};
+
 /* ******************** factory classes ****************************** */
 
 /** @brief Cholesky sampler factory */
