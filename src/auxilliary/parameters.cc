@@ -82,7 +82,7 @@ void LatticeParameters::parse_config(const libconfig::Setting &root)
 void CholeskyParameters::parse_config(const libconfig::Setting &root)
 {
     const libconfig::Setting &cholesky = root["cholesky"];
-    std::string fac_str = cholesky.lookup("factorisation");
+    std::string fac_str = cholesky.lookup("factorisation").c_str();
     if (fac_str == "sparse")
     {
         factorisation = SparseFactorisation;
