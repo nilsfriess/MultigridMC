@@ -253,8 +253,6 @@ protected:
     mutable Eigen::VectorXd xi;
     /** @brief modified right hand side vector */
     mutable Eigen::VectorXd g_rhs;
-    /** @brief the small m x m matrix that arises in the QR factorisation of V = U^{-T} B*/
-    std::shared_ptr<LinearOperator::DenseMatrixType> R;
     /** @brief the n x m matrix that arises in the QR factorisation of V = U^{-T} B;
      * the columns of Q form an orthonormal system */
     std::shared_ptr<LinearOperator::DenseMatrixType> Q;

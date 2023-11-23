@@ -53,7 +53,6 @@ LowRankCholeskySampler::LowRankCholeskySampler(const std::shared_ptr<LinearOpera
     const unsigned int m = linear_operator->get_m_lowrank();
     if (include_lowrank_correction)
     {
-
         // Include contribution from low rank correction
         const LinearOperator::SparseMatrixType &B = linear_operator->get_B();
         const LinearOperator::DenseMatrixType Sigma = linear_operator->get_Sigma().toDenseMatrix();
@@ -61,19 +60,20 @@ LowRankCholeskySampler::LowRankCholeskySampler(const std::shared_ptr<LinearOpera
         //         for each column b_j of B = (b_0,...,b_{m-1})
         LinearOperator::DenseMatrixType V(n, m);
         // loop over columns j and solve U^T v_j = b_j
+        Eigen::VectorXd v_col(n);
         for (int j = 0; j < m; ++j)
         {
-            Eigen::VectorXd v_col(n);
             LLT_of_A->solveL(B.col(j), v_col);
             V.col(j) = v_col;
         }
         // ==== Step 3 ==== Compute the QR decomposition V = QR of V
         Eigen::HouseholderQR<LinearOperator::DenseMatrixType> qr(V);
-        Q = std::make_shared<LinearOperator::DenseMatrixType>(qr.householderQ());
-        R = std::make_shared<LinearOperator::DenseMatrixType>(Q->transpose() * V);
+        LinearOperator::DenseMatrixType Id_nxm = LinearOperator::DenseMatrixType::Identity(n, m);
+        Q = std::make_shared<LinearOperator::DenseMatrixType>(qr.householderQ() * Id_nxm);
+        LinearOperator::DenseMatrixType R = Q->transpose() * V;
         // ==== Step 4 ==== Compute the matrix Id - Lambda = Id - R ( Gamma + B A^{-1} B^T)^{-1} R^T
         LinearOperator::DenseMatrixType Id_mxm = LinearOperator::DenseMatrixType::Identity(m, m);
-        LinearOperator::DenseMatrixType Id_minus_Lambda = Id_mxm - (*R) * (Sigma + V.transpose() * V) * R->transpose();
+        LinearOperator::DenseMatrixType Id_minus_Lambda = Id_mxm - R * (Sigma + V.transpose() * V).inverse() * R.transpose();
         // ==== Step 5 ==== Compute the (dense) Cholesky factorisation W^T W = Id - Lambda
         Eigen::LLT<LinearOperator::DenseMatrixType, Eigen::Lower> dense_llt(Id_minus_Lambda);
 
@@ -106,7 +106,7 @@ void LowRankCholeskySampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x)
     // ==== Step 5 ==== Set xi -> xi + Q (W^T-Id) (Q^T g)
     if (include_lowrank_correction)
     {
-        Eigen::VectorXd Q_Txi = Q->transpose() * (xi);
+        Eigen::VectorXd Q_Txi = Q->transpose() * xi;
         xi += (*Q_W_T) * Q_Txi;
     }
     /* ==== Step 6 ==== solve U x = xi for x */
