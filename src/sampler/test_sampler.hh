@@ -88,7 +88,7 @@ protected:
 };
 
 /** @brief fixture class for sampler tests */
-class SamplerTest : public ::testing::Test
+class SamplerTest : public ::testing::TestWithParam<bool>
 {
 protected:
     /** @brief initialise tests */
@@ -151,27 +151,44 @@ protected:
         double error_covariance = (covariance - covariance_exact).lpNorm<Eigen::Infinity>();
         return std::make_pair(error_mean, error_covariance);
     }
-
-protected:
 };
+
+INSTANTIATE_TEST_SUITE_P(LowRankCorrection,
+                         SamplerTest,
+                         testing::Values(false, true));
 
 /* Test sparse Cholesky sampler without / with low rank correction
  *
  * Draw a large number of samples and check that their covariance agrees with
  * the analytical value of the covariance.
  */
-TEST_F(SamplerTest, TestSparseCholeskySampler1d)
+TEST_P(SamplerTest, TestSparseCholeskySampler1d)
 {
-    for (bool lowrank_correction : {false, true})
-    {
-        std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
-        std::shared_ptr<CLCGenerator> rng = std::make_shared<CLCGenerator>();
-        std::shared_ptr<SparseCholeskySampler> sampler = std::make_shared<SparseCholeskySampler>(linear_operator, rng);
-        std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, 500000);
-        const double tolerance = 2.E-3;
-        EXPECT_NEAR(error.first, 0.0, tolerance);
-        EXPECT_NEAR(error.second, 0.0, tolerance);
-    }
+    bool lowrank_correction = GetParam();
+    std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
+    std::shared_ptr<CLCGenerator> rng = std::make_shared<CLCGenerator>();
+    std::shared_ptr<SparseCholeskySampler> sampler = std::make_shared<SparseCholeskySampler>(linear_operator, rng);
+    std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, 500000);
+    const double tolerance = 2.E-3;
+    EXPECT_NEAR(error.first, 0.0, tolerance);
+    EXPECT_NEAR(error.second, 0.0, tolerance);
+}
+
+/* Test low rank Cholesky sampler without / with low rank correction
+ *
+ * Draw a large number of samples and check that their covariance agrees with
+ * the analytical value of the covariance.
+ */
+TEST_P(SamplerTest, TestLowRankCholeskySampler1d)
+{
+    bool lowrank_correction = GetParam();
+    std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
+    std::shared_ptr<CLCGenerator> rng = std::make_shared<CLCGenerator>();
+    std::shared_ptr<LowRankCholeskySampler> sampler = std::make_shared<LowRankCholeskySampler>(linear_operator, rng);
+    std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, 500000);
+    const double tolerance = 2.E-3;
+    EXPECT_NEAR(error.first, 0.0, tolerance);
+    EXPECT_NEAR(error.second, 0.0, tolerance);
 }
 
 /* Test dense Cholesky sampler without / with low rank correction
@@ -179,18 +196,16 @@ TEST_F(SamplerTest, TestSparseCholeskySampler1d)
  * Draw a large number of samples and check that their covariance agrees with
  * the analytical value of the covariance.
  */
-TEST_F(SamplerTest, TestDenseCholeskySampler1d)
+TEST_P(SamplerTest, TestDenseCholeskySampler1d)
 {
-    for (bool lowrank_correction : {false, true})
-    {
-        std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
-        std::shared_ptr<CLCGenerator> rng = std::make_shared<CLCGenerator>();
-        std::shared_ptr<DenseCholeskySampler> sampler = std::make_shared<DenseCholeskySampler>(linear_operator, rng);
-        std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, 500000);
-        const double tolerance = 2.E-3;
-        EXPECT_NEAR(error.first, 0.0, tolerance);
-        EXPECT_NEAR(error.second, 0.0, tolerance);
-    }
+    bool lowrank_correction = GetParam();
+    std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
+    std::shared_ptr<CLCGenerator> rng = std::make_shared<CLCGenerator>();
+    std::shared_ptr<DenseCholeskySampler> sampler = std::make_shared<DenseCholeskySampler>(linear_operator, rng);
+    std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, 500000);
+    const double tolerance = 2.E-3;
+    EXPECT_NEAR(error.first, 0.0, tolerance);
+    EXPECT_NEAR(error.second, 0.0, tolerance);
 }
 
 /* Test SSOR sampler without / with low rank correction
@@ -198,22 +213,20 @@ TEST_F(SamplerTest, TestDenseCholeskySampler1d)
  * Draw a large number of samples and check that their covariance agrees with
  * the analytical value of the covariance.
  */
-TEST_F(SamplerTest, TestSSORSampler1d)
+TEST_P(SamplerTest, TestSSORSampler1d)
 {
-    for (bool lowrank_correction : {false, true})
-    {
-        std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
-        std::shared_ptr<CLCGenerator> rng = std::make_shared<CLCGenerator>();
-        const double omega = 0.8;
-        std::shared_ptr<SSORSampler> sampler = std::make_shared<SSORSampler>(linear_operator,
-                                                                             rng,
-                                                                             omega,
-                                                                             1);
-        std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, 500000);
-        const double tolerance = 2.E-3;
-        EXPECT_NEAR(error.first, 0.0, tolerance);
-        EXPECT_NEAR(error.second, 0.0, tolerance);
-    }
+    bool lowrank_correction = GetParam();
+    std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
+    std::shared_ptr<CLCGenerator> rng = std::make_shared<CLCGenerator>();
+    const double omega = 0.8;
+    std::shared_ptr<SSORSampler> sampler = std::make_shared<SSORSampler>(linear_operator,
+                                                                         rng,
+                                                                         omega,
+                                                                         1);
+    std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, 500000);
+    const double tolerance = 2.E-3;
+    EXPECT_NEAR(error.first, 0.0, tolerance);
+    EXPECT_NEAR(error.second, 0.0, tolerance);
 }
 
 /* Test Multigrid MC sampler without / with low rank correction
@@ -221,35 +234,33 @@ TEST_F(SamplerTest, TestSSORSampler1d)
  * Draw a large number of samples and check that their covariance agrees with
  * the analytical value of the covariance.
  */
-TEST_F(SamplerTest, TestMultigridMCSampler1d)
+TEST_P(SamplerTest, TestMultigridMCSampler1d)
 {
-    for (bool lowrank_correction : {false, true})
-    {
-        MultigridParameters multigrid_params;
-        multigrid_params.nlevel = 3;
-        multigrid_params.smoother = "SSOR";
-        multigrid_params.coarse_solver = "Cholesky";
-        multigrid_params.npresmooth = 1;
-        multigrid_params.npostsmooth = 1;
-        multigrid_params.ncoarsesmooth = 1;
-        multigrid_params.omega = 1.0;
-        multigrid_params.cycle = 1;
-        multigrid_params.coarse_scaling = 1.0;
-        multigrid_params.verbose = 0;
-        CholeskyParameters cholesky_params;
-        cholesky_params.factorisation = SparseFactorisation;
+    bool lowrank_correction = GetParam();
+    MultigridParameters multigrid_params;
+    multigrid_params.nlevel = 3;
+    multigrid_params.smoother = "SSOR";
+    multigrid_params.coarse_solver = "Cholesky";
+    multigrid_params.npresmooth = 1;
+    multigrid_params.npostsmooth = 1;
+    multigrid_params.ncoarsesmooth = 1;
+    multigrid_params.omega = 1.0;
+    multigrid_params.cycle = 1;
+    multigrid_params.coarse_scaling = 1.0;
+    multigrid_params.verbose = 0;
+    CholeskyParameters cholesky_params;
+    cholesky_params.factorisation = SparseFactorisation;
 
-        std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
-        std::shared_ptr<CLCGenerator> rng = std::make_shared<CLCGenerator>();
-        std::shared_ptr<MultigridMCSampler> sampler = std::make_shared<MultigridMCSampler>(linear_operator,
-                                                                                           rng,
-                                                                                           multigrid_params,
-                                                                                           cholesky_params);
-        std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, 1000000);
-        const double tolerance = 2.E-3;
-        EXPECT_NEAR(error.first, 0.0, tolerance);
-        EXPECT_NEAR(error.second, 0.0, tolerance);
-    }
+    std::shared_ptr<TestOperator1d> linear_operator = std::make_shared<TestOperator1d>(lowrank_correction);
+    std::shared_ptr<CLCGenerator> rng = std::make_shared<CLCGenerator>();
+    std::shared_ptr<MultigridMCSampler> sampler = std::make_shared<MultigridMCSampler>(linear_operator,
+                                                                                       rng,
+                                                                                       multigrid_params,
+                                                                                       cholesky_params);
+    std::pair<double, double> error = mean_covariance_error(linear_operator, sampler, 1000000);
+    const double tolerance = 2.E-3;
+    EXPECT_NEAR(error.first, 0.0, tolerance);
+    EXPECT_NEAR(error.second, 0.0, tolerance);
 }
 
 /* Test Multigrid MC sampler without / with low rank correction in 2d
