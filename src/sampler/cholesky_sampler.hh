@@ -41,7 +41,8 @@ public:
     CholeskySampler(const std::shared_ptr<LinearOperator> linear_operator_,
                     std::shared_ptr<RandomGenerator> rng_) : Base(linear_operator_, rng_),
                                                              xi(linear_operator_->get_ndof()),
-                                                             g_rhs(nullptr) {}
+                                                             g_rhs(linear_operator_->get_ndof()),
+                                                             rhs_is_fixed(false) {}
 
     /** @brief Draw a new sample x
      *
@@ -55,15 +56,13 @@ public:
         {
             xi[ell] = rng->draw_normal();
         }
-        std::shared_ptr<Eigen::VectorXd> g = g_rhs;
-        if (g == nullptr)
+        if (not(rhs_is_fixed))
         {
             /* step 2: solve U^T g = f */
-            g = std::make_shared<Eigen::VectorXd>(xi.size());
-            LLT_of_A->solveL(f, *g);
+            LLT_of_A->solveL(f, g_rhs);
         }
         /* step 3: solve U x = xi + g for x */
-        LLT_of_A->solveLT(xi + (*g), x);
+        LLT_of_A->solveLT(xi + g_rhs, x);
     }
 
     /** @brief fix the right hand side vector g from a given f
@@ -77,9 +76,8 @@ public:
      */
     virtual void fix_rhs(const Eigen::VectorXd &f)
     {
-        /* step 2: solve U^T g = f */
-        g_rhs = std::make_shared<Eigen::VectorXd>(f.size());
-        LLT_of_A->solveL(f, *g_rhs);
+        LLT_of_A->solveL(f, g_rhs);
+        rhs_is_fixed = true;
     }
 
     /** @brief unfix the right hand side vector g
@@ -89,7 +87,7 @@ public:
      */
     virtual void unfix_rhs()
     {
-        g_rhs = nullptr;
+        rhs_is_fixed = false;
     }
 
 protected:
@@ -98,7 +96,9 @@ protected:
     /** @brief vector with normal random variables */
     mutable Eigen::VectorXd xi;
     /** @brief modified right hand side vector */
-    mutable std::shared_ptr<Eigen::VectorXd> g_rhs;
+    mutable Eigen::VectorXd g_rhs;
+    /** @brief has the RHS vector been fixed? */
+    mutable bool rhs_is_fixed;
 };
 
 #ifndef NCHOLMOD
@@ -231,7 +231,7 @@ public:
      */
     virtual void unfix_rhs()
     {
-        g_rhs = nullptr;
+        rhs_is_fixed = false;
     }
 
     /** @brief deep copy
@@ -251,10 +251,8 @@ protected:
     std::shared_ptr<SparseLLTType> LLT_of_A;
     /** @brief vector with normal random variables */
     mutable Eigen::VectorXd xi;
-    /** @brief first modified right hand side vector */
-    mutable std::shared_ptr<Eigen::VectorXd> g_rhs;
-    /** @brief second modified right hand side vector */
-    mutable std::shared_ptr<Eigen::VectorXd> zeta;
+    /** @brief modified right hand side vector */
+    mutable Eigen::VectorXd g_rhs;
     /** @brief the small m x m matrix that arises in the QR factorisation of V = U^{-T} B*/
     std::shared_ptr<LinearOperator::DenseMatrixType> R;
     /** @brief the n x m matrix that arises in the QR factorisation of V = U^{-T} B;
@@ -264,6 +262,10 @@ protected:
     std::shared_ptr<LinearOperator::DenseMatrixType> Q_W_T;
     /** @brief the matrix Q (W - Id) */
     std::shared_ptr<LinearOperator::DenseMatrixType> Q_W;
+    /** @brief include the low rank correction */
+    const bool include_lowrank_correction;
+    /** @brief has the RHS vector been fixed? */
+    mutable bool rhs_is_fixed;
 };
 
 /* ******************** factory classes ****************************** */

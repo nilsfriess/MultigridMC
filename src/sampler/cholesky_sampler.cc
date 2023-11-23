@@ -42,18 +42,21 @@ LowRankCholeskySampler::LowRankCholeskySampler(const std::shared_ptr<LinearOpera
                                                std::shared_ptr<RandomGenerator> rng_,
                                                const bool verbose_) : Base(linear_operator_, rng_),
                                                                       xi(linear_operator_->get_ndof()),
-                                                                      g_rhs(nullptr)
+                                                                      g_rhs(linear_operator_->get_ndof()),
+                                                                      include_lowrank_correction(linear_operator_->get_m_lowrank() > 0),
+                                                                      rhs_is_fixed(false)
 {
     // ==== Step 1 ==== Compute sparse Cholesky factorisation of A
     LinearOperator::SparseMatrixType A_sparse = linear_operator->get_sparse();
     LLT_of_A = std::make_shared<SparseLLTType>(A_sparse, verbose_);
     const unsigned int n = linear_operator->get_ndof();
     const unsigned int m = linear_operator->get_m_lowrank();
-    if (m > 0)
+    if (include_lowrank_correction)
     {
+
         // Include contribution from low rank correction
         const LinearOperator::SparseMatrixType &B = linear_operator->get_B();
-        const Eigen::DiagonalMatrix<double, Eigen::Dynamic> &Sigma = linear_operator->get_Sigma();
+        const LinearOperator::DenseMatrixType Sigma = linear_operator->get_Sigma().toDenseMatrix();
         // ==== Step 2 ==== Compute V = (v_0,...,v_{m-1}) by solving U^T v_j = b_j
         //         for each column b_j of B = (b_0,...,b_{m-1})
         LinearOperator::DenseMatrixType V(n, m);
@@ -70,7 +73,7 @@ LowRankCholeskySampler::LowRankCholeskySampler(const std::shared_ptr<LinearOpera
         R = std::make_shared<LinearOperator::DenseMatrixType>(Q->transpose() * V);
         // ==== Step 4 ==== Compute the matrix Id - Lambda = Id - R ( Gamma + B A^{-1} B^T)^{-1} R^T
         LinearOperator::DenseMatrixType Id_mxm = LinearOperator::DenseMatrixType::Identity(m, m);
-        LinearOperator::DenseMatrixType Id_minus_Lambda = Id_mxm - (*R) * (Sigma.toDenseMatrix() + V.transpose() * V) * R->transpose();
+        LinearOperator::DenseMatrixType Id_minus_Lambda = Id_mxm - (*R) * (Sigma + V.transpose() * V) * R->transpose();
         // ==== Step 5 ==== Compute the (dense) Cholesky factorisation W^T W = Id - Lambda
         Eigen::LLT<LinearOperator::DenseMatrixType, Eigen::Lower> dense_llt(Id_minus_Lambda);
 
@@ -87,23 +90,21 @@ void LowRankCholeskySampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x)
     {
         xi[ell] = rng->draw_normal();
     }
-    std::shared_ptr<Eigen::VectorXd> g = g_rhs;
-    if (g == nullptr)
+    if (not(rhs_is_fixed))
     {
         // ==== Step 2 ==== solve U^T g = f
-        g = std::make_shared<Eigen::VectorXd>(xi.size());
-        LLT_of_A->solveL(f, *g);
+        LLT_of_A->solveL(f, g_rhs);
         // ==== Step 3 ==== Set g -> g + Q (W-Id) (Q^T g)
-        if (linear_operator->get_m_lowrank())
+        if (include_lowrank_correction)
         {
-            Eigen::VectorXd Q_Tg = Q->transpose() * (*g);
-            (*g) += (*Q_W) * Q_Tg;
+            Eigen::VectorXd Q_Tg = Q->transpose() * g_rhs;
+            g_rhs += (*Q_W) * Q_Tg;
         }
     }
     // ==== Step 4 ==== Add zeta to xi
-    xi += (*g);
+    xi += g_rhs;
     // ==== Step 5 ==== Set xi -> xi + Q (W^T-Id) (Q^T g)
-    if (linear_operator->get_m_lowrank())
+    if (include_lowrank_correction)
     {
         Eigen::VectorXd Q_Txi = Q->transpose() * (xi);
         xi += (*Q_W_T) * Q_Txi;
@@ -116,13 +117,13 @@ void LowRankCholeskySampler::apply(const Eigen::VectorXd &f, Eigen::VectorXd &x)
 void LowRankCholeskySampler::fix_rhs(const Eigen::VectorXd &f)
 {
 
-    g_rhs = std::make_shared<Eigen::VectorXd>(f.size());
     // ==== Step 1 ==== solve U^T g = f
-    LLT_of_A->solveL(f, *g_rhs);
+    LLT_of_A->solveL(f, g_rhs);
     // ==== Step 2 ==== Set g -> g + Q (W-Id) (Q^T g)
-    if (linear_operator->get_m_lowrank())
+    if (include_lowrank_correction)
     {
-        Eigen::VectorXd Q_Tg = Q->transpose() * (*g_rhs);
-        (*g_rhs) += (*Q_W) * Q_Tg;
+        Eigen::VectorXd Q_Tg = Q->transpose() * g_rhs;
+        g_rhs += (*Q_W) * Q_Tg;
     }
+    rhs_is_fixed = false;
 }
