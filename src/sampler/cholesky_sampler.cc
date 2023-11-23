@@ -42,8 +42,7 @@ LowRankCholeskySampler::LowRankCholeskySampler(const std::shared_ptr<LinearOpera
                                                std::shared_ptr<RandomGenerator> rng_,
                                                const bool verbose_) : Base(linear_operator_, rng_),
                                                                       xi(linear_operator_->get_ndof()),
-                                                                      g_rhs(nullptr),
-                                                                      zeta(nullptr)
+                                                                      g_rhs(nullptr)
 {
     // ==== Step 1 ==== Compute sparse Cholesky factorisation of A
     LinearOperator::SparseMatrixType A_sparse = linear_operator->get_sparse();
