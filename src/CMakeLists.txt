@@ -8,7 +8,6 @@ add_subdirectory(smoother)
 add_subdirectory(linear_operator)
 add_subdirectory(intergrid)
 add_subdirectory(auxilliary)
-add_subdirectory(qoi)
 
 link_libraries(Eigen3::Eigen)
 
@@ -27,7 +26,6 @@ set_target_properties(driver_mg PROPERTIES
 add_executable(driver_spectrum driver_spectrum.cc ${SOURCES})
 set_target_properties(driver_spectrum PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ../bin)
-
 
 if(USE_THOROUGH_TESTS)
     set(THOROUGH_TESTING "true")
