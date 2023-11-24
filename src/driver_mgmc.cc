@@ -493,6 +493,10 @@ int main(int argc, char *argv[])
         {
             cholesky_sampler = std::make_shared<SparseCholeskySampler>(linear_operator, rng, true);
         }
+        else if (cholesky_params.factorisation == LowRankFactorisation)
+        {
+            cholesky_sampler = std::make_shared<LowRankCholeskySampler>(linear_operator, rng, true);
+        }
         else if (cholesky_params.factorisation == DenseFactorisation)
         {
             cholesky_sampler = std::make_shared<DenseCholeskySampler>(linear_operator, rng);

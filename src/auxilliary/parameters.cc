@@ -87,6 +87,10 @@ void CholeskyParameters::parse_config(const libconfig::Setting &root)
     {
         factorisation = SparseFactorisation;
     }
+    else if (fac_str == "lowrank")
+    {
+        factorisation = LowRankFactorisation;
+    }
     else if (fac_str == "dense")
     {
         factorisation = DenseFactorisation;

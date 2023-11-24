@@ -87,7 +87,8 @@ public:
 enum cholesky_t
 {
     SparseFactorisation = 0, // Sparse factorisation
-    DenseFactorisation = 1   // Dense factorisation
+    DenseFactorisation = 1,  // Dense factorisation
+    LowRankFactorisation = 2 // Sparse, low rank factorisation
 };
 
 /** @struct Cholesky factorisation parameters */

@@ -57,6 +57,10 @@ MultigridMCSampler::MultigridMCSampler(std::shared_ptr<LinearOperator> linear_op
         {
             coarse_sampler_factory = std::make_shared<SparseCholeskySamplerFactory>(rng);
         }
+        else if (cholesky_params.factorisation == LowRankFactorisation)
+        {
+            coarse_sampler_factory = std::make_shared<LowRankCholeskySamplerFactory>(rng);
+        }
         else if (cholesky_params.factorisation == DenseFactorisation)
         {
             coarse_sampler_factory = std::make_shared<DenseCholeskySamplerFactory>(rng);
