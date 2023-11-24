@@ -45,6 +45,7 @@ void CholmodLLT::solve(const Eigen::VectorXd &b, Eigen::VectorXd &x) const
     cholmod_dense *Px_cholmod = cholmod_solve(CHOLMOD_Lt, L_cholmod, y_cholmod, ctx);
     cholmod_dense *x_cholmod = cholmod_solve(CHOLMOD_Pt, L_cholmod, Px_cholmod, ctx);
     std::copy_n((double *)x_cholmod->x, nrow, &x[0]);
+    cholmod_free_dense(&b_cholmod, ctx);
     cholmod_free_dense(&Pb_cholmod, ctx);
     cholmod_free_dense(&y_cholmod, ctx);
     cholmod_free_dense(&Px_cholmod, ctx);
@@ -74,6 +75,7 @@ void CholmodLLT::solveLT(const Eigen::VectorXd &b, Eigen::VectorXd &x) const
     std::copy_n((double *)x_cholmod->x, nrow, &x[0]);
     cholmod_free_dense(&Px_cholmod, ctx);
     cholmod_free_dense(&x_cholmod, ctx);
+    cholmod_free_dense(&b_cholmod, ctx);
 }
 #endif // NCHOLMOD
 
