@@ -8,6 +8,7 @@ add_subdirectory(smoother)
 add_subdirectory(linear_operator)
 add_subdirectory(intergrid)
 add_subdirectory(auxilliary)
+add_subdirectory(measurements)
 
 link_libraries(Eigen3::Eigen)
 
