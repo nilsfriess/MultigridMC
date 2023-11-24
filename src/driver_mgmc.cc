@@ -27,6 +27,7 @@
 #include "measurements/sampling_time.hh"
 #include "measurements/posterior_statistics.hh"
 #include "measurements/convergence.hh"
+#include "measurements/mean_squared_error.hh"
 
 /* *********************************************************************** *
  *                                M A I N
@@ -209,6 +210,10 @@ int main(int argc, char *argv[])
                                 measurement_params,
                                 "convergence_cholesky.txt");
         }
+        measure_mean_squared_error(cholesky_sampler,
+                                   sampling_params,
+                                   measurement_params,
+                                   "meansquarederror_cholesky.txt");
     }
     if (general_params.do_ssor)
     {
@@ -225,6 +230,10 @@ int main(int argc, char *argv[])
                                 measurement_params,
                                 "convergence_ssor.txt");
         }
+        measure_mean_squared_error(ssor_sampler,
+                                   sampling_params,
+                                   measurement_params,
+                                   "meansquarederror_ssor.txt");
         std::cout << std::endl;
     }
     if (general_params.do_multigridmc)
@@ -248,6 +257,10 @@ int main(int argc, char *argv[])
                                  sampling_params,
                                  measurement_params);
         }
+        measure_mean_squared_error(multigridmc_sampler,
+                                   sampling_params,
+                                   measurement_params,
+                                   "meansquarederror_multigridmc.txt");
         std::cout << std::endl;
     }
     // print out total timing information
