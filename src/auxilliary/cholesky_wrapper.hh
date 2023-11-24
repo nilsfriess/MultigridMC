@@ -81,6 +81,7 @@ public:
     {
         cholmod_free_sparse(&A_cholmod, ctx);
         cholmod_free_factor(&L_cholmod, ctx);
+        cholmod_free_dense(&b_cholmod, ctx);
         cholmod_finish(ctx);
         delete ctx;
     }
@@ -119,6 +120,8 @@ protected:
     cholmod_sparse *A_cholmod;
     /** @brief Cholmod factor */
     cholmod_factor *L_cholmod;
+    /** @brief RHS in Cholmod solve */
+    cholmod_dense *b_cholmod;
 };
 #endif // NCHOLMOD
 
