@@ -20,8 +20,8 @@ void measure_mean_squared_error(std::shared_ptr<Sampler> sampler,
                                                                                                    measurement_params);
     Eigen::SparseVector<double> sample_vector = measured_operator->measurement_vector(measurement_params.sample_location,
                                                                                       measurement_params.radius);
-    unsigned int nsamples = 100;
-    unsigned int nsteps = 100;
+    unsigned int nsamples = sampling_params.nsamplesmse;
+    unsigned int nsteps = sampling_params.nstepsmse;
     std::vector<double> x_avg(nsteps, 0.0);
     std::vector<double> x2_avg(nsteps, 0.0);
     Eigen::VectorXd x(ndof);

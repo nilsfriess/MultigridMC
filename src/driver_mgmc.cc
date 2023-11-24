@@ -209,11 +209,16 @@ int main(int argc, char *argv[])
                                 sampling_params,
                                 measurement_params,
                                 "convergence_cholesky.txt");
+            std::cout << std::endl;
         }
-        measure_mean_squared_error(cholesky_sampler,
-                                   sampling_params,
-                                   measurement_params,
-                                   "meansquarederror_cholesky.txt");
+        if (general_params.measure_mse)
+        {
+            measure_mean_squared_error(cholesky_sampler,
+                                       sampling_params,
+                                       measurement_params,
+                                       "meansquarederror_cholesky.txt");
+            std::cout << std::endl;
+        }
     }
     if (general_params.do_ssor)
     {
@@ -223,18 +228,24 @@ int main(int argc, char *argv[])
                               measurement_params,
                               "SSOR",
                               "timeseries_ssor.txt");
+        std::cout << std::endl;
         if (general_params.measure_convergence)
         {
             measure_convergence(ssor_sampler,
                                 sampling_params,
                                 measurement_params,
                                 "convergence_ssor.txt");
+
+            std::cout << std::endl;
         }
-        measure_mean_squared_error(ssor_sampler,
-                                   sampling_params,
-                                   measurement_params,
-                                   "meansquarederror_ssor.txt");
-        std::cout << std::endl;
+        if (general_params.measure_mse)
+        {
+            measure_mean_squared_error(ssor_sampler,
+                                       sampling_params,
+                                       measurement_params,
+                                       "meansquarederror_ssor.txt");
+            std::cout << std::endl;
+        }
     }
     if (general_params.do_multigridmc)
     {
@@ -244,24 +255,30 @@ int main(int argc, char *argv[])
                               measurement_params,
                               "MGMC",
                               "timeseries_multigridmc.txt");
+        std::cout << std::endl;
         if (general_params.measure_convergence)
         {
             measure_convergence(multigridmc_sampler,
                                 sampling_params,
                                 measurement_params,
                                 "convergence_multigridmc.txt");
+            std::cout << std::endl;
         }
         if (general_params.save_posterior_statistics)
         {
             posterior_statistics(multigridmc_sampler,
                                  sampling_params,
                                  measurement_params);
+            std::cout << std::endl;
         }
-        measure_mean_squared_error(multigridmc_sampler,
-                                   sampling_params,
-                                   measurement_params,
-                                   "meansquarederror_multigridmc.txt");
-        std::cout << std::endl;
+        if (general_params.measure_mse)
+        {
+            measure_mean_squared_error(multigridmc_sampler,
+                                       sampling_params,
+                                       measurement_params,
+                                       "meansquarederror_multigridmc.txt");
+            std::cout << std::endl;
+        }
     }
     // print out total timing information
     auto t_finish = std::chrono::system_clock::now();

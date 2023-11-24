@@ -61,6 +61,8 @@ public:
     bool save_posterior_statistics;
     /** @brief measure convergence for the SSOR and MGMC samplers? */
     bool measure_convergence;
+    /** @brief measure mean square error? */
+    bool measure_mse;
     /** @brief operator to use for sampling (prior or posterior)*/
     std::string operator_name;
 };
@@ -194,6 +196,10 @@ public:
     unsigned int nsamplesconvergence;
     /** @brief number of steps used in convergence test */
     unsigned int nstepsconvergence;
+    /** @brief number of samples used in mean-squared-error test */
+    unsigned int nsamplesmse;
+    /** @brief number of steps used in mean-squared-error test */
+    unsigned int nstepsmse;
 };
 
 /** @brief structure for prior parameters

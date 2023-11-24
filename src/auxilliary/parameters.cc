@@ -58,6 +58,7 @@ void GeneralParameters::parse_config(const libconfig::Setting &root)
     do_multigridmc = general.lookup("do_multigridmc");
     save_posterior_statistics = general.lookup("save_posterior_statistics");
     measure_convergence = general.lookup("measure_convergence");
+    measure_mse = general.lookup("measure_mse");
     operator_name = general.lookup("operator").c_str();
     if (not((operator_name == "prior") or (operator_name == "posterior")))
     {
@@ -181,16 +182,21 @@ void SamplingParameters::parse_config(const libconfig::Setting &root)
     const libconfig::Setting &sampling = root["sampling"];
     const libconfig::Setting &timeseries = sampling.lookup("timeseries");
     const libconfig::Setting &convergence = sampling.lookup("convergence");
+    const libconfig::Setting &mse = sampling.lookup("mse");
     nsamples = timeseries.lookup("nsamples");
     nwarmup = timeseries.lookup("nwarmup");
     nstepsconvergence = convergence.lookup("nsteps");
     nsamplesconvergence = convergence.lookup("nsamples");
     nthreadsconvergence = convergence.lookup("nthreads");
+    nstepsmse = mse.lookup("nsteps");
+    nsamplesmse = mse.lookup("nsamples");
     std::cout << "  timeseries: number of samples         = " << nsamples << std::endl;
     std::cout << "  timeseries: number of warmup samples  = " << nwarmup << std::endl;
     std::cout << "  convergence test: OpenMP threads      = " << nthreadsconvergence << std::endl;
     std::cout << "  convergence test: number of steps     = " << nstepsconvergence << std::endl;
     std::cout << "  convergence test: number of samples   = " << nsamplesconvergence << std::endl;
+    std::cout << "  MSE test: number of steps             = " << nstepsmse << std::endl;
+    std::cout << "  MSE test: number of samples           = " << nsamplesmse << std::endl;
 }
 
 /* prior configuration */
