@@ -6,6 +6,7 @@ void measure_mean_squared_error(std::shared_ptr<Sampler> sampler,
                                 const MeasurementParameters &measurement_params,
                                 const std::string filename)
 {
+    std::cout << "  Measuring MSE" << std::endl;
     const std::shared_ptr<LinearOperator> linear_operator = sampler->get_linear_operator();
     unsigned int ndof = linear_operator->get_ndof();
     std::shared_ptr<Lattice> lattice = linear_operator->get_lattice();

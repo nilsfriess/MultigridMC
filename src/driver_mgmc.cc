@@ -197,9 +197,9 @@ int main(int argc, char *argv[])
     /* ********************** Cholesky ********************** */
     if (general_params.do_cholesky)
     {
+        std::cout << "**** Cholesky ****" << std::endl;
         if (general_params.measure_time_per_sample)
         {
-            std::cout << "**** Cholesky ****" << std::endl;
             measure_sampling_time(cholesky_sampler,
                                   sampling_params,
                                   measurement_params,
@@ -227,9 +227,9 @@ int main(int argc, char *argv[])
     /* ********************** SSOR ********************** */
     if (general_params.do_ssor)
     {
+        std::cout << "**** SSOR ****" << std::endl;
         if (general_params.measure_time_per_sample)
         {
-            std::cout << "**** SSOR ****" << std::endl;
             measure_sampling_time(ssor_sampler,
                                   sampling_params,
                                   measurement_params,
@@ -258,9 +258,9 @@ int main(int argc, char *argv[])
     /* ********************** Multigrid ********************** */
     if (general_params.do_multigridmc)
     {
+        std::cout << "**** Multigrid MC ****" << std::endl;
         if (general_params.measure_time_per_sample)
         {
-            std::cout << "**** Multigrid MC ****" << std::endl;
             measure_sampling_time(multigridmc_sampler,
                                   sampling_params,
                                   measurement_params,
