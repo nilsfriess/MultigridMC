@@ -56,6 +56,7 @@ void GeneralParameters::parse_config(const libconfig::Setting &root)
     do_cholesky = general.lookup("do_cholesky");
     do_ssor = general.lookup("do_ssor");
     do_multigridmc = general.lookup("do_multigridmc");
+    measure_time_per_sample = general.lookup("measure_time_per_sample");
     save_posterior_statistics = general.lookup("save_posterior_statistics");
     measure_convergence = general.lookup("measure_convergence");
     measure_mse = general.lookup("measure_mse");

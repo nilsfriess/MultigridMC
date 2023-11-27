@@ -57,6 +57,8 @@ public:
     bool do_ssor;
     /** @brief Run the MultigridMC sampler? */
     bool do_multigridmc;
+    /** @brief measure time per sample? */
+    bool measure_time_per_sample;
     /** @brief save posterior statistics to disk? */
     bool save_posterior_statistics;
     /** @brief measure convergence for the SSOR and MGMC samplers? */
